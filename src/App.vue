@@ -1,21 +1,21 @@
 <template>
-    <div class="any-scroll-view">
-        <div
-            ref="body"
-            :style="bodyStyle"
-            class="any-scroll-view__body"
-            @transitionend="transitionendHandler"
-        >
-            <slot>
-                <ul>
-                    <li v-for="n in 300">
-                        第{{n}}行
-                        , scrollTop: {{scrollTop}} | scrollLeft: {{scrollLeft}}
-                    </li>
-                </ul>
-            </slot>
-        </div>
+  <div class="any-scroll-view">
+    <div
+      ref="body"
+      :style="bodyStyle"
+      class="any-scroll-view__body"
+      @transitionend="transitionendHandler"
+    >
+      <slot>
+        <ul>
+          <li v-for="n in 100" :key="n">
+            第{{n}}行
+            , scrollTop: {{scrollTop}} | scrollLeft: {{scrollLeft}}
+          </li>
+        </ul>
+      </slot>
     </div>
+  </div>
 </template>
 
 <script>
@@ -92,6 +92,10 @@ export default {
         // X轴滚动的最远距离
         maxScrollLeft() {
             return this.bodyWidth - this.viewWidth;
+        }, 
+
+        map(){
+            return { X: 'Left', Y: 'Top' };
         }
     },
 
@@ -116,7 +120,9 @@ export default {
 
         // 快速滑动
         at.on('swipe', (ev) => {
-            this.decelerate(ev);
+            if (0 < this.scrollTop) {
+                this.decelerate(ev);
+            }
         });
 
         this.$on('hook:destroy', () => {
@@ -158,7 +164,7 @@ export default {
             this.transitionDuration = transitionDuration;
             this.translateX += deltaX;
             this.translateY += deltaY;
-            this.limitScrollAll();
+            this.stopScrollInEdge();
             this.refreshScrollData(this.translateX, this.translateY);
         },
 
@@ -169,7 +175,7 @@ export default {
             this.transitionDuration = transitionDuration;
             this.translateX = translateX;
             this.translateY = translateY;
-            this.limitScrollAll();
+            this.stopScrollInEdge();
             this.refreshScrollData(this.translateX, this.translateY);
         },
 
@@ -200,7 +206,7 @@ export default {
                     Math.pow(velocity * 1000, 2) / (2 * this.acceleration)
                 );
 
-            this.limitScrollAll();
+            this.stopScrollInEdge();
 
             // 定时刷新scroll信息
             this.setScrollLive();
@@ -209,31 +215,15 @@ export default {
         /**
          * 滚动的边界限制
          */
-        limitScrollTop() {
-            if (this.minScrollTop > this.willScrollTop) {
-                this.translateY = 0 - this.minScrollTop;
-            } else if (this.maxScrollTop < this.willScrollTop) {
-                this.translateY = 0 - this.maxScrollTop;
+        stopScrollInEdge() {
+            for (let axis in this.map) {
+                const direction = this.map[axis];
+                if (this[`minScroll${direction}`] > this[`willScroll${direction}`]) {
+                    this[`translate${axis}`] = 0 - this[`minScroll${direction}`];
+                } else if (this[`maxScroll${direction}`] < this[`willScroll${direction}`]) {
+                    this[`translate${axis}`] = 0 - this[`maxScroll${direction}`];
+                }
             }
-        },
-
-        /**
-         * 滚动的边界限制
-         */
-        limitScrollLeft() {
-            if (this.minScrollLeft > this.willScrollLeft) {
-                this.translateX = 0 - this.minScrollLeft;
-            } else if (this.maxScrollLeft < this.willScrollLeft) {
-                this.translateX = 0 - this.maxScrollLeft;
-            }
-        },
-
-        /**
-         * 滚动的边界限制
-         */
-        limitScrollAll() {
-            this.limitScrollLeft();
-            this.limitScrollTop();
         },
 
         /**
