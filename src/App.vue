@@ -8,7 +8,7 @@
         >
             <slot>
                 <ul>
-                    <li v-for="n in 300">
+                    <li v-for="n in 100">
                         第{{n}}行
                         , scrollTop: {{scrollTop}} | scrollLeft: {{scrollLeft}}
                     </li>
@@ -92,7 +92,34 @@ export default {
         // X轴滚动的最远距离
         maxScrollLeft() {
             return this.bodyWidth - this.viewWidth;
+        },
+
+        // 是否滚动条在最顶端
+        isInTopEdge(){
+            return 0 === this.scrollTop;
+        },
+
+        // 是否滚动条在最左端
+        isInLeftEdge(){
+            return 0 === this.scrollLeft;
+        },
+
+
+        // 是否滚动条在最底端
+        isInBottomEdge(){
+            return this.maxScrollTop === this.scrollTop;
+        },
+
+        // 是否滚动条在最右端
+        isInRightEdge(){
+            return this.maxScrollLeft === this.scrollLeft;
+        },
+
+        // 是否在边界位置
+        isInEdge(){
+            return this.isInBottomEdge || this.isInLeftEdge || this.isInRightEdge || this.isInTopEdge;
         }
+
     },
 
     mounted() {
@@ -203,7 +230,10 @@ export default {
             this.limitScrollAll();
 
             // 定时刷新scroll信息
-            this.setScrollLive();
+            if(!this.isInEdge) {
+                this.setScrollLive();
+            }
+            
         },
 
         /**
