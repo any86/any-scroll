@@ -117,13 +117,7 @@ export default {
         // 是否滚动条在最右端
         isInRightEdge(){
             return this.maxScrollLeft === this.scrollLeft;
-        },
-
-        // 是否在边界位置
-        isInEdge(){
-            return this.isInBottomEdge || this.isInLeftEdge || this.isInRightEdge || this.isInTopEdge;
         }
-
     },
 
     mounted() {
@@ -191,7 +185,7 @@ export default {
             this.transitionDuration = transitionDuration;
             this.translateX += deltaX;
             this.translateY += deltaY;
-            this.stopScrollInEdge();
+            this.stopScrollWhenTouchEdge();
             this.refreshScrollData(this.translateX, this.translateY);
         },
 
@@ -202,7 +196,7 @@ export default {
             this.transitionDuration = transitionDuration;
             this.translateX = translateX;
             this.translateY = translateY;
-            this.stopScrollInEdge();
+            this.stopScrollWhenTouchEdge();
             this.refreshScrollData(this.translateX, this.translateY);
         },
 
@@ -211,10 +205,8 @@ export default {
          * velocityX/Y的单位是px/ms
          */
         decelerate(ev) {
-            const directionSign = { up: -1, right: 1, down: 1, left: -1 }[
-                ev.direction
-            ];
-
+            const {direction} = ev;
+            const directionSign = { up: -1, right: 1, down: 1, left: -1 }[direction];
             // 判断是那个轴的运动
             const axis = ev.velocityX > ev.velocityY ? 'X' : 'Y';
 
@@ -233,19 +225,22 @@ export default {
                     Math.pow(velocity * 1000, 2) / (2 * this.acceleration)
                 );
 
-            this.stopScrollInEdge();
+            this.stopScrollWhenTouchEdge();
 
-            // 定时刷新scroll信息
-            if(!this.isInEdge) {
+            // 不如将要移动的方向上还有可移动距离
+            // 开始监听translate的变化
+            const edgeNameMap = {up: 'Bottom', down:'Up', left: 'Right', right: 'Left'};
+            console.warn(direction);
+            console.warn(`isIn${edgeNameMap[direction]}Edge`);
+            if(!this[`isIn${edgeNameMap[direction]}Edge`]){
                 this.setScrollLive();
             }
-            
         },
 
         /**
          * 滚动的边界限制
          */
-        stopScrollInEdge() {
+        stopScrollWhenTouchEdge() {
             for (let axis in this.map) {
                 const direction = this.map[axis];
                 if (this[`minScroll${direction}`] > this[`willScroll${direction}`]) {
@@ -307,7 +302,7 @@ export default {
     overflow: hidden;
     border-bottom: 2px solid #f10;
     &__body {
-        transition-timing-function: ease-in-out;
+        transition-timing-function: ease-out;
         background: #eee;
         position: absolute;
         ul {
