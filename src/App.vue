@@ -8,9 +8,8 @@
         >
             <slot>
                 <ul>
-                    <li v-for="n in 150" :key="n">
-                        第{{n}}行
-                        <!-- , scrollTop: {{scrollTop}} | scrollLeft: {{scrollLeft}} -->
+                    <li v-for="{title} in data" :key="title">
+                        {{title}}
                     </li>
                 </ul>
             </slot>
@@ -45,6 +44,7 @@ export default {
 
     data() {
         return {
+            data: [],
             translateY: 0,
             translateX: 0,
             transitionDuration: 2000,
@@ -125,7 +125,13 @@ export default {
         }
     },
 
-    mounted() {
+    async mounted() {
+        const resp = await fetch('https://cnodejs.org/api/v1/topics?limit=100');
+        const {data} = await resp.json();
+        this.data = data;
+        await this.$nextTick();
+
+        
         const at = new AnyTouch(this.$el);
         this.updateSize();
         // 第一次触碰
@@ -353,6 +359,7 @@ export default {
             width: 150vw;
         }
         li {
+            box-sizing: border-box;
             font-size: 16px;
             list-style-type: none;
             padding: 15px;
