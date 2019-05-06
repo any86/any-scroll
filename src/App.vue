@@ -23,6 +23,12 @@ export default {
     name: 'any-scroll-view',
 
     props: {
+        // 回弹距离
+        bounceDistance: {
+            type: Number,
+            default: 100
+        },
+
         height: {
             type: Number,
             default: 500
@@ -148,6 +154,11 @@ export default {
             this.move(ev);
         });
 
+        // 结束拖拽
+        at.on('panend', (ev) => {
+            // this.resetPosition();
+        });
+
         // 快速滑动
         at.on('swipe', (ev) => {
             this.decelerate(ev);
@@ -227,7 +238,6 @@ export default {
             let distance = Math.round(
                 acc.s({ a: this.acceleration, vt: velocity * 1000, v0: 0 })
             );
-
             // 通过方向判断最大可移动距离
             if ('up' === direction) {
                 distance = Math.min(
@@ -235,9 +245,15 @@ export default {
                     this.maxScrollTop - this.scrollTop
                 );
             } else if ('down' === direction) {
-                distance = Math.min(distance, this.scrollTop);
+                distance = Math.min(
+                    distance,
+                    this.scrollTop - this.minScrollTop
+                );
             } else if ('right' === direction) {
-                distance = Math.min(distance, this.scrollLeft);
+                distance = Math.min(
+                    distance,
+                    this.scrollLeft - this.minScrollLeft
+                );
             } else if ('left' === direction) {
                 distance = Math.min(
                     distance,
@@ -254,11 +270,9 @@ export default {
                 v0: velocity
             });
 
-            // 动画时间, 单位ms
+            // 用到达边界的速度, 求运动时间, 单位ms
             this.transitionDuration =
                 acc.t({ vt, v0: velocity, a: this.acceleration }) * 1000;
-
-            console.log(this.transitionDuration, 'this.transitionDuration');
 
             this.stopScrollWhenTouchEdge();
 
@@ -270,8 +284,6 @@ export default {
                 left: 'Right',
                 right: 'Left'
             };
-            // console.warn(direction);
-            // console.warn(`isIn${edgeNameMap[direction]}Edge`);
             if (!this[`isIn${edgeNameMap[direction]}Edge`]) {
                 this.setScrollLive();
             }
@@ -279,22 +291,23 @@ export default {
 
         /**
          * 滚动的边界限制
+         * bounceDistance会参与计算
          */
         stopScrollWhenTouchEdge() {
             for (let axis in this.map) {
                 const direction = this.map[axis];
                 if (
-                    this[`minScroll${direction}`] >
+                    this[`minScroll${direction}`] - this.bounceDistance >
                     this[`willScroll${direction}`]
                 ) {
                     this[`translate${axis}`] =
-                        0 - this[`minScroll${direction}`];
+                        this.bounceDistance - this[`minScroll${direction}`];
                 } else if (
-                    this[`maxScroll${direction}`] <
+                    this[`maxScroll${direction}`] + this.bounceDistance <
                     this[`willScroll${direction}`]
                 ) {
                     this[`translate${axis}`] =
-                        0 - this[`maxScroll${direction}`];
+                        0 - this[`maxScroll${direction}`] - this.bounceDistance;
                 }
             }
         },
@@ -303,8 +316,8 @@ export default {
          * 刷新scroll信息
          */
         refreshScrollData(translateX, translateY) {
-            this.scrollTop = 0 - translateY;
-            this.scrollLeft = 0 - translateX;
+            this.scrollTop = this.minScrollTop - translateY;
+            this.scrollLeft = this.minScrollTop - translateX;
         },
 
         /**
@@ -330,6 +343,19 @@ export default {
 
         transitionendHandler() {
             this.cancelScrollLive();
+        },
+
+        /**
+         * 恢复到0,0位置
+         */
+        resetPosition() {
+            this.moveTo(
+                {
+                    translateX: 0 - this.minScrollLeft,
+                    translateY: 0 - this.minScrollTop
+                },
+                500
+            );
         }
     }
 };
@@ -352,7 +378,7 @@ export default {
         background: #eee;
         position: absolute;
         ul {
-            // width: 150vw;
+            width: 350vw;
         }
         li {
             box-sizing: border-box;
