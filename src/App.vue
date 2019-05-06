@@ -8,9 +8,7 @@
         >
             <slot>
                 <ul>
-                    <li v-for="{title} in data" :key="title">
-                        {{title}}
-                    </li>
+                    <li v-for="({title}, index) in data" :key="index">{{index}} - {{title}}</li>
                 </ul>
             </slot>
         </div>
@@ -19,6 +17,7 @@
 
 <script>
 import AnyTouch from 'any-touch';
+import * as acc from './utils/acceleration';
 import raf from 'raf';
 export default {
     name: 'any-scroll-view',
@@ -32,7 +31,7 @@ export default {
         // 减速度, 单位px/s²
         acceleration: {
             type: Number,
-            default: 15000
+            default: 7200
         },
 
         // 滑动动画的最大执行时间
@@ -64,9 +63,9 @@ export default {
         bodyStyle() {
             return {
                 transitionDuration: `${this.transitionDuration}ms`,
-                transform: `translate(${this.translateX}px, ${
+                transform: `translate3d(${this.translateX}px, ${
                     this.translateY
-                }px)`
+                }px,0)`
             };
         },
 
@@ -126,12 +125,11 @@ export default {
     },
 
     async mounted() {
-        const resp = await fetch('https://cnodejs.org/api/v1/topics?limit=100');
-        const {data} = await resp.json();
+        const resp = await fetch('https://cnodejs.org/api/v1/topics?limit=300');
+        const { data } = await resp.json();
         this.data = data;
         await this.$nextTick();
 
-        
         const at = new AnyTouch(this.$el);
         this.updateSize();
         // 第一次触碰
@@ -226,11 +224,11 @@ export default {
             console.log({ velocity });
 
             // 滑动距离
-            // s = (v₁² - v₀²) / (2 * a)
             let distance = Math.round(
-                Math.pow(velocity * 1000, 2) / (2 * this.acceleration)
+                acc.s({ a: this.acceleration, vt: velocity * 1000, v0: 0 })
             );
-            console.log({ distance }, 1);
+
+            // 通过方向判断最大可移动距离
             if ('up' === direction) {
                 distance = Math.min(
                     distance,
@@ -246,23 +244,21 @@ export default {
                     this.maxScrollLeft - this.scrollLeft
                 );
             }
-            console.log({ distance }, 2);
 
             this[`translate${axis}`] += directionSign * distance;
 
-            // 反过来求运动时间
-            // 减速时间, 单位ms
-            // s = (v₁² - v₀²) / (2 * a)
-            // 求指定距离的滑动时间
-            // t = (v₁ - v₀) / a
-            const vt = Math.sqrt(
-                2 * this.acceleration * distance + Math.pow(velocity, 2)
-            );
+            // 如果终点超过边界, 那么求到达边界的速度
+            const vt = acc.vt({
+                a: this.acceleration,
+                s: distance,
+                v0: velocity
+            });
+
+            // 动画时间, 单位ms
             this.transitionDuration =
-                ((vt - velocity) / this.acceleration) * 1000; // 单位ms
+                acc.t({ vt, v0: velocity, a: this.acceleration }) * 1000;
+
             console.log(this.transitionDuration, 'this.transitionDuration');
-            // 上标: º ¹ ² ³ ⁴⁵ ⁶ ⁷ ⁸ ⁹ ⁺ ⁻ ⁼ ⁽ ⁾ ⁿ ′ ½
-            // 下标:₀ ₁ ₂ ₃ ₄ ₅ ₆ ₇ ₈ ₉ ₊ ₋ ₌ ₍ ₎
 
             this.stopScrollWhenTouchEdge();
 
@@ -352,11 +348,11 @@ export default {
     overflow: hidden;
     border-bottom: 2px solid #f10;
     &__body {
-        transition-timing-function: ease-out;
+        transition-timing-function: cubic-bezier(0.18, 0.84, 0.44, 1);
         background: #eee;
         position: absolute;
         ul {
-            width: 150vw;
+            // width: 150vw;
         }
         li {
             box-sizing: border-box;
