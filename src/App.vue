@@ -1,21 +1,21 @@
 <template>
-  <div class="any-scroll-view">
-    <div
-      ref="body"
-      :style="bodyStyle"
-      class="any-scroll-view__body"
-      @transitionend="transitionendHandler"
-    >
-      <slot>
-        <ul>
-          <li v-for="n in 100" :key="n">
-            第{{n}}行
-            , scrollTop: {{scrollTop}} | scrollLeft: {{scrollLeft}}
-          </li>
-        </ul>
-      </slot>
+    <div class="any-scroll-view">
+        <div
+            ref="body"
+            :style="bodyStyle"
+            class="any-scroll-view__body"
+            @transitionend="transitionendHandler"
+        >
+            <slot>
+                <ul>
+                    <li v-for="n in 150" :key="n">
+                        第{{n}}行
+                        <!-- , scrollTop: {{scrollTop}} | scrollLeft: {{scrollLeft}} -->
+                    </li>
+                </ul>
+            </slot>
+        </div>
     </div>
-  </div>
 </template>
 
 <script>
@@ -33,7 +33,13 @@ export default {
         // 减速度, 单位px/s²
         acceleration: {
             type: Number,
-            default: 3600
+            default: 15000
+        },
+
+        // 滑动动画的最大执行时间
+        maxScrollAnimateTime: {
+            type: Number,
+            default: 2000
         }
     },
 
@@ -41,7 +47,7 @@ export default {
         return {
             translateY: 0,
             translateX: 0,
-            transitionDuration: 300,
+            transitionDuration: 2000,
             bodyHeight: 0,
             bodyWidth: 0,
             viewWidth: 0,
@@ -92,30 +98,29 @@ export default {
         // X轴滚动的最远距离
         maxScrollLeft() {
             return this.bodyWidth - this.viewWidth;
-        }, 
+        },
 
-        map(){
+        map() {
             return { X: 'Left', Y: 'Top' };
         },
 
         // 是否滚动条在最顶端
-        isInTopEdge(){
+        isInTopEdge() {
             return 0 === this.scrollTop;
         },
 
         // 是否滚动条在最左端
-        isInLeftEdge(){
+        isInLeftEdge() {
             return 0 === this.scrollLeft;
         },
 
-
         // 是否滚动条在最底端
-        isInBottomEdge(){
+        isInBottomEdge() {
             return this.maxScrollTop === this.scrollTop;
         },
 
         // 是否滚动条在最右端
-        isInRightEdge(){
+        isInRightEdge() {
             return this.maxScrollLeft === this.scrollLeft;
         }
     },
@@ -141,9 +146,7 @@ export default {
 
         // 快速滑动
         at.on('swipe', (ev) => {
-            if (0 < this.scrollTop) {
-                this.decelerate(ev);
-            }
+            this.decelerate(ev);
         });
 
         this.$on('hook:destroy', () => {
@@ -205,34 +208,69 @@ export default {
          * velocityX/Y的单位是px/ms
          */
         decelerate(ev) {
-            const {direction} = ev;
-            const directionSign = { up: -1, right: 1, down: 1, left: -1 }[direction];
+            const { direction } = ev;
+            const directionSign = { up: -1, right: 1, down: 1, left: -1 }[
+                direction
+            ];
             // 判断是那个轴的运动
             const axis = ev.velocityX > ev.velocityY ? 'X' : 'Y';
 
-            // 减速时间, 单位ms
-            // t = (v₂ - v₁) / a
             const velocity = ev[`velocity${axis}`];
-            this.transitionDuration = Math.round(
-                ((velocity * 1000) / this.acceleration) * 1000
-            );
+
+            console.log({ velocity });
 
             // 滑动距离
-            // s = (v₂² - v₁²) / (2 * a)
-            this[`translate${axis}`] +=
-                directionSign *
-                Math.round(
-                    Math.pow(velocity * 1000, 2) / (2 * this.acceleration)
+            // s = (v₁² - v₀²) / (2 * a)
+            let distance = Math.round(
+                Math.pow(velocity * 1000, 2) / (2 * this.acceleration)
+            );
+            console.log({ distance }, 1);
+            if ('up' === direction) {
+                distance = Math.min(
+                    distance,
+                    this.maxScrollTop - this.scrollTop
                 );
+            } else if ('down' === direction) {
+                distance = Math.min(distance, this.scrollTop);
+            } else if ('right' === direction) {
+                distance = Math.min(distance, this.scrollLeft);
+            } else if ('left' === direction) {
+                distance = Math.min(
+                    distance,
+                    this.maxScrollLeft - this.scrollLeft
+                );
+            }
+            console.log({ distance }, 2);
+
+            this[`translate${axis}`] += directionSign * distance;
+
+            // 反过来求运动时间
+            // 减速时间, 单位ms
+            // s = (v₁² - v₀²) / (2 * a)
+            // 求指定距离的滑动时间
+            // t = (v₁ - v₀) / a
+            const vt = Math.sqrt(
+                2 * this.acceleration * distance + Math.pow(velocity, 2)
+            );
+            this.transitionDuration =
+                ((vt - velocity) / this.acceleration) * 1000; // 单位ms
+            console.log(this.transitionDuration, 'this.transitionDuration');
+            // 上标: º ¹ ² ³ ⁴⁵ ⁶ ⁷ ⁸ ⁹ ⁺ ⁻ ⁼ ⁽ ⁾ ⁿ ′ ½
+            // 下标:₀ ₁ ₂ ₃ ₄ ₅ ₆ ₇ ₈ ₉ ₊ ₋ ₌ ₍ ₎
 
             this.stopScrollWhenTouchEdge();
 
             // 不如将要移动的方向上还有可移动距离
             // 开始监听translate的变化
-            const edgeNameMap = {up: 'Bottom', down:'Up', left: 'Right', right: 'Left'};
-            console.warn(direction);
-            console.warn(`isIn${edgeNameMap[direction]}Edge`);
-            if(!this[`isIn${edgeNameMap[direction]}Edge`]){
+            const edgeNameMap = {
+                up: 'Bottom',
+                down: 'Up',
+                left: 'Right',
+                right: 'Left'
+            };
+            // console.warn(direction);
+            // console.warn(`isIn${edgeNameMap[direction]}Edge`);
+            if (!this[`isIn${edgeNameMap[direction]}Edge`]) {
                 this.setScrollLive();
             }
         },
@@ -243,10 +281,18 @@ export default {
         stopScrollWhenTouchEdge() {
             for (let axis in this.map) {
                 const direction = this.map[axis];
-                if (this[`minScroll${direction}`] > this[`willScroll${direction}`]) {
-                    this[`translate${axis}`] = 0 - this[`minScroll${direction}`];
-                } else if (this[`maxScroll${direction}`] < this[`willScroll${direction}`]) {
-                    this[`translate${axis}`] = 0 - this[`maxScroll${direction}`];
+                if (
+                    this[`minScroll${direction}`] >
+                    this[`willScroll${direction}`]
+                ) {
+                    this[`translate${axis}`] =
+                        0 - this[`minScroll${direction}`];
+                } else if (
+                    this[`maxScroll${direction}`] <
+                    this[`willScroll${direction}`]
+                ) {
+                    this[`translate${axis}`] =
+                        0 - this[`maxScroll${direction}`];
                 }
             }
         },
@@ -267,7 +313,6 @@ export default {
             this.cancelScrollLive();
             const refreshScrollData = () => {
                 const { x, y } = this.getCurrentTranslate();
-                console.log(y);
                 this.refreshScrollData(x, y);
                 this.rafId = raf(refreshScrollData);
             };
@@ -282,7 +327,6 @@ export default {
         },
 
         transitionendHandler() {
-            console.log('transitionendHandler');
             this.cancelScrollLive();
         }
     }
@@ -309,11 +353,15 @@ export default {
             width: 150vw;
         }
         li {
-            font-size: 14px;
+            font-size: 16px;
             list-style-type: none;
             padding: 15px;
             margin: 0;
             border-bottom: 1px solid #ddd;
+            background: #ddd;
+            &:nth-child(2n + 1) {
+                background: #fff;
+            }
         }
     }
 }
