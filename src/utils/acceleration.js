@@ -1,16 +1,28 @@
+// /**
+//  * s = (v₁² - v₀²) / (2 * a), 
+//  * 获取位移
+//  * @param {Number} a, 加速度
+//  * @param {Number} vt, 截止速度
+//  * @param {Number} v0, 起始速度
+//  * @return {Number} 位移
+//  */
+// export const s = ({
+//     a,
+//     vt,
+//     v0
+// }) => (vt ** 2 - v0 ** 2) / (2 * a);
 /**
  * s = (v₁² - v₀²) / (2 * a), 
  * 获取位移
  * @param {Number} a, 加速度
- * @param {Number} vt, 截止速度
  * @param {Number} v0, 起始速度
+ * @param {}
  * @return {Number} 位移
  */
 export const s = ({
     a,
-    vt,
     v0
-}) => (vt ** 2 - v0 ** 2) / (2 * a);
+},t) => v0 * t + a * t ** 2 / 2;
 
 /**
  * t = (v₁ - v₀) / a

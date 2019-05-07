@@ -37,7 +37,7 @@ export default {
         // 减速度, 单位px/s²
         acceleration: {
             type: Number,
-            default: 7200
+            default: 0.0024
         },
 
         // 滑动动画的最大执行时间
@@ -68,7 +68,7 @@ export default {
     computed: {
         bodyStyle() {
             return {
-                transitionDuration: `${this.transitionDuration}ms`,
+                // transitionDuration: `${this.transitionDuration}ms`,
                 transform: `translate3d(${this.translateX}px, ${
                     this.translateY
                 }px,0)`
@@ -131,13 +131,15 @@ export default {
     },
 
     async mounted() {
-        const resp = await fetch('https://cnodejs.org/api/v1/topics?limit=300');
+        const resp = await fetch('db.json');
         const { data } = await resp.json();
         this.data = data;
         await this.$nextTick();
 
         const at = new AnyTouch(this.$el);
         this.updateSize();
+
+
         // 第一次触碰
         at.on('inputstart', (ev) => {
             this.cancelScrollLive();
@@ -211,11 +213,13 @@ export default {
          * 移动到
          */
         moveTo({ translateY, translateX }, transitionDuration = 0) {
-            this.transitionDuration = transitionDuration;
-            this.translateX = translateX;
-            this.translateY = translateY;
-            this.stopScrollWhenTouchEdge();
-            this.refreshScrollData(this.translateX, this.translateY);
+            this.ease();
+
+            // this.transitionDuration = transitionDuration;
+            // this.translateX = translateX;
+            // this.translateY = translateY;
+            // this.stopScrollWhenTouchEdge();
+            // this.refreshScrollData(this.translateX, this.translateY);
         },
 
         /**
@@ -356,6 +360,26 @@ export default {
                 },
                 500
             );
+        },
+
+        ease(maxDistance=30000, v = 3) {
+            let distance = 0;
+            let now = Date.now();
+            let maxTime = v / this.acceleration;
+            let id = null;
+            const sss = () => {
+                const t = Date.now() - now;
+                if (maxTime < t || maxDistance < distance) {
+                    // raf.cancel(id);
+                    return;
+                }
+                console.log({ t });
+                distance = acc.s({ a: -this.acceleration, v0: v }, t);
+                id = raf(sss);
+                this.translateY = -distance;
+                console.log(distance);
+            };
+            id = raf(sss);
         }
     }
 };
@@ -374,7 +398,7 @@ export default {
     overflow: hidden;
     border-bottom: 2px solid #f10;
     &__body {
-        transition-timing-function: cubic-bezier(0.18, 0.84, 0.44, 1);
+        // transition-timing-function: cubic-bezier(0.18, 0.84, 0.44, 1);
         background: #eee;
         position: absolute;
         ul {
