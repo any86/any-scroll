@@ -17,7 +17,6 @@
 
 <script>
 import AnyTouch from 'any-touch';
-import * as acc from './utils/acceleration';
 import raf from 'raf';
 export default {
     name: 'any-scroll-view',
@@ -34,16 +33,26 @@ export default {
             default: 500
         },
 
-        // 减速度, 单位px/s²
-        acceleration: {
-            type: Number,
-            default: 0.0024
-        },
-
         // 滑动动画的最大执行时间
         maxScrollAnimateTime: {
             type: Number,
             default: 2000
+        },
+
+        // 缓动函数
+        easing: {
+            type: Function,
+            default: (t) => (t - 1) ** 3 + 1
+        },
+
+        overflowX: {
+            type: Boolean,
+            default: true
+        },
+
+        overflowY: {
+            type: Boolean,
+            default: false
         }
     },
 
@@ -61,17 +70,18 @@ export default {
             scrollTop: 0,
             scrollLeft: 0,
             // 定时器句柄
-            rafId: []
+            rafId: [],
+
+            rafEaseId: null
         };
     },
 
     computed: {
         bodyStyle() {
             return {
-                // transitionDuration: `${this.transitionDuration}ms`,
                 transform: `translate3d(${this.translateX}px, ${
                     this.translateY
-                }px,0)`
+                }px, 0px)`
             };
         },
 
@@ -139,11 +149,9 @@ export default {
         const at = new AnyTouch(this.$el);
         this.updateSize();
 
-
         // 第一次触碰
         at.on('inputstart', (ev) => {
-            this.cancelScrollLive();
-            this.stopRoll();
+            this.stopScroll();
         });
 
         // 拖拽开始
@@ -158,7 +166,7 @@ export default {
 
         // 结束拖拽
         at.on('panend', (ev) => {
-            // this.resetPosition();
+            // this.resetScroll();
         });
 
         // 快速滑动
@@ -179,20 +187,11 @@ export default {
             this.bodyHeight = this.$refs.body.scrollHeight;
         },
 
-        // https://github.com/nolimits4web/Swiper/blob/master/src/utils/utils.js#L25
-        getCurrentTranslate() {
-            const style = getComputedStyle(this.$refs.body, null);
-            const { transform } = style;
-            const array = transform.match(/(\-?)(\d)+(\.\d{0,})?/g);
-            return { x: Math.round(array[4]), y: Math.round(array[5]) };
-        },
-
         /**
          * 立即在当前位置停止滚动
          */
-        stopRoll() {
-            const { x, y } = this.getCurrentTranslate();
-            this.moveTo({ translateY: y, translateX: x });
+        stopScroll() {
+            raf.cancel(this.rafEaseId);
         },
 
         /**
@@ -203,23 +202,68 @@ export default {
          */
         move({ deltaX, deltaY }, transitionDuration = 0) {
             this.transitionDuration = transitionDuration;
-            this.translateX += deltaX;
-            this.translateY += deltaY;
+            if (!this.overflowX) {
+                this.translateX += deltaX;
+            }
+
+            if (!this.overflowY) {
+                this.translateY += deltaY;
+            }
             this.stopScrollWhenTouchEdge();
             this.refreshScrollData(this.translateX, this.translateY);
         },
 
         /**
+         * 滚动动画结束触发
+         */
+        scrollAnimateEndHandler() {
+            console.log(this.scrollTop)
+            if (this.scrollTop < this.minScrollTop) {
+                console.log('resetScroll');
+                // this.resetScroll();
+            }
+            this.$emit('scroll-animate-end');
+        },
+
+        /**
          * 移动到
          */
-        moveTo({ translateY, translateX }, transitionDuration = 0) {
-            this.ease();
+        moveTo({ scrollTop, scrollLeft }, duration = 0) {
+            raf.cancel(this.rafEaseId);
+            const startScrollLeft = this.scrollLeft;
+            const startScrollTop = this.scrollTop;
+            const distance = scrollTop - this.scrollTop;
 
-            // this.transitionDuration = transitionDuration;
-            // this.translateX = translateX;
-            // this.translateY = translateY;
-            // this.stopScrollWhenTouchEdge();
-            // this.refreshScrollData(this.translateX, this.translateY);
+            // 开始时间点
+            let startTime = Date.now();
+
+            const getDistance = () => {
+                const elapse = Date.now() - startTime;
+                if (duration <= elapse) {
+                    this.scrollAnimateEndHandler();
+                    return;
+                }
+                const delta = this.easing(elapse / duration) * distance;
+ 
+
+                if (!this.overflowX) {
+                    this.scrollLeft = startScrollLeft + Math.round(delta);
+                    this.translateX = 0 - this.scrollLeft;
+                }
+                if (!this.overflowY) {
+                    this.scrollTop = startScrollTop + Math.round(delta);
+                    this.translateY = 0 - this.scrollTop;
+                }
+
+                this.stopScrollWhenTouchEdge();
+
+                this.$emit('scroll', {
+                    scrollTop: this.scrollTop,
+                    scrollLeft: this.scrollLeft
+                });
+                this.rafEaseId = raf(getDistance);
+            };
+            this.rafEaseId = raf(getDistance);
         },
 
         /**
@@ -228,69 +272,17 @@ export default {
          */
         decelerate(ev) {
             const { direction } = ev;
-            const directionSign = { up: -1, right: 1, down: 1, left: -1 }[
+            const directionSign = { up: 1, right: -1, down: -1, left: 1 }[
                 direction
             ];
             // 判断是那个轴的运动
             const axis = ev.velocityX > ev.velocityY ? 'X' : 'Y';
 
             const velocity = ev[`velocity${axis}`];
+            const time = Math.max(768, velocity * 256);
 
-            console.log({ velocity });
-
-            // 滑动距离
-            let distance = Math.round(
-                acc.s({ a: this.acceleration, vt: velocity * 1000, v0: 0 })
-            );
-            // 通过方向判断最大可移动距离
-            if ('up' === direction) {
-                distance = Math.min(
-                    distance,
-                    this.maxScrollTop - this.scrollTop
-                );
-            } else if ('down' === direction) {
-                distance = Math.min(
-                    distance,
-                    this.scrollTop - this.minScrollTop
-                );
-            } else if ('right' === direction) {
-                distance = Math.min(
-                    distance,
-                    this.scrollLeft - this.minScrollLeft
-                );
-            } else if ('left' === direction) {
-                distance = Math.min(
-                    distance,
-                    this.maxScrollLeft - this.scrollLeft
-                );
-            }
-
-            this[`translate${axis}`] += directionSign * distance;
-
-            // 如果终点超过边界, 那么求到达边界的速度
-            const vt = acc.vt({
-                a: this.acceleration,
-                s: distance,
-                v0: velocity
-            });
-
-            // 用到达边界的速度, 求运动时间, 单位ms
-            this.transitionDuration =
-                acc.t({ vt, v0: velocity, a: this.acceleration }) * 1000;
-
-            this.stopScrollWhenTouchEdge();
-
-            // 不如将要移动的方向上还有可移动距离
-            // 开始监听translate的变化
-            const edgeNameMap = {
-                up: 'Bottom',
-                down: 'Up',
-                left: 'Right',
-                right: 'Left'
-            };
-            if (!this[`isIn${edgeNameMap[direction]}Edge`]) {
-                this.setScrollLive();
-            }
+            const willMove = (directionSign * velocity * time) / 2;
+            this.moveTo({ scrollTop: this.scrollTop + willMove }, time);
         },
 
         /**
@@ -324,27 +316,6 @@ export default {
             this.scrollLeft = this.minScrollTop - translateX;
         },
 
-        /**
-         * 页面滚动过程中, 实时返回scroll数据
-         */
-        setScrollLive() {
-            // 定时刷新scroll信息
-            this.cancelScrollLive();
-            const refreshScrollData = () => {
-                const { x, y } = this.getCurrentTranslate();
-                this.refreshScrollData(x, y);
-                this.rafId = raf(refreshScrollData);
-            };
-            this.rafId = raf(refreshScrollData);
-        },
-
-        /**
-         * 实时返回scroll数据
-         */
-        cancelScrollLive() {
-            raf.cancel(this.rafId);
-        },
-
         transitionendHandler() {
             this.cancelScrollLive();
         },
@@ -352,34 +323,8 @@ export default {
         /**
          * 恢复到0,0位置
          */
-        resetPosition() {
-            this.moveTo(
-                {
-                    translateX: 0 - this.minScrollLeft,
-                    translateY: 0 - this.minScrollTop
-                },
-                500
-            );
-        },
-
-        ease(maxDistance=30000, v = 3) {
-            let distance = 0;
-            let now = Date.now();
-            let maxTime = v / this.acceleration;
-            let id = null;
-            const sss = () => {
-                const t = Date.now() - now;
-                if (maxTime < t || maxDistance < distance) {
-                    // raf.cancel(id);
-                    return;
-                }
-                console.log({ t });
-                distance = acc.s({ a: -this.acceleration, v0: v }, t);
-                id = raf(sss);
-                this.translateY = -distance;
-                console.log(distance);
-            };
-            id = raf(sss);
+        resetScroll() {
+            this.moveTo({ scrollTop: 0, scrollLeft: 0 });
         }
     }
 };
