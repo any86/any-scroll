@@ -217,11 +217,13 @@ export default {
          * 滚动动画结束触发
          */
         scrollAnimateEndHandler() {
-            console.log(this.scrollTop)
+            console.log(this.scrollTop);
             if (this.scrollTop < this.minScrollTop) {
+                this.translateY = 0;
                 console.log('resetScroll');
                 // this.resetScroll();
             }
+            console.log('scroll-animate-end')
             this.$emit('scroll-animate-end');
         },
 
@@ -232,8 +234,7 @@ export default {
             raf.cancel(this.rafEaseId);
             const startScrollLeft = this.scrollLeft;
             const startScrollTop = this.scrollTop;
-            const distance = scrollTop - this.scrollTop;
-
+            const distance = Math.max(scrollTop, -this.bounceDistance) - startScrollTop;
             // 开始时间点
             let startTime = Date.now();
 
@@ -243,15 +244,24 @@ export default {
                     this.scrollAnimateEndHandler();
                     return;
                 }
-                const delta = this.easing(elapse / duration) * distance;
- 
+                let delta = 
+                    this.easing(elapse / duration) * distance
+                ;
+                console.log({delta, distance});
+                delta = Math.round(delta);
+
+                if (Math.abs(delta) >= Math.abs(distance)) {
+                    delta = distance;
+                    this.scrollAnimateEndHandler();
+                    return;
+                }
 
                 if (!this.overflowX) {
-                    this.scrollLeft = startScrollLeft + Math.round(delta);
+                    this.scrollLeft = startScrollLeft + delta;
                     this.translateX = 0 - this.scrollLeft;
                 }
                 if (!this.overflowY) {
-                    this.scrollTop = startScrollTop + Math.round(delta);
+                    this.scrollTop = startScrollTop + delta;
                     this.translateY = 0 - this.scrollTop;
                 }
 
