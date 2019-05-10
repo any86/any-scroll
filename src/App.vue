@@ -8,7 +8,9 @@
         >
             <slot>
                 <ul>
-                    <li v-for="({title}, index) in data" :key="index">{{index}} - {{title}}</li>
+                    <li v-for="({title, author}, index) in data" :key="index">
+                        <img :src="author.avatar_url"/>{{index}} - {{title}}
+                    </li>
                 </ul>
             </slot>
         </div>
@@ -22,6 +24,11 @@ export default {
     name: 'any-scroll-view',
 
     props: {
+        decelerationFactor: {
+            type: Number,
+            default: 0.1
+        },
+
         // 回弹距离
         bounceDistance: {
             type: Number,
@@ -66,9 +73,7 @@ export default {
             bodyWidth: 0,
             viewWidth: 0,
             viewHeight: 0,
-            // 实时scroll
-            scrollTop: 0,
-            scrollLeft: 0,
+
             // 定时器句柄
             rafId: [],
 
@@ -79,19 +84,17 @@ export default {
     computed: {
         bodyStyle() {
             return {
-                transform: `translate3d(${this.translateX}px, ${
-                    this.translateY
-                }px, 0px)`
+                transform: `translate3d(${this.translateX}px, ${this.translateY}px, 0px)`
             };
         },
 
         // Y轴目标滚动条高度
-        willScrollTop() {
+        scrollTop() {
             return -this.translateY;
         },
 
         // X轴目标滚动条高度
-        willScrollLeft() {
+        scrollLeft() {
             return -this.translateX;
         },
 
@@ -156,12 +159,12 @@ export default {
 
         // 拖拽开始
         at.on('panstart', (ev) => {
-            this.move(ev);
+            // this.move(ev);
         });
 
         // 拖拽中
         at.on('panmove', (ev) => {
-            this.move(ev);
+            // this.move(ev);
         });
 
         // 结束拖拽
@@ -209,7 +212,7 @@ export default {
             if (!this.overflowY) {
                 this.translateY += deltaY;
             }
-            this.stopScrollWhenTouchEdge();
+            // this.stopScrollWhenTouchEdge();
             this.refreshScrollData(this.translateX, this.translateY);
         },
 
@@ -228,96 +231,51 @@ export default {
         },
 
         /**
-         * 移动到
-         */
-        moveTo({ scrollTop, scrollLeft }, duration = 0) {
-            raf.cancel(this.rafEaseId);
-            const startScrollLeft = this.scrollLeft;
-            const startScrollTop = this.scrollTop;
-            const distance =
-                Math.max(scrollTop, -this.bounceDistance) - startScrollTop;
-            // 开始时间点
-            let startTime = Date.now();
-
-            const getDistance = () => {
-                const elapse = Date.now() - startTime;
-                // if (duration <= elapse) {
-                //     this.scrollAnimateEndHandler();
-                //     return;
-                // }
-                let delta = this.easing(elapse / duration) * distance;
-                console.log({ delta, distance });
-                delta = Math.round(delta);
-
-                if (Math.abs(delta) >= Math.abs(distance)) {
-                    delta = distance;
-                    this.scrollAnimateEndHandler();
-                    return;
-                }
-
-                if (!this.overflowX) {
-                    this.scrollLeft = startScrollLeft + delta;
-                    this.translateX = 0 - this.scrollLeft;
-                }
-                if (!this.overflowY) {
-                    this.scrollTop = startScrollTop + delta;
-                    this.translateY = 0 - this.scrollTop;
-                }
-
-                this.stopScrollWhenTouchEdge();
-
-                this.$emit('scroll', {
-                    scrollTop: this.scrollTop,
-                    scrollLeft: this.scrollLeft
-                });
-                this.rafEaseId = raf(getDistance);
-            };
-            this.rafEaseId = raf(getDistance);
-        },
-
-        /**
          * 拖拽松手后减速移动至停止
          * velocityX/Y的单位是px/ms
          */
         decelerate(ev) {
-            const { direction } = ev;
-            const directionSign = { up: 1, right: -1, down: -1, left: 1 }[
-                direction
-            ];
-            // 判断是那个轴的运动
-            const axis = ev.velocityX > ev.velocityY ? 'X' : 'Y';
-
-            const velocity = ev[`velocity${axis}`];
-            const willMove = velocity * 300;
-            this.scrollAfterSwipe({
-                scrollTop: this.scrollTop + willMove
+            const { speedX, speedY } = ev;
+            const _move = (speed) => {
+                // 根据速度求滑动距离
+                // 此处的公式其实就是想给让速度和距离有一个线性关系,
+                // 并不是什么物理公式,
+                // 此处的300也可以是其他任何值
+                return (speed * 30) / this.decelerationFactor;
+            };
+            // 减速动画
+            this._decelerateAnimation({
+                deltaX: _move(speedX),
+                deltaY: _move(speedY)
             });
         },
 
         /**
-         * 动画滑动效果
+         * 减速动画
          */
-        scrollAfterSwipe({ scrollTop, scrollLeft } = {}) {
+        _decelerateAnimation({ deltaX, deltaY } = {}) {
             raf.cancel(this.rafEaseId);
-            const startScrollLeft = this.scrollLeft;
-            const startScrollTop = this.scrollTop;
-            const willMoveDistance = {
-                x: scrollLeft - startScrollLeft,
-                y: scrollTop - startScrollTop
+
+            // 剩余滑动位移
+            let remainDelta = {
+                x: deltaX,
+                y: deltaY
             };
-            let remainDistance = willMoveDistance;
-            console.log({ scrollTop, remainDistance, startScrollTop });
-            const _scrollTo = () => {
-                console.log({ remainDistance });
-                remainDistance *= 1 - 0.1;
-                remainDistance |= 0;
-                this.translateY = remainDistance - willMoveDistance - startScrollTop;
-                if (remainDistance <= 0.0001) {
+            // 滑动到下一帧的scroll位置
+            const _moveToNextFramePosition = () => {
+                let axis = 'y';
+                const willMove = remainDelta[axis] * this.decelerationFactor;
+                remainDelta[axis] -= willMove;
+                remainDelta[axis] |= 0;
+                this[`translate${axis.toUpperCase()}`] += willMove;
+                // console.log(remainDelta, willMove);
+
+                if (Math.abs(remainDelta.y) <= 0.1) {
                     return;
                 }
-                this.rafEaseId = raf(_scrollTo);
+                this.rafEaseId = raf(_moveToNextFramePosition);
             };
-            this.rafEaseId = raf(_scrollTo);
+            this.rafEaseId = raf(_moveToNextFramePosition);
         },
 
         /**
@@ -327,18 +285,10 @@ export default {
         stopScrollWhenTouchEdge() {
             for (let axis in this.map) {
                 const direction = this.map[axis];
-                if (
-                    this[`minScroll${direction}`] - this.bounceDistance >
-                    this[`willScroll${direction}`]
-                ) {
-                    this[`translate${axis}`] =
-                        this.bounceDistance - this[`minScroll${direction}`];
-                } else if (
-                    this[`maxScroll${direction}`] + this.bounceDistance <
-                    this[`willScroll${direction}`]
-                ) {
-                    this[`translate${axis}`] =
-                        0 - this[`maxScroll${direction}`] - this.bounceDistance;
+                if (this[`minScroll${direction}`] - this.bounceDistance > this[`willScroll${direction}`]) {
+                    this[`translate${axis}`] = this.bounceDistance - this[`minScroll${direction}`];
+                } else if (this[`maxScroll${direction}`] + this.bounceDistance < this[`willScroll${direction}`]) {
+                    this[`translate${axis}`] = 0 - this[`maxScroll${direction}`] - this.bounceDistance;
                 }
             }
         },
@@ -359,7 +309,7 @@ export default {
          * 恢复到0,0位置
          */
         resetScroll() {
-            this.moveTo({ scrollTop: 0, scrollLeft: 0 });
+            // this.moveTo({ scrollTop: 0, scrollLeft: 0 });
         }
     }
 };
@@ -392,9 +342,18 @@ export default {
             margin: 0;
             border-bottom: 1px solid #ddd;
             background: #ddd;
+            display:flex;
+            align-items: center;
+            img{
+                width:30px;
+                height:30px;
+                margin-right:10px;
+            }
             &:nth-child(2n + 1) {
                 background: #fff;
             }
+
+    
         }
     }
 }

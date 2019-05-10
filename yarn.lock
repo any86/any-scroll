@@ -1153,9 +1153,10 @@ any-event@^0.3.6:
   version "0.3.6"
   resolved "https://registry.yarnpkg.com/any-event/-/any-event-0.3.6.tgz#daf6e95bf0c934591c1c2c38a6700e7c5833ffc7"
 
-any-touch@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/any-touch/-/any-touch-0.3.0.tgz#c77f0489969144dc7004d48bab220f4aaa8e2246"
+any-touch@^0.3.2:
+  version "0.3.2"
+  resolved "https://registry.npmjs.org/any-touch/-/any-touch-0.3.2.tgz#809b674fb2caf5371e7bec1b4d1f3371b72555ea"
+  integrity sha512-I0+EwCyqmifWjtoECg2kyqzKET1hCQZFhJhps8Tq9zWnMVmfKML5XmzxngMd4tOWgA+6cA6/rYwEBN06w3MqeQ==
   dependencies:
     any-event "^0.3.6"
 
