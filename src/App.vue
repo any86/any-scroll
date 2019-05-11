@@ -1,20 +1,21 @@
 <template>
-    <div class="any-scroll-view">
-        <div
-            ref="body"
-            :style="bodyStyle"
-            class="any-scroll-view__body"
-            @transitionend="transitionendHandler"
-        >
-            <slot>
-                <ul>
-                    <li v-for="({title, author}, index) in data" :key="index">
-                        <img :src="author.avatar_url"/>{{index}} - {{title}}
-                    </li>
-                </ul>
-            </slot>
-        </div>
+  <div class="any-scroll-view">
+    <div
+      ref="body"
+      :style="bodyStyle"
+      class="any-scroll-view__body"
+      @transitionend="transitionendHandler"
+    >
+      <slot>
+        <ul>
+          <li v-for="({title, author}, index) in data" :key="index">
+            <img :src="author.avatar_url">
+            {{index}} - {{title}}
+          </li>
+        </ul>
+      </slot>
     </div>
+  </div>
 </template>
 
 <script>
@@ -74,10 +75,9 @@ export default {
             viewWidth: 0,
             viewHeight: 0,
 
-            // 定时器句柄
-            rafId: [],
+            rafXId: null,
+            rafYId: null
 
-            rafEaseId: null
         };
     },
 
@@ -236,46 +236,41 @@ export default {
          */
         decelerate(ev) {
             const { speedX, speedY } = ev;
-            const _move = (speed) => {
+            const _calcDeltaDisplacement = (speed) => {
                 // 根据速度求滑动距离
                 // 此处的公式其实就是想给让速度和距离有一个线性关系,
                 // 并不是什么物理公式,
-                // 此处的300也可以是其他任何值
+                // 此处的30也可以是其他任何值
                 return (speed * 30) / this.decelerationFactor;
             };
             // 减速动画
-            this._decelerateAnimation({
-                deltaX: _move(speedX),
-                deltaY: _move(speedY)
-            });
+            this._decelerateAnimation('x', _calcDeltaDisplacement(speedX));
+            this._decelerateAnimation('y', _calcDeltaDisplacement(speedY));
         },
 
         /**
-         * 减速动画
+         * 减速动
          */
-        _decelerateAnimation({ deltaX, deltaY } = {}) {
-            raf.cancel(this.rafEaseId);
+        _decelerateAnimation(axis, delta) {
+            raf.cancel(this[`raf${axis.toUpperCase()}Id`]);
 
             // 剩余滑动位移
-            let remainDelta = {
-                x: deltaX,
-                y: deltaY
-            };
+            let remainDelta = delta;
             // 滑动到下一帧的scroll位置
             const _moveToNextFramePosition = () => {
-                let axis = 'y';
-                const willMove = remainDelta[axis] * this.decelerationFactor;
-                remainDelta[axis] -= willMove;
-                remainDelta[axis] |= 0;
+                const willMove = remainDelta * this.decelerationFactor;
+                remainDelta -= willMove;
+                remainDelta |= 0;
+                console.log(`translate${axis.toUpperCase()}`, willMove)
                 this[`translate${axis.toUpperCase()}`] += willMove;
                 // console.log(remainDelta, willMove);
 
-                if (Math.abs(remainDelta.y) <= 0.1) {
+                if (Math.abs(remainDelta) <= 0.1) {
                     return;
                 }
-                this.rafEaseId = raf(_moveToNextFramePosition);
+                this[`raf${axis.toUpperCase()}Id`] = raf(_moveToNextFramePosition);
             };
-            this.rafEaseId = raf(_moveToNextFramePosition);
+            this[`raf${axis.toUpperCase()}Id`] = raf(_moveToNextFramePosition);
         },
 
         /**
@@ -342,18 +337,16 @@ export default {
             margin: 0;
             border-bottom: 1px solid #ddd;
             background: #ddd;
-            display:flex;
+            display: flex;
             align-items: center;
-            img{
-                width:30px;
-                height:30px;
-                margin-right:10px;
+            img {
+                width: 30px;
+                height: 30px;
+                margin-right: 10px;
             }
             &:nth-child(2n + 1) {
                 background: #fff;
             }
-
-    
         }
     }
 }
