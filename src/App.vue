@@ -55,7 +55,7 @@ export default {
 
         overflowX: {
             type: Boolean,
-            default: true
+            default: false
         },
 
         overflowY: {
@@ -74,10 +74,8 @@ export default {
             bodyWidth: 0,
             viewWidth: 0,
             viewHeight: 0,
-
-            rafXId: null,
-            rafYId: null
-
+            // 记录惯性滚动动画的id
+            rafId: null
         };
     },
 
@@ -159,12 +157,12 @@ export default {
 
         // 拖拽开始
         at.on('panstart', (ev) => {
-            // this.move(ev);
+            this.move(ev);
         });
 
         // 拖拽中
         at.on('panmove', (ev) => {
-            // this.move(ev);
+            this.move(ev);
         });
 
         // 结束拖拽
@@ -194,7 +192,7 @@ export default {
          * 立即在当前位置停止滚动
          */
         stopScroll() {
-            raf.cancel(this.rafEaseId);
+            raf.cancel(this.rafId);
         },
 
         /**
@@ -213,7 +211,6 @@ export default {
                 this.translateY += deltaY;
             }
             // this.stopScrollWhenTouchEdge();
-            this.refreshScrollData(this.translateX, this.translateY);
         },
 
         /**
@@ -244,33 +241,39 @@ export default {
                 return (speed * 30) / this.decelerationFactor;
             };
             // 减速动画
-            this._decelerateAnimation('x', _calcDeltaDisplacement(speedX));
-            this._decelerateAnimation('y', _calcDeltaDisplacement(speedY));
+            this._decelerateAnimation({
+                x: _calcDeltaDisplacement(speedX),
+                y: _calcDeltaDisplacement(speedY)
+            });
+            // this._decelerateAnimation('y', _calcDeltaDisplacement(speedY));
         },
 
         /**
          * 减速动
          */
-        _decelerateAnimation(axis, delta) {
-            raf.cancel(this[`raf${axis.toUpperCase()}Id`]);
-
+        _decelerateAnimation(delta) {
+            raf.cancel(this.rafId);
             // 剩余滑动位移
-            let remainDelta = delta;
+            let remainDelta = { x: delta.x, y: delta.y };
             // 滑动到下一帧的scroll位置
             const _moveToNextFramePosition = () => {
-                const willMove = remainDelta * this.decelerationFactor;
-                remainDelta -= willMove;
-                remainDelta |= 0;
-                console.log(`translate${axis.toUpperCase()}`, willMove)
-                this[`translate${axis.toUpperCase()}`] += willMove;
-                // console.log(remainDelta, willMove);
+                let willMove = { x: 0, y: 0 };
+                const axisGroup = ['x','y'].filter((axis) => !this[`overflow${axis.toUpperCase()}`]);
 
-                if (Math.abs(remainDelta) <= 0.1) {
+                axisGroup.forEach((axis) => {
+                    willMove[axis] = remainDelta[axis] * this.decelerationFactor;
+                    remainDelta[axis] -= willMove[axis];
+                    willMove[axis] |= 0;
+                    // console.log(`translate${axis.toUpperCase()}`, willMove[axis])
+                    this[`translate${axis.toUpperCase()}`] += willMove[axis];
+                });
+
+                if (Math.abs(remainDelta.x) <= 0.1 && Math.abs(remainDelta.y) <= 0.1) {
                     return;
                 }
-                this[`raf${axis.toUpperCase()}Id`] = raf(_moveToNextFramePosition);
+                this.rafId = raf(_moveToNextFramePosition);
             };
-            this[`raf${axis.toUpperCase()}Id`] = raf(_moveToNextFramePosition);
+            this.rafId = raf(_moveToNextFramePosition);
         },
 
         /**
