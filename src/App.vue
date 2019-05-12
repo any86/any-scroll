@@ -8,7 +8,12 @@
     >
       <slot>
         <ul>
-          <li v-for="({title, author}, index) in data" :key="index">
+
+          <!-- <li v-for="index in 100" :key="index">
+            {{index}}
+          </li> -->
+
+                    <li v-for="({title, author}, index) in data" :key="title+index">
             <img :src="author.avatar_url">
             {{index}} - {{title}}
           </li>
@@ -87,13 +92,25 @@ export default {
         },
 
         // Y轴目标滚动条高度
-        scrollTop() {
-            return -this.translateY;
+        scrollTop: {
+            get() {
+                return -this.translateY;
+            },
+
+            set(scrollTop) {
+                this.translateY = 0 - scrollTop;
+            }
         },
 
         // X轴目标滚动条高度
-        scrollLeft() {
-            return -this.translateX;
+        scrollLeft: {
+            get() {
+                return -this.translateX;
+            },
+
+            set(scrollLeft) {
+                this.translateX = 0 - scrollLeft;
+            }
         },
 
         // Y轴滚动的最小距离
@@ -146,13 +163,14 @@ export default {
         const { data } = await resp.json();
         this.data = data;
         await this.$nextTick();
-
         const at = new AnyTouch(this.$el);
+        console.log(at.get('pan'));
         this.updateSize();
 
         // 第一次触碰
         at.on('inputstart', (ev) => {
-            this.stopScroll();
+            console.log(ev)
+            // this.stopScroll();
         });
 
         // 拖拽开始
@@ -172,6 +190,7 @@ export default {
 
         // 快速滑动
         at.on('swipe', (ev) => {
+            console.log('swipe');
             this.decelerate(ev);
         });
 
@@ -202,7 +221,7 @@ export default {
          *  @param {Number} deltaY: y轴位移变化
          */
         move({ deltaX, deltaY }, transitionDuration = 0) {
-            this.transitionDuration = transitionDuration;
+            // this.transitionDuration = transitionDuration;
             if (!this.overflowX) {
                 this.translateX += deltaX;
             }
@@ -210,6 +229,10 @@ export default {
             if (!this.overflowY) {
                 this.translateY += deltaY;
             }
+
+            // if (this.minScrollTop > this.scrollTop) {
+            //     this.scrollTop = this.minScrollTop;
+            // }
             // this.stopScrollWhenTouchEdge();
         },
 
@@ -245,7 +268,6 @@ export default {
                 x: _calcDeltaDisplacement(speedX),
                 y: _calcDeltaDisplacement(speedY)
             });
-            // this._decelerateAnimation('y', _calcDeltaDisplacement(speedY));
         },
 
         /**
@@ -258,13 +280,13 @@ export default {
             // 滑动到下一帧的scroll位置
             const _moveToNextFramePosition = () => {
                 let willMove = { x: 0, y: 0 };
-                const axisGroup = ['x','y'].filter((axis) => !this[`overflow${axis.toUpperCase()}`]);
+                const axisGroup = ['x', 'y'].filter((axis) => !this[`overflow${axis.toUpperCase()}`]);
 
                 axisGroup.forEach((axis) => {
                     willMove[axis] = remainDelta[axis] * this.decelerationFactor;
                     remainDelta[axis] -= willMove[axis];
                     willMove[axis] |= 0;
-                    // console.log(`translate${axis.toUpperCase()}`, willMove[axis])
+                    // console.log(`translate${axis.toUpperCase()}`, willMove[axis]);
                     this[`translate${axis.toUpperCase()}`] += willMove[axis];
                 });
 
@@ -291,16 +313,7 @@ export default {
             }
         },
 
-        /**
-         * 刷新scroll信息
-         */
-        refreshScrollData(translateX, translateY) {
-            this.scrollTop = this.minScrollTop - translateY;
-            this.scrollLeft = this.minScrollTop - translateX;
-        },
-
         transitionendHandler() {
-            this.cancelScrollLive();
         },
 
         /**
@@ -330,7 +343,8 @@ export default {
         background: #eee;
         position: absolute;
         ul {
-            width: 350vw;
+            // width: 350vw;
+            min-width: 100vw;
         }
         li {
             box-sizing: border-box;
