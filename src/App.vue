@@ -39,7 +39,10 @@ export default {
         // 速度衰减因子
         damping: {
             type: Number,
-            default: 0.1
+            default: 0.1,
+            validator: (v) => {
+                return 0 < v && 1 > v;
+            }
         },
 
         // 回弹距离
@@ -366,9 +369,13 @@ export default {
                 // 过滤掉overflow限制的方向
                 const axisGroup = ['x', 'y'].filter((axis) => !this[`overflow${axis.toUpperCase()}`]);
                 axisGroup.forEach((axis) => {
-                    willMove[axis] = remainDelta[axis] * this.damping;
-                    remainDelta[axis] -= willMove[axis];
-                    willMove[axis] |= 0;
+                    const remain = ~~(remainDelta[axis] * (1 - this.damping));
+                    willMove[axis] = remainDelta[axis] - remain;
+                    remainDelta[axis] = remain;
+
+                    // willMove[axis] = remainDelta[axis] * this.damping;
+                    // remainDelta[axis] -= willMove[axis];
+                    // willMove[axis] |= 0;
                     this[`translate${axis.toUpperCase()}`] += willMove[axis];
                 });
                 console.log(willMove, remainDelta);
