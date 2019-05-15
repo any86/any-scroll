@@ -1,14 +1,14 @@
 <template>
-    <div :style="viewStyle" class="any-scroll-view">
-        <div
-            ref="body"
-            :style="bodyStyle"
-            class="any-scroll-view__body"
-            @transitionend="transitionendHandler"
-        >
-            <slot>内容为空</slot>
-        </div>
+  <div :style="viewStyle" class="any-scroll-view">
+    <div
+      ref="body"
+      :style="bodyStyle"
+      class="any-scroll-view__body"
+      @transitionend="transitionendHandler"
+    >
+      <slot>内容为空</slot>
     </div>
+  </div>
 </template>
 
 <script>
@@ -205,6 +205,18 @@ export default {
             return (
                 this.isTouchTopBounce || this.isTouchRightBounce || this.isTouchLeftBounce || this.isTouchBottomBounce
             );
+        },
+
+        isTouchBounceY() {
+            return (
+                this.isTouchTopBounce || this.isTouchBottomBounce
+            );
+        },
+
+        isTouchBounceX(){
+            return (
+                this.isTouchRightBounce || this.isTouchLeftBounc
+            );
         }
     },
 
@@ -394,16 +406,28 @@ export default {
                 });
                 console.log(`willMove`, willMove, `remainDelta`, remainDelta);
                 // if (this.isTouchBounce || Math.abs(remainDelta.x) <= 1) {
-                if (this.isTouchBounce || (Math.abs(remainDelta.x) <= 1 && Math.abs(remainDelta.y) <= 1)) {
+                if (this.isTouchBounceX || (Math.abs(remainDelta.x) <= 1)) {
                     this.scrollState = STATE_STATIC;
                     // 吸附边缘
-                    this.snapToEdge();
+                    this.snapToEdge('x');
 
                     if (STATE_BOUNCE_GROW === this.bounceState) {
                         this.bounceState = STATE_BOUNCE_SHRINK;
                     }
                     this.afterAnimateScrollEnd();
-                    return;
+                    // return;
+                }
+
+                if (this.isTouchBounceY || Math.abs(remainDelta.y) <= 1) {
+                    this.scrollState = STATE_STATIC;
+                    // 吸附边缘
+                    this.snapToEdge('y');
+
+                    if (STATE_BOUNCE_GROW === this.bounceState) {
+                        this.bounceState = STATE_BOUNCE_SHRINK;
+                    }
+                    this.afterAnimateScrollEnd();
+                    // return;
                 }
                 this.rafId = raf(_moveToNextFramePosition);
             };
@@ -425,7 +449,7 @@ export default {
         /**
          * 滚动指定位置
          */
-        scrollTo({ top, left,callback }, duration = 300) {
+        scrollTo({ top, left,callback=()=>{} }, duration = 300) {
             const START_TIME = Date.now();
             const START_SCROLL_X = this.scrollLeft;
             const START_SCROLL_Y = this.scrollTop;

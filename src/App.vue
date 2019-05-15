@@ -65,19 +65,16 @@ export default {
             this.$refs.scroll.decelerate({ speedX: 0, speedY: -4 });
         },
 
-        reset(callback) {
-            this.$refs.scroll.scrollTo({ top: 0, left: 0, callback });
+        reset() {
+            this.$refs.scroll.scrollTo({ top: 0, left: 0 });
         },
 
         test() {
-            this.reset();
-            setTimeout(() => {
-                this.$refs.scroll.scrollTo({ left: -200, top: 2700 });
-                this.$refs.scroll.stopScroll();
-                setTimeout(() => {
-                    this.$refs.scroll.decelerate({ speedX: -0.1, speedY: -1 });
-                }, 100);
-            }, 1000);
+            this.$refs.scroll.scrollTo({ left: 0, top: 2700 });
+            this.$refs.scroll.stopScroll();
+            setTimeout(()=>{
+                this.$refs.scroll.decelerate({ speedX: 0.1, speedY: -1 });
+            },2000)
         }
     }
 };
@@ -116,7 +113,7 @@ main {
                 padding: 10px 30px;
                 background: #69c;
                 color: #fff;
-                width:100%;
+                width: 100%;
             }
         }
     }
