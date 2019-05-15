@@ -7,6 +7,7 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
+    "annyang": "^2.6.1",
     "core-js": "^2.6.5",
     "raf": "^3.4.1",
     "vue": "^2.6.6"
