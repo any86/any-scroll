@@ -19,9 +19,10 @@
             </ul>
         </any-scroll>
 
-        <button @click="decelerate">减速滑动</button>
+        <button @click="scrollUp">向上滑动</button>
+        <button @click="scrollDown">向下滑动</button>
         <button @click="reset">复位</button>
-
+        <button @click="test">测试</button>
     </main>
 </template>
 
@@ -41,17 +42,29 @@ export default {
         const { data } = await resp.json();
         this.data = data.slice(0, 66);
         this.$nextTick();
-        console.log('nextTick')
+        console.log('nextTick');
         this.$refs.scroll.updateSize();
     },
 
     methods: {
-        decelerate() {
-            this.$refs.scroll.decelerate({speedX:20, speedY:300});
+        scrollUp() {
+            this.$refs.scroll.stopScroll();
+            this.$refs.scroll.decelerate({ speedX: 0, speedY: 4 });
         },
 
-        reset(){
-            this.$refs.scroll.scrollTo({top:0, left:0});
+        scrollDown() {
+            this.$refs.scroll.stopScroll();
+            this.$refs.scroll.decelerate({ speedX: 0, speedY: -4 });
+        },
+
+        reset() {
+            this.$refs.scroll.scrollTo({ top: 0, left: 0 });
+        },
+
+        test() {
+            this.$refs.scroll.scrollTo({ left: -200, top: 2700 });
+            // this.$refs.scroll.stopScroll();
+            // this.$refs.scroll.decelerate({ speedX: -0.1, speedY: -0.3});
         }
     }
 };
@@ -76,9 +89,9 @@ h1 {
     text-align: center;
 }
 button {
-    margin-top:15px;
-    padding: 10px 0;
-    width: 100%;
+    margin-top: 15px;
+    margin-right: 15px;
+    padding: 10px 30px;
     background: #69c;
     color: #fff;
 }

@@ -41,9 +41,9 @@ export default {
         },
 
         // 回弹动画曲线
-        bounceEase: {
-            type: String,
-            default: 'cubic-bezier(0.18, 0.84, 0.44, 1)'
+        easeFunction: {
+            type: Function,
+            default: (t) => (t - 1) ** 3 + 1
         },
 
         height: {
@@ -88,9 +88,9 @@ export default {
 
         bodyStyle() {
             return {
-                transform: `translate3d(${this.translateX}px, ${this.translateY}px, 0px)`,
+                transform: `translate3d(${this.translateX}px, ${this.translateY}px, 0px)`
                 // transitionTimingFunction: this.bounceEase,
-                transitionDuration: `${this.transitionDuration}ms`
+                // transitionDuration: `${this.transitionDuration}ms`
             };
         },
 
@@ -354,8 +354,11 @@ export default {
          * velocityX/Y的单位是px/ms
          */
         decelerate(ev) {
+            console.log(ev);
             if (STATE_BOUNCE_SHRINK === this.bounceState) return;
+            this.transitionDuration = 0;
             this.scrollState = STATE_ANIMATE_SCROLL;
+            console.log(this.scrollState);
             const { speedX, speedY } = ev;
             const _calcDeltaDisplacement = (speed) => {
                 // 根据速度求滑动距离
@@ -389,7 +392,7 @@ export default {
                     remainDelta[axis] = remain;
                     this[`translate${axis.toUpperCase()}`] += willMove[axis];
                 });
-                console.log(willMove, remainDelta);
+                console.log(`willMove`, willMove, `remainDelta`, remainDelta);
                 // if (this.isTouchBounce || Math.abs(remainDelta.x) <= 1) {
                 if (this.isTouchBounce || (Math.abs(remainDelta.x) <= 1 && Math.abs(remainDelta.y) <= 1)) {
                     this.scrollState = STATE_STATIC;
@@ -419,21 +422,42 @@ export default {
             }
         },
 
-        scrollTo({ top, left }, duration = 0) {
-            if (undefined !== top) {
-                this.scrollTop = top;
-            }
+        /**
+         * 滚动指定位置
+         */
+        scrollTo({ top, left }, duration = 300) {
+            const START_TIME = Date.now();
+            const START_SCROLL_X = this.scrollLeft;
+            const START_SCROLL_Y = this.scrollTop;
+            const WILL_MOVE_X = left - START_SCROLL_X;
+            const WILL_MOVE_Y = top - START_SCROLL_Y;
+            let rafId = 0;
+            const _toNextPosition = () => {
+                const elapse = Date.now() - START_TIME;
+                // 通过和1比较大小, 让easeFunction的返回值以1结束
+                const progress = this.easeFunction(Math.min(1, elapse / duration));
 
-            if (undefined !== left) {
-                this.scrollLeft = left;
-            }
-            this.transitionDuration = duration;
+                if (elapse <= duration) {
+                    console.log({rafId, progress})
+                    if (undefined !== top) {
+                        this.scrollTop = START_SCROLL_Y + WILL_MOVE_Y * progress;
+                    }
+
+                    if (undefined !== left) {
+                        this.scrollLeft = START_SCROLL_X + WILL_MOVE_X * progress;
+                    }
+
+                    rafId = raf(_toNextPosition);
+                }
+            };
+            rafId = raf(_toNextPosition);
         },
 
         /**
          * 吸附最近的边界位置
          */
         snapToEdge(axis) {
+            return;
             // y轴
             if (undefined === axis || 'y' === axis) {
                 if (this.isOutOfTop) {
