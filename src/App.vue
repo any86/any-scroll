@@ -1,29 +1,37 @@
 <template>
-    <main>
-        <h1>
-            {{scrollState}} /
-            <small>{{bounceState}}</small>
-        </h1>
-        <any-scroll
-            ref="scroll"
-            :height="600"
-            @change-bounce-state="bounceState=$event"
-            @change-scroll-state="scrollState=$event"
-            class="scroll-view"
-        >
-            <ul>
-                <li v-for="({title, author}, index) in data" :key="title+index">
-                    <img :src="author.avatar_url">
-                    {{index}} - {{title}}
-                </li>
-            </ul>
-        </any-scroll>
+<main>
+  <head>
+    <h1>
+      {{scrollState}} /
+      <small>{{bounceState}}</small>
+    </h1>
+  </head>
 
-        <button @click="scrollUp">向上滑动</button>
-        <button @click="scrollDown">向下滑动</button>
-        <button @click="reset">复位</button>
-        <button @click="test">测试</button>
-    </main>
+  <section class="body">
+    <any-scroll
+      ref="scroll"
+      :height="600"
+      @change-bounce-state="bounceState=$event"
+      @change-scroll-state="scrollState=$event"
+      class="scroll-view"
+    >
+      <ul>
+        <li v-for="({title, author}, index) in data" :key="title+index">
+          <img :src="author.avatar_url">
+          {{index}} - {{title}}
+        </li>
+      </ul>
+    </any-scroll>
+
+    <!-- 表单 -->
+    <div class="form">
+      <button @click="scrollUp">向上滑动</button>
+      <button @click="scrollDown">向下滑动</button>
+      <button @click="reset">复位</button>
+      <button @click="test">测试</button>
+    </div>
+  </section>
+</main>
 </template>
 
 <script>
@@ -81,23 +89,36 @@ export default {
     margin: 0;
 }
 
-.scroll-view {
-    border-bottom: 10px solid #444;
-}
 h1 {
     font-size: 24px;
-    position: fixed;
     background: rgba(#000, 0.5);
-    z-index: 999;
     width: 100%;
     color: #fff;
     text-align: center;
 }
-button {
-    margin-top: 15px;
-    margin-right: 15px;
-    padding: 10px 30px;
-    background: #69c;
-    color: #fff;
+
+main {
+    overflow: hidden;
+    > .body {
+        display: flex;
+        > .scroll-view {
+            width: 360px;
+            flex-shrink: 0;
+            margin: 5%;
+            box-shadow: 1px 2px 3px rgba(#000, 0.1), -1px -2px 3px rgba(#000, 0.1);
+        }
+
+        > .form {
+            margin: 5% auto;
+            button {
+                margin-top: 15px;
+                margin-right: 15px;
+                padding: 10px 30px;
+                background: #69c;
+                color: #fff;
+                width:100%;
+            }
+        }
+    }
 }
 </style>
