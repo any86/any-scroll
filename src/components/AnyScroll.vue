@@ -425,7 +425,7 @@ export default {
         /**
          * 滚动指定位置
          */
-        scrollTo({ top, left }, duration = 300) {
+        scrollTo({ top, left,callback }, duration = 300) {
             const START_TIME = Date.now();
             const START_SCROLL_X = this.scrollLeft;
             const START_SCROLL_Y = this.scrollTop;
@@ -437,17 +437,20 @@ export default {
                 // 通过和1比较大小, 让easeFunction的返回值以1结束
                 const progress = this.easeFunction(Math.min(1, elapse / duration));
 
+                // 移动
+                if (undefined !== top) {
+                    this.scrollTop = Math.ceil(START_SCROLL_Y + WILL_MOVE_Y * progress);
+                }
+
+                if (undefined !== left) {
+                    this.scrollLeft = Math.ceil(START_SCROLL_X + WILL_MOVE_X * progress);
+                }
+                // console.log({ rafId, progress });
+
                 if (elapse <= duration) {
-                    console.log({rafId, progress})
-                    if (undefined !== top) {
-                        this.scrollTop = START_SCROLL_Y + WILL_MOVE_Y * progress;
-                    }
-
-                    if (undefined !== left) {
-                        this.scrollLeft = START_SCROLL_X + WILL_MOVE_X * progress;
-                    }
-
                     rafId = raf(_toNextPosition);
+                } else {
+                    callback();
                 }
             };
             rafId = raf(_toNextPosition);
@@ -457,7 +460,6 @@ export default {
          * 吸附最近的边界位置
          */
         snapToEdge(axis) {
-            return;
             // y轴
             if (undefined === axis || 'y' === axis) {
                 if (this.isOutOfTop) {

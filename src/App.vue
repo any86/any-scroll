@@ -57,14 +57,19 @@ export default {
             this.$refs.scroll.decelerate({ speedX: 0, speedY: -4 });
         },
 
-        reset() {
-            this.$refs.scroll.scrollTo({ top: 0, left: 0 });
+        reset(callback) {
+            this.$refs.scroll.scrollTo({ top: 0, left: 0, callback });
         },
 
         test() {
-            this.$refs.scroll.scrollTo({ left: -200, top: 2700 });
-            // this.$refs.scroll.stopScroll();
-            // this.$refs.scroll.decelerate({ speedX: -0.1, speedY: -0.3});
+            this.reset();
+            setTimeout(() => {
+                this.$refs.scroll.scrollTo({ left: -200, top: 2700 });
+                this.$refs.scroll.stopScroll();
+                setTimeout(() => {
+                    this.$refs.scroll.decelerate({ speedX: -0.1, speedY: -1 });
+                }, 100);
+            }, 1000);
         }
     }
 };
