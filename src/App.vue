@@ -41,46 +41,50 @@
                 :overflow-x="overflowX"
                 :overflow-y="overflowY"
                 :bounce-distance="bounceDistance"
-                @change-bounce-state="bounceState=$event"
-                @change-scroll-state="scrollState=$event"
+                @bounce-state-change="bounceState=$event"
+                @scroll-state-change="scrollState=$event"
                 @scroll="scrollHandler"
                 class="scroll-view"
             >
-                <ul>
+                <ul v-if="0 < data.length">
                     <li v-for="({title, author}, index) in data" :key="title+index">
                         <img :src="author.avatar_url">
                         {{index}} - {{title}}
                     </li>
                 </ul>
+                <span v-else class="loading"></span>
             </any-scroll>
 
             <!-- data -->
             <article class="dataAndMethods">
                 <table>
                     <tr>
-                        <td>弹簧状态</td>
-                        <td>{{bounceState}}</td>
+                        <td>🌀 弹簧状态</td>
+                        <td>X轴: {{bounceState.x}} <br> Y轴: {{bounceState.y}}</td>
                     </tr>
                     <tr>
-                        <td>滚动状态</td>
+                        <td>🚂 滚动状态</td>
                         <td>{{scrollState}}</td>
                     </tr>
 
                     <tr>
-                        <td>scrollLeft</td>
+                        <td>↔ scrollLeft</td>
                         <td>{{scrollLeft}}</td>
                     </tr>
 
                     <tr>
-                        <td>scrollTop</td>
+                        <td>↕ scrollTop</td>
                         <td>{{scrollTop}}</td>
                     </tr>
                 </table>
 
                 <!-- 表单 -->
                 <div class="form">
-                    <button @click="scrollUp">向上滑动</button>
-                    <button @click="scrollDown">向下滑动</button>
+                    <button @click="scrollUp">模拟拖拽向上</button>
+                    <button @click="scrollDown">模拟拖拽向下</button>
+                    <button @click="scrollLeftHandler">模拟拖拽向左</button>
+                    <button @click="scrollRightHandler">模拟拖拽向右</button>
+
                     <button @click="reset">复位</button>
                     <button @click="test">测试</button>
                 </div>
@@ -90,6 +94,13 @@
 </template>
 
 <script>
+import {
+    STATE_STATIC,
+    STATE_DRAG_SCROLL,
+    STATE_ANIMATE_SCROLL,
+    STATE_BOUNCE_GROW,
+    STATE_BOUNCE_SHRINK
+} from './const.js';
 import AnyScroll from './components/AnyScroll';
 export default {
     name: 'App',
@@ -100,14 +111,14 @@ export default {
         return {
             data: [],
             height: 600,
-            width:undefined,
+            width: undefined,
             bounceDistance: 150,
             overflowX: false,
             overflowY: false,
             scrollTop: 0,
             scrollLeft: 0,
-            bounceState: '静止',
-            scrollState: '静止'
+            bounceState: {x:STATE_STATIC, y:STATE_STATIC},
+            scrollState: STATE_STATIC
         };
     },
 
@@ -116,7 +127,6 @@ export default {
         const { data } = await resp.json();
         this.data = data.slice(0, 66);
         this.$nextTick();
-        console.log('nextTick');
         this.$refs.scroll.updateSize();
     },
 
@@ -127,24 +137,37 @@ export default {
         },
         scrollUp() {
             this.$refs.scroll.stopScroll();
-            this.$refs.scroll.decelerate({ speedX: 0, speedY: 4 });
+            this.$refs.scroll.decelerate({ speedX: 0, speedY: -4 });
         },
 
         scrollDown() {
             this.$refs.scroll.stopScroll();
-            this.$refs.scroll.decelerate({ speedX: 0, speedY: -4 });
+            this.$refs.scroll.decelerate({ speedX: 0, speedY: 4 });
         },
+
+
+        scrollLeftHandler() {
+            this.$refs.scroll.stopScroll();
+            this.$refs.scroll.decelerate({ speedX: 1, speedY: 0 });
+        },
+
+        scrollRightHandler() {
+            this.$refs.scroll.stopScroll();
+            this.$refs.scroll.decelerate({ speedX: -1, speedY: 0 });
+        },
+
 
         reset() {
             this.$refs.scroll.scrollTo({ top: 0, left: 0 });
         },
 
         test() {
-            this.$refs.scroll.scrollTo({ left: 0, top: 2700 });
-            this.$refs.scroll.stopScroll();
-            setTimeout(() => {
-                this.$refs.scroll.decelerate({ speedX: 0.1, speedY: -1 });
-            }, 2000);
+            // this.$refs.scroll.scrollTo({ left: -300, top: 2700 });
+            // this.reset();
+            // setTimeout(() => {
+                this.$refs.scroll.stopScroll();
+                this.$refs.scroll.decelerate({ speedX: 1, speedY: 4 });
+            // }, 200);
         }
     }
 };
@@ -201,29 +224,59 @@ main {
             flex-shrink: 0;
             margin-left: 2%;
             box-shadow: 1px 2px 3px rgba(#000, 0.1), -1px -2px 3px rgba(#000, 0.1);
-                    ul {
-            width: 950vw;
-            min-width: 100vw;
-        }
-        li {
-            box-sizing: border-box;
-            font-size: 16px;
-            list-style-type: none;
-            padding: 15px;
-            margin: 0;
-            border-bottom: 1px solid #ddd;
-            background: #ddd;
-            display: flex;
-            align-items: center;
-            img {
-                width: 30px;
-                height: 30px;
-                margin-right: 10px;
+            .loading{
+                display: block;
+                width:72px;
+                height:72px;
+                border-bottom-width: 0;
+                border-top-width:0;
+                border-color:#aaa;
+                border-radius:100%;
+                border-right-width:4px;
+                border-left-width:4px;
+                border-style: solid;
+                animation: rotate 0.5s infinite linear;
+                position: absolute;
+                margin:auto;
+                left:0;
+                right:0;
+                top:0;bottom:0;
             }
-            &:nth-child(2n + 1) {
-                background: #fff;
+
+
+            @keyframes rotate{
+                from{
+                    transform: rotate(0deg);
+                }
+
+                to{
+                    transform: rotate(360deg);
+                }
             }
-        }
+
+            ul {
+                width: 950vw;
+                li {
+                box-sizing: border-box;
+                font-size: 16px;
+                list-style-type: none;
+                padding: 15px;
+                margin: 0;
+                border-bottom: 1px solid #ddd;
+                background: #ddd;
+                display: flex;
+                align-items: center;
+                img {
+                    width: 30px;
+                    height: 30px;
+                    margin-right: 10px;
+                }
+                &:nth-child(2n) {
+                    background: #fff;
+                }
+            }
+            }
+            
         }
 
         > .dataAndMethods {
@@ -245,7 +298,7 @@ main {
                         border-bottom: 1px solid transparent;
                         color: #000;
                         &:nth-child(1) {
-                            min-width: 150px;
+                            width: 150px;
                         }
                     }
 
@@ -263,12 +316,21 @@ main {
             }
 
             button {
+                border: 1px solid #eee;
+                appearance: none;
+                outline: none;
+                border-radius: 4px;
+                font-size: 16px;
                 margin-top: 15px;
                 margin-right: 15px;
                 padding: 10px 30px;
-                background: #69c;
-                color: #fff;
+                background: #aaa;
+                color: rgba(255, 255, 255, 1);
                 width: 100%;
+                box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.1);
+                &:active {
+                    box-shadow: 1px 1px 1px rgba(255, 255, 255, 1) inset;
+                }
             }
         }
     }
