@@ -1,14 +1,14 @@
 <template>
-  <div :style="viewStyle" class="any-scroll-view">
-    <div
-      ref="body"
-      :style="bodyStyle"
-      class="any-scroll-view__body"
-      @transitionend="transitionendHandler"
-    >
-      <slot>内容为空</slot>
+    <div :style="viewStyle" class="any-scroll-view">
+        <div
+            ref="body"
+            :style="bodyStyle"
+            class="any-scroll-view__body"
+            @transitionend="transitionendHandler"
+        >
+            <slot>内容为空</slot>
+        </div>
     </div>
-  </div>
 </template>
 
 <script>
@@ -44,6 +44,10 @@ export default {
         easeFunction: {
             type: Function,
             default: (t) => (t - 1) ** 3 + 1
+        },
+
+        width: {
+            type: Number
         },
 
         height: {
@@ -83,7 +87,7 @@ export default {
 
     computed: {
         viewStyle() {
-            return { height: `${this.height}px` };
+            return { height: `${this.height}px`, width: `${this.width}px` };
         },
 
         bodyStyle() {
@@ -208,15 +212,11 @@ export default {
         },
 
         isTouchBounceY() {
-            return (
-                this.isTouchTopBounce || this.isTouchBottomBounce
-            );
+            return this.isTouchTopBounce || this.isTouchBottomBounce;
         },
 
-        isTouchBounceX(){
-            return (
-                this.isTouchRightBounce || this.isTouchLeftBounc
-            );
+        isTouchBounceX() {
+            return this.isTouchRightBounce || this.isTouchLeftBounc;
         }
     },
 
@@ -236,6 +236,7 @@ export default {
                 this.bounceState = STATE_BOUNCE_GROW;
             } else {
                 this.bounceState = STATE_STATIC;
+                this.$emit('scroll', { scrollTop, scrollLeft: this.scrollLeft });
             }
 
             // 监控scrollTop, 防止滑出有效区域
@@ -248,11 +249,13 @@ export default {
 
         // 监控scrollLeft, 防止滑出有效区域
         scrollLeft(scrollLeft) {
-            // if (this.minScrollLeftWithBounce > scrollLeft) {
-            //     this.scrollLeft = this.minScrollLeftWithBounce;
-            // } else if (this.maxScrollLeftWithBounce < scrollLeft) {
-            //     this.scrollLeft = this.maxScrollLeftWithBounce;
-            // }
+            // 响应弹簧的状态
+            if (this.minScrollLeft > scrollLeft || this.maxScrollLeft < scrollLeft) {
+                this.bounceState = STATE_BOUNCE_GROW;
+            } else {
+                this.bounceState = STATE_STATIC;
+                this.$emit('scroll', { scrollLeft, scrollTop: this.scrollTop });
+            }
         }
     },
 
@@ -406,7 +409,7 @@ export default {
                 });
                 console.log(`willMove`, willMove, `remainDelta`, remainDelta);
                 // if (this.isTouchBounce || Math.abs(remainDelta.x) <= 1) {
-                if (this.isTouchBounceX || (Math.abs(remainDelta.x) <= 1)) {
+                if (this.isTouchBounceX || Math.abs(remainDelta.x) <= 1) {
                     this.scrollState = STATE_STATIC;
                     // 吸附边缘
                     this.snapToEdge('x');
@@ -449,7 +452,7 @@ export default {
         /**
          * 滚动指定位置
          */
-        scrollTo({ top, left,callback=()=>{} }, duration = 300) {
+        scrollTo({ top, left, callback = () => {} }, duration = 300) {
             const START_TIME = Date.now();
             const START_SCROLL_X = this.scrollLeft;
             const START_SCROLL_Y = this.scrollTop;
@@ -513,32 +516,9 @@ export default {
     height: 100%;
     overflow: hidden;
     &__body {
-        // transition-timing-function: cubic-bezier(0.18, 0.84, 0.44, 1);
-        background: #eee;
         position: absolute;
-        ul {
-            width: 950vw;
-            min-width: 100vw;
-        }
-        li {
-            box-sizing: border-box;
-            font-size: 16px;
-            list-style-type: none;
-            padding: 15px;
-            margin: 0;
-            border-bottom: 1px solid #ddd;
-            background: #ddd;
-            display: flex;
-            align-items: center;
-            img {
-                width: 30px;
-                height: 30px;
-                margin-right: 10px;
-            }
-            &:nth-child(2n + 1) {
-                background: #fff;
-            }
-        }
+        width:100%;
+        height: 100%;
     }
 }
 </style>
