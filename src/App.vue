@@ -136,23 +136,19 @@ export default {
             this.scrollTop = scrollTop;
         },
         scrollUp() {
-            this.$refs.scroll.stopScroll();
-            this.$refs.scroll.decelerate({ speedX: 0, speedY: -4 });
+            this.$refs.scroll.decelerate({ speedX: 0, speedY: -1 });
         },
 
         scrollDown() {
-            this.$refs.scroll.stopScroll();
-            this.$refs.scroll.decelerate({ speedX: 0, speedY: 4 });
+            this.$refs.scroll.decelerate({ speedX: 0, speedY: 1 });
         },
 
 
         scrollLeftHandler() {
-            this.$refs.scroll.stopScroll();
             this.$refs.scroll.decelerate({ speedX: 1, speedY: 0 });
         },
 
         scrollRightHandler() {
-            this.$refs.scroll.stopScroll();
             this.$refs.scroll.decelerate({ speedX: -1, speedY: 0 });
         },
 
@@ -165,7 +161,6 @@ export default {
             // this.$refs.scroll.scrollTo({ left: -300, top: 2700 });
             // this.reset();
             // setTimeout(() => {
-                this.$refs.scroll.stopScroll();
                 this.$refs.scroll.decelerate({ speedX: 1, speedY: 4 });
             // }, 200);
         }

@@ -384,7 +384,15 @@ export default {
          */
         decelerate(ev) {
             this.stopScroll();
-            if (STATE_BOUNCE_SHRINK === this.bounceXState || STATE_BOUNCE_SHRINK === this.bounceYState) return;
+            console.log(this.bounceYState, this.scrollState);
+            if (
+                STATE_ANIMATE_SCROLL === this.scrollState ||
+                STATE_BOUNCE_GROW === this.bounceYState ||
+                STATE_BOUNCE_GROW === this.bounceXState
+            ) {
+                return;
+            }
+
             this.scrollState = STATE_ANIMATE_SCROLL;
             const { speedX, speedY } = ev;
             const _calcDeltaDisplacement = (speed) => {
