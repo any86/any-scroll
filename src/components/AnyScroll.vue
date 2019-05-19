@@ -1,9 +1,9 @@
 <template>
-    <div :style="viewStyle" class="any-scroll-view">
-        <div ref="body" :style="bodyStyle" class="any-scroll-view__body">
-            <slot>内容为空</slot>
-        </div>
+  <div :style="viewStyle" class="any-scroll-view">
+    <div ref="body" :style="bodyStyle" class="any-scroll-view__body">
+      <slot>内容为空</slot>
     </div>
+  </div>
 </template>
 
 <script>
@@ -97,64 +97,64 @@ export default {
         },
 
         // Y轴目标滚动条高度
-        scrollTop: {
+        scrollY: {
             get() {
                 return -this.translateY;
             },
 
-            set(scrollTop) {
-                this.translateY = 0 - scrollTop;
+            set(scrollY) {
+                this.translateY = 0 - scrollY;
             }
         },
 
         // X轴目标滚动条高度
-        scrollLeft: {
+        scrollX: {
             get() {
                 return -this.translateX;
             },
 
-            set(scrollLeft) {
-                this.translateX = 0 - scrollLeft;
+            set(scrollX) {
+                this.translateX = 0 - scrollX;
             }
         },
 
         // 在有回弹特效的情况下, 最小的scrollTop
-        minScrollTopWithBounce() {
-            return this.minScrollTop - this.bounceDistance;
+        minScrollYWithBounce() {
+            return this.minScrollY - this.bounceDistance;
         },
 
         // 在有回弹特效的情况下, 最小的scrollTop
-        maxScrollTopWithBounce() {
-            return this.maxScrollTop + this.bounceDistance;
+        maxScrollYWithBounce() {
+            return this.maxScrollY + this.bounceDistance;
         },
 
         // 在有回弹特效的情况下, 最小的scrollLeft
-        minScrollLeftWithBounce() {
-            return this.minScrollLeft - this.bounceDistance;
+        minScrollXWithBounce() {
+            return this.minScrollX - this.bounceDistance;
         },
 
         // 在有回弹特效的情况下, 最小的scrollLeft
-        maxScrollLeftWithBounce() {
-            return this.maxScrollLeft + this.bounceDistance;
+        maxScrollXWithBounce() {
+            return this.maxScrollX + this.bounceDistance;
         },
 
         // Y轴滚动的最小距离
-        minScrollTop() {
+        minScrollY() {
             return 0;
         },
 
         // Y轴滚动的最远距离
-        maxScrollTop() {
+        maxScrollY() {
             return this.bodyHeight - this.viewHeight;
         },
 
         // X轴滚动的最小距离
-        minScrollLeft() {
+        minScrollX() {
             return 0;
         },
 
         // X轴滚动的最远距离
-        maxScrollLeft() {
+        maxScrollX() {
             return this.bodyWidth - this.viewWidth;
         },
 
@@ -164,42 +164,42 @@ export default {
 
         // 是否超出顶部边界
         isOutOfTop() {
-            return this.minScrollTop > this.scrollTop;
+            return this.minScrollY > this.scrollY;
         },
 
         // 是否超出左侧边界
         isOutOfLeft() {
-            return this.minScrollLeft > this.scrollLeft;
+            return this.minScrollX > this.scrollX;
         },
 
         // 是否滚动条在最底端
         isOutOfBottom() {
-            return this.maxScrollTop < this.scrollTop;
+            return this.maxScrollY < this.scrollY;
         },
 
         // 是否滚动条在最右端
         isOutOfRight() {
-            return this.maxScrollLeft < this.scrollLeft;
+            return this.maxScrollX < this.scrollX;
         },
 
         // 是否超出顶部+弹簧边界
         isTouchTopBounce() {
-            return this.minScrollTop - this.bounceDistance >= this.scrollTop;
+            return this.minScrollY - this.bounceDistance >= this.scrollY;
         },
 
         // 是否超出左侧+弹簧边界
         isTouchLeftBounce() {
-            return this.minScrollLeft - this.bounceDistance >= this.scrollLeft;
+            return this.minScrollX - this.bounceDistance >= this.scrollX;
         },
 
         // 是否超出底部+弹簧边界
         isTouchBottomBounce() {
-            return this.maxScrollTop + this.bounceDistance <= this.scrollTop;
+            return this.maxScrollY + this.bounceDistance <= this.scrollY;
         },
 
         // 是否超出右侧+弹簧边界
         isTouchRightBounce() {
-            return this.maxScrollLeft + this.bounceDistance <= this.scrollLeft;
+            return this.maxScrollX + this.bounceDistance <= this.scrollX;
         },
 
         // 是否超出任何一个边界
@@ -219,25 +219,18 @@ export default {
     },
 
     watch: {
-        isOutOfBounceX(isOutOfBounceX) {
-            if (isOutOfBounceX) {
-                // 吸附边缘
-                this.snapToEdge('x');
-            }
-        },
-
-        isOutOfBounceY(isOutOfBounceY) {
-            if (isOutOfBounceY) {
-                // 吸附边缘
-                this.snapToEdge('y');
-            }
-        },
-
         bounceXState(x) {
             this.$emit('bounce-state-change', { x, y: this.bounceYState });
         },
 
         bounceYState(y) {
+            // if (STATE_BOUNCE_GROW === bounceYState) {
+            //     if (this.isOutOfBounceY) {
+            //         alert(88889)
+            //         // 吸附边缘
+            //         this.snapToEdge('y');
+            //     }
+            // }
             this.$emit('bounce-state-change', { x: this.bounceXState, y });
         },
 
@@ -246,31 +239,35 @@ export default {
         },
 
         // 监控scrollTop, 防止滑出有效区域
-        scrollTop(scrollTop) {
+        scrollY(scrollY, prevScrollY) {
             // 响应弹簧的状态
-            if (this.minScrollTop > scrollTop || this.maxScrollTop < scrollTop) {
-                this.bounceYState = STATE_BOUNCE_GROW;
+            if (this.minScrollY > scrollY || this.maxScrollY < scrollY) {
+                if (prevScrollY < scrollY) {
+                    this.bounceYState = STATE_BOUNCE_SHRINK;
+                } else {
+                    this.bounceYState = STATE_BOUNCE_GROW;
+                }
             } else {
                 this.bounceYState = STATE_STATIC;
             }
-            this.$emit('scroll', { scrollTop, scrollLeft: this.scrollLeft });
+            this.$emit('scroll', { scrollY, scrollX: this.scrollX });
             // 监控scrollTop, 防止滑出有效区域
-            // if (this.minScrollTopWithBounce > scrollTop) {
-            //     this.scrollTop = this.minScrollTopWithBounce;
-            // } else if (this.maxScrollTopWithBounce < scrollTop) {
-            //     this.scrollTop = this.maxScrollTopWithBounce;
+            // if (this.minScrollYWithBounce > scrollY) {
+            //     this.scrollY = this.minScrollYWithBounce;
+            // } else if (this.maxScrollYWithBounce < scrollY) {
+            //     this.scrollY = this.maxScrollYWithBounce;
             // }
         },
 
         // 监控scrollLeft, 防止滑出有效区域
-        scrollLeft(scrollLeft) {
+        scrollX(scrollX) {
             // 响应弹簧的状态
-            if (this.minScrollLeft > scrollLeft || this.maxScrollLeft < scrollLeft) {
+            if (this.minScrollX > scrollX || this.maxScrollX < scrollX) {
                 this.bounceXState = STATE_BOUNCE_GROW;
             } else {
                 this.bounceXState = STATE_STATIC;
             }
-            this.$emit('scroll', { scrollLeft, scrollTop: this.scrollTop });
+            this.$emit('scroll', { scrollX, scrollY: this.scrollY });
         }
     },
 
@@ -372,7 +369,7 @@ export default {
          * 滚动动画结束触发
          */
         scrollAnimateEndHandler() {
-            if (this.scrollTop < this.minScrollTop) {
+            if (this.scrollY < this.minScrollY) {
                 this.translateY = 0;
             }
             this.$emit('scroll-animate-end');
@@ -384,16 +381,16 @@ export default {
          */
         decelerate(ev) {
             this.stopScroll();
-            console.log(this.bounceYState, this.scrollState);
-            if (
-                STATE_ANIMATE_SCROLL === this.scrollState ||
-                STATE_BOUNCE_GROW === this.bounceYState ||
-                STATE_BOUNCE_GROW === this.bounceXState
-            ) {
-                return;
-            }
+            // if (
+            //     STATE_BOUNCE_GROW === this.bounceYState ||
+            //     STATE_BOUNCE_GROW === this.bounceXState
+            // ) {
+            //     return;
+            // }
 
             this.scrollState = STATE_ANIMATE_SCROLL;
+            console.log(this.bounceYState, this.scrollState);
+
             const { speedX, speedY } = ev;
             const _calcDeltaDisplacement = (speed) => {
                 // 根据速度求滑动距离
@@ -414,32 +411,52 @@ export default {
          * 减速动
          */
         _decelerateAnimation(delta) {
+            let axisGroup = ['x', 'y'].filter((axis) => !this[`overflow${axis.toUpperCase()}`]);
+            let isFinish = { x: false, y: false };
             raf.cancel(this.rafId);
+            // 已经移动
+            let hasMoved = { x: 0, y: 0 };
             // 剩余滑动位移
-            let remainDelta = { x: delta.x, y: delta.y };
+            let remainDistance = { x: delta.x, y: delta.y };
+
             // 滑动到下一帧的scroll位置
             const _moveToNextFramePosition = () => {
                 let willMove = { x: 0, y: 0 };
                 // 过滤掉overflow限制的方向
                 // 过滤掉超出弹簧边界移动的方向
-                const axisGroup = ['x', 'y'].filter((axis) => !this[`overflow${axis.toUpperCase()}`]);
-                // console.log(axisGroup, this[`isOutOfBounceY`], this[`isOutOfBounceX`]);
-
-                axisGroup.forEach((axis) => {
+                for (let axis of axisGroup) {
+                    if (isFinish[axis]) continue;
                     // 如果有在边缘接线上, 那么剩余滑动距离置0
-                    if (this[`isOutOfBounce${axis.toUpperCase()}`]) {
-                        remainDelta[axis] = 0;
+                    // if (this[`isOutOfBounce${axis.toUpperCase()}`]) {
+                    //     remainDistance[axis] = 0;
+                    // }
+                    const currentRemain = ~~(remainDistance[axis] * (1 - this.damping));
+                    // 本次移动距离
+                    willMove[axis] = currentRemain - remainDistance[axis];
+                    hasMoved[axis] += willMove[axis];
+                    // 待滑动距离
+                    remainDistance[axis] = currentRemain;
+                    // 滑动
+                    this[`scroll${axis.toUpperCase()}`] += willMove[axis];
+                    // 修正滑动, 限制在移动范围内
+                    if (this[`minScroll${axis.toUpperCase()}WithBounce`] > this[`scroll${axis.toUpperCase()}`]) {
+                        this[`scroll${axis.toUpperCase()}`] = this[`minScroll${axis.toUpperCase()}WithBounce`];
+                        isFinish[axis] = true;
+                    } else if (this[`maxScroll${axis.toUpperCase()}WithBounce`] < this[`scroll${axis.toUpperCase()}`]) {
+                        this[`scroll${axis.toUpperCase()}`] = this[`maxScroll${axis.toUpperCase()}WithBounce`];
+                        isFinish[axis] = true;
                     }
-                    const currentRemain = ~~(remainDelta[axis] * (1 - this.damping));
-                    willMove[axis] = remainDelta[axis] - currentRemain;
-                    remainDelta[axis] = currentRemain;
-                    this[`translate${axis.toUpperCase()}`] += willMove[axis];
-                });
+                    // 剩余滑动距离为0, 当前轴结束滑动
+                    if (0 >= Math.abs(remainDistance[axis])) {
+                        isFinish[axis] = true;
+                    }
+                }
 
-                // console.log(`willMove`, willMove, `remainDelta`, remainDelta);
-
-                if (Math.abs(remainDelta.x) <= 1 && Math.abs(remainDelta.y) <= 1) {
-                    this.scrollState = STATE_STATIC;
+                // 2个轴都结束滑动, 那么标记为"静止"
+                if (isFinish.x && isFinish.y) {
+                    this.$nextTick(() => {
+                        this.scrollState = STATE_STATIC;
+                    });
                 } else {
                     this.rafId = raf(_moveToNextFramePosition);
                 }
@@ -458,8 +475,8 @@ export default {
         scrollTo({ top, left, callback = () => {} }, duration = 300) {
             // raf.cancel(this.scrollToRafId);
             const START_TIME = Date.now();
-            const START_SCROLL_X = this.scrollLeft;
-            const START_SCROLL_Y = this.scrollTop;
+            const START_SCROLL_X = this.scrollX;
+            const START_SCROLL_Y = this.scrollY;
             const WILL_MOVE_X = left - START_SCROLL_X;
             const WILL_MOVE_Y = top - START_SCROLL_Y;
             const _toNextPosition = () => {
@@ -469,11 +486,11 @@ export default {
 
                 // 移动
                 if (undefined !== top) {
-                    this.scrollTop = Math.ceil(START_SCROLL_Y + WILL_MOVE_Y * progress);
+                    this.scrollY = Math.ceil(START_SCROLL_Y + WILL_MOVE_Y * progress);
                 }
 
                 if (undefined !== left) {
-                    this.scrollLeft = Math.ceil(START_SCROLL_X + WILL_MOVE_X * progress);
+                    this.scrollX = Math.ceil(START_SCROLL_X + WILL_MOVE_X * progress);
                 }
                 // console.log({ rafId, progress });
 
@@ -493,9 +510,9 @@ export default {
             // y轴
             if (undefined === axis || 'y' === axis) {
                 if (this.isOutOfTop) {
-                    this.scrollTo({ top: this.minScrollTop }, 300);
+                    this.scrollTo({ top: this.minScrollY }, 300);
                 } else if (this.isOutOfBottom) {
-                    this.scrollTo({ top: this.maxScrollTop }, 300);
+                    this.scrollTo({ top: this.maxScrollY }, 300);
                 }
 
                 // 如果"拉伸"状态, 那么变为"收缩"状态
@@ -507,9 +524,9 @@ export default {
             // x轴
             if (undefined === axis || 'x' === axis) {
                 if (this.isOutOfLeft) {
-                    this.scrollTo({ left: this.minScrollLeft }, 300);
+                    this.scrollTo({ left: this.minScrollX }, 300);
                 } else if (this.isOutOfRight) {
-                    this.scrollTo({ left: this.maxScrollLeft }, 300);
+                    this.scrollTo({ left: this.maxScrollX }, 300);
                 }
 
                 // 如果"拉伸"状态, 那么变为"收缩"状态

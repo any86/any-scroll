@@ -5,7 +5,7 @@
         </header>
 
         <article class="body">
-            <article class="props-form">
+            <article v-if="false" class="props-form">
                 <h1>设置</h1>
 
                 <label>
@@ -68,13 +68,13 @@
                     </tr>
 
                     <tr>
-                        <td>↔ scrollLeft</td>
-                        <td>{{scrollLeft}}</td>
+                        <td>↔ scrollX</td>
+                        <td>{{scrollX}}</td>
                     </tr>
 
                     <tr>
-                        <td>↕ scrollTop</td>
-                        <td>{{scrollTop}}</td>
+                        <td>↕ scrollY</td>
+                        <td>{{scrollY}}</td>
                     </tr>
                 </table>
 
@@ -115,8 +115,8 @@ export default {
             bounceDistance: 150,
             overflowX: false,
             overflowY: false,
-            scrollTop: 0,
-            scrollLeft: 0,
+            scrollY: 0,
+            scrollX: 0,
             bounceState: {x:STATE_STATIC, y:STATE_STATIC},
             scrollState: STATE_STATIC
         };
@@ -131,9 +131,9 @@ export default {
     },
 
     methods: {
-        scrollHandler({ scrollTop, scrollLeft }) {
-            this.scrollLeft = scrollLeft;
-            this.scrollTop = scrollTop;
+        scrollHandler({ scrollY, scrollX }) {
+            this.scrollX = scrollX;
+            this.scrollY = scrollY;
         },
         scrollUp() {
             this.$refs.scroll.decelerate({ speedX: 0, speedY: -1 });
@@ -250,12 +250,12 @@ main {
             }
 
             ul {
-                width: 950vw;
+                width: 280vw;
                 li {
-                box-sizing: border-box;
                 font-size: 16px;
                 list-style-type: none;
-                padding: 15px;
+                padding:15px;
+                height:29px;
                 margin: 0;
                 border-bottom: 1px solid #ddd;
                 background: #ddd;
