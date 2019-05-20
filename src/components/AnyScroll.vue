@@ -120,22 +120,22 @@ export default {
 
         // 在有回弹特效的情况下, 最小的scrollTop
         minScrollYWithBounce() {
-            return this.minScrollY - this.bounceDistance;
+            return this.minScrollY - Number(this.bounceDistance);
         },
 
         // 在有回弹特效的情况下, 最小的scrollTop
         maxScrollYWithBounce() {
-            return this.maxScrollY + this.bounceDistance;
+            return this.maxScrollY + Number(this.bounceDistance);
         },
 
         // 在有回弹特效的情况下, 最小的scrollLeft
         minScrollXWithBounce() {
-            return this.minScrollX - this.bounceDistance;
+            return this.minScrollX - Number(this.bounceDistance);
         },
 
         // 在有回弹特效的情况下, 最小的scrollLeft
         maxScrollXWithBounce() {
-            return this.maxScrollX + this.bounceDistance;
+            return this.maxScrollX + Number(this.bounceDistance);
         },
 
         // Y轴滚动的最小距离
@@ -224,13 +224,6 @@ export default {
         },
 
         bounceYState(y) {
-            // if (STATE_BOUNCE_GROW === bounceYState) {
-            //     if (this.isOutOfBounceY) {
-            //         alert(88889)
-            //         // 吸附边缘
-            //         this.snapToEdge('y');
-            //     }
-            // }
             this.$emit('bounce-state-change', { x: this.bounceXState, y });
         },
 
@@ -333,22 +326,20 @@ export default {
         },
 
         dragMove({ deltaX, deltaY }) {
-            if (STATE_BOUNCE_SHRINK === this.bounceXState || STATE_BOUNCE_SHRINK === this.bounceYState) return;
             this.scrollState = STATE_DRAG_SCROLL;
             this.scrollBy({ deltaX, deltaY });
         },
 
         dropMove() {
-            return
             // 滚动状态为静止
             this.scrollState = STATE_STATIC;
             // 弹簧"展开"状态的时候松手, 弹簧进入"收缩"状态
-            if (STATE_BOUNCE_GROW === this.bounceXState) {
+            if (STATE_STATIC !== this.bounceXState) {
                 this.bounceXState = STATE_BOUNCE_SHRINK;
                 this.snapToEdge('x');
             }
 
-            if (STATE_BOUNCE_GROW === this.bounceYState) {
+            if (STATE_STATIC !== this.bounceYState) {
                 this.bounceYState = STATE_BOUNCE_SHRINK;
                 this.snapToEdge('y');
             }
@@ -357,17 +348,21 @@ export default {
         /**
          * 移动body
          * @param {Object} 多拽产生的数据
-         *  @param {Number} deltaX: x轴位移变化
-         *  @param {Number} deltaY: y轴位移变化
+         * @param {Object} 包含deltaX: x轴位移变化;deltaY: y轴位移变化
          */
-        scrollBy({ deltaX, deltaY }) {
-            if (!this.overflowX) {
-                this.translateX += deltaX;
-            }
-
-            if (!this.overflowY) {
-                this.translateY += deltaY;
-            }
+        scrollBy(ev) {
+            ['X', 'Y'].forEach((axis) => {
+                if (!this[`overflow${axis}`]) {
+                    let willScroll = this[`scroll${axis}`] - ev[`delta${axis}`];
+                    console.log(willScroll);
+                    if (this[`maxScroll${axis}WithBounce`] < willScroll) {
+                        willScroll = this[`maxScroll${axis}WithBounce`];
+                    } else if (this[`minScroll${axis}WithBounce`] > willScroll) {
+                        willScroll = this[`minScroll${axis}WithBounce`];
+                    }
+                    this[`scroll${axis}`] = willScroll;
+                }
+            });
         },
 
         /**
@@ -385,13 +380,17 @@ export default {
          * velocityX/Y的单位是px/ms
          */
         decelerate(ev) {
+            // raf.cancel(this.rafId);
             this.stopScroll();
-            // if (
-            //     STATE_BOUNCE_GROW === this.bounceYState ||
-            //     STATE_BOUNCE_GROW === this.bounceXState
-            // ) {
-            //     return;
-            // }
+            // 弹簧启用状态下, 不允许加速运动
+            if (
+                STATE_BOUNCE_GROW === this.bounceYState ||
+                STATE_BOUNCE_GROW === this.bounceXState ||
+                STATE_BOUNCE_SHRINK === this.bounceYState ||
+                STATE_BOUNCE_SHRINK === this.bounceXState
+            ) {
+                return;
+            }
 
             this.scrollState = STATE_ANIMATE_SCROLL;
             console.log(this.bounceYState, this.scrollState);
@@ -404,7 +403,7 @@ export default {
                 // 此处的30也可以是其他任何值
                 return ~~(speed * 30) / this.damping;
             };
-// console.clear();
+            // console.clear();
             // 减速动画
             this._decelerateAnimation({
                 x: _calcDeltaDisplacement(speedX),
@@ -448,9 +447,11 @@ export default {
                     if (this[`minScroll${axis.toUpperCase()}WithBounce`] > this[`scroll${axis.toUpperCase()}`]) {
                         this[`scroll${axis.toUpperCase()}`] = this[`minScroll${axis.toUpperCase()}WithBounce`];
                         isFinish[axis] = true;
+                        this.snapToEdge(axis);
                     } else if (this[`maxScroll${axis.toUpperCase()}WithBounce`] < this[`scroll${axis.toUpperCase()}`]) {
                         this[`scroll${axis.toUpperCase()}`] = this[`maxScroll${axis.toUpperCase()}WithBounce`];
                         isFinish[axis] = true;
+                        this.snapToEdge(axis);
                     }
                     // 剩余滑动距离为0, 当前轴结束滑动
                     if (0 >= Math.abs(remainDistance[axis])) {
