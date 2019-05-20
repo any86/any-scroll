@@ -22,7 +22,7 @@ export default {
     props: {
         // 速度衰减因子
         damping: {
-            type: Number,
+            type: [Number, String],
             default: 0.1,
             validator: (v) => {
                 return 0 < v && 1 > v;
@@ -31,7 +31,7 @@ export default {
 
         // 回弹距离
         bounceDistance: {
-            type: Number,
+            type: [Number, String],
             default: 150
         },
 
@@ -42,11 +42,11 @@ export default {
         },
 
         width: {
-            type: Number
+            type: [Number, String]
         },
 
         height: {
-            type: Number,
+            type: [Number, String],
             default: 500
         },
 
@@ -219,6 +219,14 @@ export default {
     },
 
     watch: {
+        width() {
+            this.updateSize();
+        },
+
+        height() {
+            this.updateSize();
+        },
+
         bounceXState(x) {
             this.$emit('bounce-state-change', { x, y: this.bounceYState });
         },
@@ -311,8 +319,8 @@ export default {
 
     methods: {
         updateSize() {
-            this.viewWidth = this.$el.offsetWidth;
-            this.viewHeight = this.$el.offsetHeight;
+            this.viewWidth = this.width || this.$el.offsetWidth;
+            this.viewHeight = this.height || this.$el.offsetHeight;
             this.bodyWidth = this.$refs.body.scrollWidth;
             this.bodyHeight = this.$refs.body.scrollHeight;
         },
