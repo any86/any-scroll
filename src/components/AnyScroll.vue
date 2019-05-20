@@ -1,9 +1,9 @@
 <template>
-  <div :style="viewStyle" class="any-scroll-view">
-    <div ref="body" :style="bodyStyle" class="any-scroll-view__body">
-      <slot>内容为空</slot>
+    <div :style="viewStyle" class="any-scroll-view">
+        <div ref="body" :style="bodyStyle" class="any-scroll-view__body">
+            <slot>内容为空</slot>
+        </div>
     </div>
-  </div>
 </template>
 
 <script>
@@ -303,18 +303,7 @@ export default {
 
         // 结束拖拽
         at.on('panend', (ev) => {
-            // 滚动状态为静止
-            this.scrollState = STATE_STATIC;
-            // 弹簧"展开"状态的时候松手, 弹簧进入"收缩"状态
-            if (STATE_BOUNCE_GROW === this.bounceXState) {
-                this.bounceXState = STATE_BOUNCE_SHRINK;
-                this.snapToEdge('x');
-            }
-
-            if (STATE_BOUNCE_GROW === this.bounceYState) {
-                this.bounceYState = STATE_BOUNCE_SHRINK;
-                this.snapToEdge('y');
-            }
+            this.dropMove();
         });
 
         // 快速滑动
@@ -347,6 +336,22 @@ export default {
             if (STATE_BOUNCE_SHRINK === this.bounceXState || STATE_BOUNCE_SHRINK === this.bounceYState) return;
             this.scrollState = STATE_DRAG_SCROLL;
             this.scrollBy({ deltaX, deltaY });
+        },
+
+        dropMove() {
+            return
+            // 滚动状态为静止
+            this.scrollState = STATE_STATIC;
+            // 弹簧"展开"状态的时候松手, 弹簧进入"收缩"状态
+            if (STATE_BOUNCE_GROW === this.bounceXState) {
+                this.bounceXState = STATE_BOUNCE_SHRINK;
+                this.snapToEdge('x');
+            }
+
+            if (STATE_BOUNCE_GROW === this.bounceYState) {
+                this.bounceYState = STATE_BOUNCE_SHRINK;
+                this.snapToEdge('y');
+            }
         },
 
         /**
@@ -397,9 +402,9 @@ export default {
                 // 此处的公式其实就是想让速度和距离有一个线性关系,
                 // 并不是什么物理公式,
                 // 此处的30也可以是其他任何值
-                return (speed * 30) / this.damping;
+                return ~~(speed * 30) / this.damping;
             };
-
+// console.clear();
             // 减速动画
             this._decelerateAnimation({
                 x: _calcDeltaDisplacement(speedX),
@@ -418,7 +423,6 @@ export default {
             let hasMoved = { x: 0, y: 0 };
             // 剩余滑动位移
             let remainDistance = { x: delta.x, y: delta.y };
-
             // 滑动到下一帧的scroll位置
             const _moveToNextFramePosition = () => {
                 let willMove = { x: 0, y: 0 };
@@ -430,6 +434,7 @@ export default {
                     // if (this[`isOutOfBounce${axis.toUpperCase()}`]) {
                     //     remainDistance[axis] = 0;
                     // }
+                    // console.log(this[`scroll${axis.toUpperCase()}`] ,axis,`remainDistance[axis]`, remainDistance[axis])
                     const currentRemain = ~~(remainDistance[axis] * (1 - this.damping));
                     // 本次移动距离
                     willMove[axis] = currentRemain - remainDistance[axis];
@@ -438,6 +443,7 @@ export default {
                     remainDistance[axis] = currentRemain;
                     // 滑动
                     this[`scroll${axis.toUpperCase()}`] += willMove[axis];
+                    // console.log(axis,willMove[axis], this[`scroll${axis.toUpperCase()}`])
                     // 修正滑动, 限制在移动范围内
                     if (this[`minScroll${axis.toUpperCase()}WithBounce`] > this[`scroll${axis.toUpperCase()}`]) {
                         this[`scroll${axis.toUpperCase()}`] = this[`minScroll${axis.toUpperCase()}WithBounce`];
