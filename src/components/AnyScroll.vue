@@ -1,9 +1,9 @@
 <template>
-    <div :style="viewStyle" class="any-scroll-view">
-        <div ref="body" :style="bodyStyle" class="any-scroll-view__body">
-            <slot>内容为空</slot>
-        </div>
+  <div :style="viewStyle" class="any-scroll-view">
+    <div ref="body" :style="bodyStyle" class="any-scroll-view__body">
+      <slot>内容为空</slot>
     </div>
+  </div>
 </template>
 
 <script>
@@ -93,8 +93,6 @@ export default {
         bodyStyle() {
             return {
                 transform: `translate3d(${this.translateX}px, ${this.translateY}px, 0px)`
-                // transitionTimingFunction: this.bounceEase,
-                // transitionDuration: `${this.transitionDuration}ms`
             };
         },
 
@@ -158,10 +156,6 @@ export default {
         // X轴滚动的最远距离
         maxScrollX() {
             return this.bodyWidth - this.viewWidth;
-        },
-
-        map() {
-            return { X: 'Left', Y: 'Top' };
         },
 
         // 是否超出顶部边界
@@ -391,8 +385,7 @@ export default {
          * velocityX/Y的单位是px/ms
          */
         decelerate(ev) {
-            console.clear();
-            console.log(this.bounceYState, this.scrollYState);
+            if (STATE_ANIMATE_SCROLL === this.scrollXState || STATE_ANIMATE_SCROLL === this.scrollYState) return;
 
             this.stopScroll();
             // 弹簧启用状态下, 不允许加速运动
