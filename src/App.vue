@@ -42,7 +42,8 @@
                 :overflow-y="overflowY"
                 :bounce-distance="bounceDistance"
                 @bounce-state-change="bounceState=$event"
-                @scroll-state-change="scrollState=$event"
+                @scroll-x-state-change="scrollXState=$event"
+                @scroll-y-state-change="scrollYState=$event"
                 @scroll="scrollHandler"
                 class="scroll-view"
             >
@@ -60,11 +61,19 @@
                 <table>
                     <tr>
                         <td>🌀 弹簧状态</td>
-                        <td>X轴: {{bounceState.x}} <br> Y轴: {{bounceState.y}}</td>
+                        <td>
+                            X轴: {{bounceState.x}}
+                            <br>
+                            Y轴: {{bounceState.y}}
+                        </td>
                     </tr>
                     <tr>
                         <td>🚂 滚动状态</td>
-                        <td>{{scrollState}}</td>
+                        <td>
+                            X轴: {{scrollXState}}
+                            <br>
+                            Y轴: {{scrollYState}}
+                        </td>
                     </tr>
 
                     <tr>
@@ -117,8 +126,9 @@ export default {
             overflowY: false,
             scrollY: 0,
             scrollX: 0,
-            bounceState: {x:STATE_STATIC, y:STATE_STATIC},
-            scrollState: STATE_STATIC
+            bounceState: { x: STATE_STATIC, y: STATE_STATIC },
+            scrollXState: STATE_STATIC,
+            scrollYState: STATE_STATIC
         };
     },
 
@@ -143,7 +153,6 @@ export default {
             this.$refs.scroll.decelerate({ speedX: 0, speedY: 1 });
         },
 
-
         scrollLeftHandler() {
             this.$refs.scroll.decelerate({ speedX: 1, speedY: 0 });
         },
@@ -152,7 +161,6 @@ export default {
             this.$refs.scroll.decelerate({ speedX: -1, speedY: 0 });
         },
 
-
         reset() {
             this.$refs.scroll.scrollTo({ top: 0, left: 0 });
         },
@@ -160,9 +168,16 @@ export default {
         test() {
             // this.$refs.scroll.scrollTo({ left: -300, top: 2700 });
             // this.reset();
-            // setTimeout(() => {
-                this.$refs.scroll.decelerate({ speedX: 1, speedY: 4 });
-            // }, 200);
+
+            // this.$refs.scroll.dragMove({deltaX:200, deltaY:400})
+            //     this.$refs.scroll.dropMove();
+            const run = () => {
+                setTimeout(() => {
+                    this.$refs.scroll.decelerate({ speedX: 0, speedY: 5 });
+                    run();
+                }, 140);
+            };
+            run();
         }
     }
 };
@@ -219,59 +234,58 @@ main {
             flex-shrink: 0;
             margin-left: 2%;
             box-shadow: 1px 2px 3px rgba(#000, 0.1), -1px -2px 3px rgba(#000, 0.1);
-            .loading{
+            .loading {
                 display: block;
-                width:72px;
-                height:72px;
+                width: 72px;
+                height: 72px;
                 border-bottom-width: 0;
-                border-top-width:0;
-                border-color:#aaa;
-                border-radius:100%;
-                border-right-width:4px;
-                border-left-width:4px;
+                border-top-width: 0;
+                border-color: #aaa;
+                border-radius: 100%;
+                border-right-width: 4px;
+                border-left-width: 4px;
                 border-style: solid;
                 animation: rotate 0.5s infinite linear;
                 position: absolute;
-                margin:auto;
-                left:0;
-                right:0;
-                top:0;bottom:0;
+                margin: auto;
+                left: 0;
+                right: 0;
+                top: 0;
+                bottom: 0;
             }
 
-
-            @keyframes rotate{
-                from{
+            @keyframes rotate {
+                from {
                     transform: rotate(0deg);
                 }
 
-                to{
+                to {
                     transform: rotate(360deg);
                 }
             }
 
             ul {
-                width: 280vw;
+                width: 180%;
                 li {
-                font-size: 16px;
-                list-style-type: none;
-                padding:15px;
-                height:29px;
-                margin: 0;
-                border-bottom: 1px solid #ddd;
-                background: #ddd;
-                display: flex;
-                align-items: center;
-                img {
-                    width: 30px;
-                    height: 30px;
-                    margin-right: 10px;
-                }
-                &:nth-child(2n) {
-                    background: #fff;
+                    font-size: 16px;
+                    list-style-type: none;
+                    padding: 15px;
+                    height: 29px;
+                    margin: 0;
+                    border-bottom: 1px solid #ddd;
+                    background: #ddd;
+                    display: flex;
+                    align-items: center;
+                    img {
+                        width: 30px;
+                        height: 30px;
+                        margin-right: 10px;
+                    }
+                    &:nth-child(2n) {
+                        background: #fff;
+                    }
                 }
             }
-            }
-            
         }
 
         > .dataAndMethods {
