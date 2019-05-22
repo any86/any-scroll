@@ -5,7 +5,7 @@
         </header>
 
         <article class="body">
-            <article v-if="false" class="props-form">
+            <article v-if="true" class="props-form">
                 <h1>设置</h1>
 
                 <label>
@@ -41,16 +41,32 @@
                 :overflow-x="overflowX"
                 :overflow-y="overflowY"
                 :bounce-distance="bounceDistance"
+                :bounce-time="1000"
                 @bounce-state-change="bounceState=$event"
-                @scroll-x-state-change="scrollXState=$event"
-                @scroll-y-state-change="scrollYState=$event"
+                @scroll-state-change="scrollState=$event"
                 @scroll="scrollHandler"
                 class="scroll-view"
             >
                 <ul v-if="0 < data.length">
+                    <li>
+                        <label>
+                            <input placeholder="请输入标题">
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <textarea placeholder="请输入内容"></textarea>
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <button>提交</button>
+                        </label>
+                    </li>
+
                     <li v-for="({title, author}, index) in data" :key="title+index">
                         <img :src="author.avatar_url">
-                        {{index}} - {{title}}
+                        {{index}} | {{title}}
                     </li>
                 </ul>
                 <span v-else class="loading"></span>
@@ -70,32 +86,33 @@
                     <tr>
                         <td>🚂 滚动状态</td>
                         <td>
-                            X轴: {{scrollXState}}
+                            X轴: {{scrollState.x}}
                             <br>
-                            Y轴: {{scrollYState}}
+                            Y轴: {{scrollState.y}}
                         </td>
                     </tr>
 
                     <tr>
-                        <td>↔ scrollX</td>
-                        <td>{{scrollX}}</td>
+                        <td>↔ scrollLeft</td>
+                        <td>{{scrollLeft}}</td>
                     </tr>
 
                     <tr>
-                        <td>↕ scrollY</td>
-                        <td>{{scrollY}}</td>
+                        <td>↕ scrollTop</td>
+                        <td>{{scrollTop}}</td>
                     </tr>
                 </table>
 
                 <!-- 表单 -->
                 <div class="form">
+                    <button @click="test">测试</button>
+
                     <button @click="scrollUp">模拟拖拽向上</button>
                     <button @click="scrollDown">模拟拖拽向下</button>
                     <button @click="scrollLeftHandler">模拟拖拽向左</button>
                     <button @click="scrollRightHandler">模拟拖拽向右</button>
 
                     <button @click="reset">复位</button>
-                    <button @click="test">测试</button>
                 </div>
             </article>
         </article>
@@ -107,7 +124,7 @@ import {
     STATE_STATIC,
     STATE_DRAG_SCROLL,
     STATE_ANIMATE_SCROLL,
-    STATE_BOUNCE_GROW,
+    STATE_BOUNCE_STRETCHED,
     STATE_BOUNCE_SHRINK
 } from './const.js';
 import AnyScroll from './components/AnyScroll';
@@ -124,11 +141,10 @@ export default {
             bounceDistance: 150,
             overflowX: false,
             overflowY: false,
-            scrollY: 0,
-            scrollX: 0,
+            scrollTop: 0,
+            scrollLeft: 0,
             bounceState: { x: STATE_STATIC, y: STATE_STATIC },
-            scrollXState: STATE_STATIC,
-            scrollYState: STATE_STATIC
+            scrollState: { x: STATE_STATIC, y: STATE_STATIC }
         };
     },
 
@@ -141,9 +157,9 @@ export default {
     },
 
     methods: {
-        scrollHandler({ scrollY, scrollX }) {
-            this.scrollX = scrollX;
-            this.scrollY = scrollY;
+        scrollHandler({ scrollTop, scrollLeft }) {
+            this.scrollLeft = scrollLeft;
+            this.scrollTop = scrollTop;
         },
         scrollUp() {
             this.$refs.scroll.decelerate({ speedX: 0, speedY: -1 });
@@ -166,18 +182,7 @@ export default {
         },
 
         test() {
-            // this.$refs.scroll.scrollTo({ left: -300, top: 2700 });
-            // this.reset();
-
-            // this.$refs.scroll.dragMove({deltaX:200, deltaY:400})
-            //     this.$refs.scroll.dropMove();
-            const run = () => {
-                setTimeout(() => {
-                    this.$refs.scroll.decelerate({ speedX: 0, speedY: 5 });
-                    run();
-                }, 140);
-            };
-            run();
+            this.$refs.scroll.decelerate({ speedX: 1, speedY: 2 });
         }
     }
 };
@@ -261,6 +266,24 @@ main {
 
                 to {
                     transform: rotate(360deg);
+                }
+            }
+
+            label {
+                width: 100%;
+                padding: 15px;
+                input {
+                    display: block;
+                    width: 100%;
+                    padding: 5px 15px;
+                }
+                textarea {
+                    display: block;
+                    width: 100%;
+                    padding: 5px 15px;
+                }
+                button {
+                    padding: 5px 45px;
                 }
             }
 

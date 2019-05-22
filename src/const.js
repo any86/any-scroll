@@ -1,10 +1,5 @@
 export const STATE_STATIC = 'static';
 export const STATE_DRAG_SCROLL = 'drag-scroll';
 export const STATE_ANIMATE_SCROLL = 'animate-scroll';
-export const STATE_BOUNCE_GROW = 'bounce-grow';
-export const STATE_BOUNCE_SHRINK = 'bounce-shrink';
-// export const STATE_STATIC = '静止';
-// export const STATE_DRAG_SCROLL = '拖拽滚动';
-// export const STATE_ANIMATE_SCROLL = '惯性滚动';
-// export const STATE_BOUNCE_GROW = '拉伸';
-// export const STATE_BOUNCE_SHRINK = '收缩';
+export const STATE_BOUNCE_STRETCHED = 'stretched';
+export const STATE_BOUNCE_SHRINK = 'shrink';
