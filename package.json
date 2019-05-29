@@ -8,15 +8,15 @@
   },
   "dependencies": {
     "core-js": "^2.6.5",
-    "raf": "^3.4.1",
+    "any-touch": "^0.3.3",
     "vue": "^2.6.6"
   },
   "devDependencies": {
+    "raf": "^3.4.1",
     "@vue/cli-plugin-babel": "^3.5.0",
     "@vue/cli-plugin-unit-jest": "^3.5.0",
     "@vue/cli-service": "^3.5.0",
     "@vue/test-utils": "1.0.0-beta.29",
-    "any-touch": "^0.3.3",
     "babel-core": "7.0.0-bridge.0",
     "babel-jest": "^23.6.0",
     "node-sass": "^4.9.0",
