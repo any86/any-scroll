@@ -65,7 +65,7 @@
                     </li>
 
                     <li v-for="({title, author}, index) in data" :key="title+index">
-                        <img :src="author.avatar_url">
+                        <!-- <img :src="author.avatar_url"> -->
                         {{index}} | {{title}}
                     </li>
                 </ul>
@@ -127,7 +127,7 @@ import {
     STATE_BOUNCE_STRETCHED,
     STATE_BOUNCE_SHRINK
 } from './const.js';
-import AnyScroll from './components/AnyScroll';
+import AnyScroll from './components/Core';
 export default {
     name: 'App',
 
@@ -151,7 +151,7 @@ export default {
     async mounted() {
         const resp = await fetch('db.json');
         const { data } = await resp.json();
-        this.data = data.slice(0, 66);
+        this.data = data.slice(0, 36);
         this.$nextTick();
         this.$refs.scroll.updateSize();
     },

@@ -1,6 +1,25 @@
 <template>
     <div :style="viewStyle" class="any-scroll-view">
-        <!-- <h1>{{scrollToRafId}} | {{rafId}}</h1> -->
+        <scroll-bar
+            :scroll-x-state="scrollXState"
+            :scroll-y-state="scrollYState"
+            :scroll-x="scrollX"
+            :scroll-y="scrollY"
+            :content-width="contentWidth"
+            :content-height="contentHeight"
+            :view-width="viewWidth"
+            :view-height="viewHeight"
+            :is-out-of-top="isOutOfTop"
+            :is-out-of-left="isOutOfLeft"
+            :is-out-of-right="isOutOfRight"
+            :is-out-of-bottom="isOutOfBottom"
+            :min-scrollX="minScrollX"
+            :max-scrollX="maxScrollX"
+            :min-scrollY="minScrollY"
+            :max-scrollY="maxScrollY"
+
+
+        />
         <div ref="content" :style="contentStyle" class="any-scroll-view__content">
             <slot></slot>
         </div>
@@ -14,17 +33,21 @@ import {
     STATE_ANIMATE_SCROLL,
     STATE_BOUNCE_STRETCHED,
     STATE_BOUNCE_SHRINK
-} from '../const.js';
+} from '@/const.js';
 import AnyTouch from 'any-touch';
 import raf from 'raf';
+import ScrollBar from '@/components/ScrollBar';
 export default {
     name: 'any-scroll-view',
+
+    components: { ScrollBar },
 
     props: {
         hasRipple: {
             type: Boolean,
             default: true
         },
+
         // 速度衰减因子
         damping: {
             type: [Number, String],
@@ -36,7 +59,7 @@ export default {
 
         // 回弹距离
         bounceDistance: {
-            type: [Number, String],
+            type: [Number, String, Object],
             default: 150
         },
 
@@ -92,7 +115,7 @@ export default {
             scrollYState: STATE_STATIC,
             // 弹簧状态
             bounceXState: STATE_STATIC,
-            bounceYState: STATE_STATIC,
+            bounceYState: STATE_STATIC
         };
     },
 
@@ -129,24 +152,40 @@ export default {
             }
         },
 
+        topBounceDistance() {
+            return Number(this.bounceDistance.top || this.bounceDistance);
+        },
+
+        rightBounceDistance() {
+            return Number(this.bounceDistance.right || this.bounceDistance);
+        },
+
+        leftBounceDistance() {
+            return Number(this.bounceDistance.left || this.bounceDistance);
+        },
+
+        bottomBounceDistance() {
+            return Number(this.bounceDistance.bottom || this.bounceDistance);
+        },
+
         // 在有回弹特效的情况下, 最小的scrollTop
         minScrollYWithBounce() {
-            return this.minScrollY - Number(this.bounceDistance);
+            return this.minScrollY - this.topBounceDistance;
         },
 
         // 在有回弹特效的情况下, 最小的scrollTop
         maxScrollYWithBounce() {
-            return this.maxScrollY + Number(this.bounceDistance);
+            return this.maxScrollY + this.bottomBounceDistance;
         },
 
         // 在有回弹特效的情况下, 最小的scrollLeft
         minScrollXWithBounce() {
-            return this.minScrollX - Number(this.bounceDistance);
+            return this.minScrollX - this.leftBounceDistance;
         },
 
         // 在有回弹特效的情况下, 最小的scrollLeft
         maxScrollXWithBounce() {
-            return this.maxScrollX + Number(this.bounceDistance);
+            return this.maxScrollX + this.rightBounceDistance;
         },
 
         // Y轴滚动的最小距离
@@ -187,7 +226,7 @@ export default {
         // 是否滚动条在最右端
         isOutOfRight() {
             return this.maxScrollX < this.scrollX;
-        }
+        },
     },
 
     watch: {
@@ -241,30 +280,45 @@ export default {
 
         // 第一次触碰
         at.on('inputstart', (ev) => {
-            this.stopScroll();
+            this.stop();
+        });
+
+        // 第一次触碰
+        at.on('inputend', (ev) => {
+            console.warn('inputend');
+            this.panendHandler();
         });
 
         // 拖拽开始
         at.on('panstart', (ev) => {
-            console.warn('panstart');
             this.panstartHandler(ev);
+            this.$emit('panstart', ev);
         });
 
         // 拖拽中
         at.on('panmove', (ev) => {
             this.panmoveHandler(ev);
+            this.$emit('panmove', ev);
         });
 
         // 结束拖拽
         at.on('panend', (ev) => {
-            this.panendHandler();
-            console.warn('panend');
+            // this.panendHandler();
+            this.$emit('panend', ev);
         });
 
         // 快速滑动
         at.on('swipe', (ev) => {
-            console.log('swipe');
             this.decelerate(ev);
+            this.$emit('swipe', ev);
+        });
+
+        at.on('tap', (ev) => {
+            this.$emit('tap');
+        });
+
+        at.on('doubletap', (ev) => {
+            this.$emit('doubletap');
         });
 
         this.$on('hook:destroy', () => {
@@ -299,7 +353,7 @@ export default {
         /**
          * 立即在当前位置停止滚动
          */
-        stopScroll() {
+        stop() {
             raf.cancel(this.scrollToRafId);
             raf.cancel(this.rafId);
             this.scrollXState = STATE_STATIC;
@@ -330,8 +384,6 @@ export default {
         },
 
         panendHandler() {
-            // this.q = { x: undefined, y: undefined };
-
             // 滚动状态为静止
             this.scrollXState = STATE_STATIC;
             this.scrollYState = STATE_STATIC;
