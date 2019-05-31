@@ -10,7 +10,7 @@
 
                 <label>
                     height(高度)
-                    <input v-model="height" placeholder="scrollView的高度">
+                    <input v-model="height" placeholder="scrollView的高度, 默认500px">
                 </label>
 
                 <label>
@@ -140,7 +140,7 @@ export default {
     data() {
         return {
             data: [],
-            height: 600,
+            height: undefined,
             width: undefined,
             bounceDistance: 150,
             overflowX: false,

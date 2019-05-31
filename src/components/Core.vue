@@ -1,5 +1,6 @@
 <template>
     <div :style="viewStyle" class="any-scroll-view">
+        <h1>{{rafId}} | {{scrollToRafId}} | {{maxScrollY}}</h1>
         <scroll-bar
             :scroll-x-state="scrollXState"
             :scroll-y-state="scrollYState"
@@ -43,11 +44,6 @@ export default {
     components: { ScrollBar },
 
     props: {
-        hasRipple: {
-            type: Boolean,
-            default: true
-        },
-
         // 速度衰减因子
         damping: {
             type: [Number, String],
@@ -81,7 +77,7 @@ export default {
 
         height: {
             type: [Number, String],
-            default: 500
+            default: `500px`
         },
 
         overflowX: {
@@ -104,8 +100,6 @@ export default {
             contentWidth: 0,
             viewWidth: 0,
             viewHeight: 0,
-            viewTop: 0,
-            viewLeft: 0,
             // 记录惯性滚动动画的id
             rafId: null,
             // scrollTo内容rafId
@@ -123,13 +117,17 @@ export default {
 
     computed: {
         viewStyle() {
-            return { height: `${this.height}px`, width: this.width && `${this.width}px` };
+            return { height: this.height && `${this.height}`, width: this.width && `${this.width}` };
         },
 
         contentStyle() {
             return {
                 transform: `translate3d(${this.translateX}px, ${this.translateY}px, 0px)`
             };
+        },
+
+        scrollData() {
+            return { scrollTop: this.scrollY, scrollLeft: this.scrollX };
         },
 
         // Y轴目标滚动条高度
@@ -303,7 +301,7 @@ export default {
 
     mounted() {
         const at = new AnyTouch(this.$el);
-
+        this.updateSize();
         const MutationObserver = MutationObserver || WebKitMutationObserver || MozMutationObserver;
         const _observer = new MutationObserver(() => {
             this.updateSize();
@@ -367,7 +365,6 @@ export default {
          * 通过观察scroll的值
          */
         watchScrollXYHandler(scrollPosition) {
-            console.log(123);
             // 响应弹簧的状态
             POSITION_UPPERCASE_LIST.forEach((DIRECTION_UPPERCASE, index) => {
                 // topBounceState等
@@ -379,14 +376,17 @@ export default {
                     this[`${POSITION_LOWERCASE_LIST[index]}BounceState`] = STATE_STATIC;
                 }
             });
-            this.$emit('scroll', { scrollTop: this.scrollY, scrollLeft: this.scrollX });
+            this.$emit('scroll', this.scrollData);
         },
 
         updateSize() {
-            this.viewWidth = this.width || this.$el.offsetWidth;
-            this.viewHeight = this.height || this.$el.offsetHeight;
-            this.contentWidth = this.$refs.content.scrollWidth;
-            this.contentHeight = this.$refs.content.scrollHeight;
+            this.$nextTick(() => {
+                this.viewWidth = this.$el.offsetWidth;
+                this.viewHeight = this.$el.offsetHeight;
+                this.contentWidth = this.$refs.content.scrollWidth;
+                this.contentHeight = this.$refs.content.scrollHeight;
+                console.warn('updateSize', this.viewHeight);
+            });
         },
 
         /**
@@ -453,10 +453,8 @@ export default {
          * velocityX/Y的单位是px/ms
          */
         decelerate(ev) {
-            this.$emit('before-scroll', { scrollTop: this.scrollTop, scrollleft: this.scrollleft });
+            this.$emit('before-scroll', this.scrollData);
             raf.cancel(this.rafId);
-            // this.scrollXState = STATE_STATIC;
-            // this.scrollYState = STATE_STATIC;
 
             const { speedX, speedY } = ev;
             const _calcDeltaDisplacement = (speed) => {
@@ -469,8 +467,8 @@ export default {
             // 减速动画
             // 弹簧shrink状态下,对应轴线, 不允许加速运动
             this._decelerateAnimation({
-                x: _calcDeltaDisplacement(STATE_BOUNCE_SHRINK === this.bounceXState ? 0 : speedX),
-                y: _calcDeltaDisplacement(STATE_BOUNCE_SHRINK === this.bounceYState ? 0 : speedY)
+                x: _calcDeltaDisplacement(STATE_BOUNCE_SHRINK === this.bounceXState || this.overflowX ? 0 : speedX),
+                y: _calcDeltaDisplacement(STATE_BOUNCE_SHRINK === this.bounceYState || this.overflowY ? 0 : speedY)
             });
         },
 
@@ -485,7 +483,7 @@ export default {
             // let hasMoved = { x: 0, y: 0 };
             // 剩余滑动位移
             let remainDistance = { x: delta.x, y: delta.y };
-            this.$emit('scroll-start', { scrollTop: this.scrollTop, scrollleft: this.scrollleft });
+            this.$emit('scroll-start', this.scrollData);
             // 滑动到下一帧的scroll位置
             const _moveToNextFramePosition = () => {
                 // 过滤掉overflow限制的方向
@@ -538,10 +536,11 @@ export default {
                 }
 
                 // 2个轴都结束滑动, 那么标记为"静止"
-                if (!isFinish.x || !isFinish.y) {
-                    this.rafId = raf(_moveToNextFramePosition);
+                if (isFinish.x && isFinish.y) {
+                    this.$emit('scroll-end', this.scrollData);
+                    this.$emit('after-scroll', this.scrollData);
                 } else {
-                    this.$emit('after-scroll', { scrollTop: this.scrollTop, scrollleft: this.scrollleft });
+                    this.rafId = raf(_moveToNextFramePosition);
                 }
             };
             _moveToNextFramePosition();
