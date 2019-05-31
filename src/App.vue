@@ -78,9 +78,13 @@
                     <tr>
                         <td>🌀 弹簧状态</td>
                         <td>
-                            X轴: {{bounceState.x}}
+                            顶部: {{bounceState.top}}
                             <br>
-                            Y轴: {{bounceState.y}}
+                            右侧: {{bounceState.right}}
+                            <br>
+                            底部: {{bounceState.bottom}}
+                            <br>
+                            左侧: {{bounceState.left}}
                         </td>
                     </tr>
                     <tr>
@@ -143,7 +147,7 @@ export default {
             overflowY: false,
             scrollTop: 0,
             scrollLeft: 0,
-            bounceState: { x: STATE_STATIC, y: STATE_STATIC },
+            bounceState: { top: STATE_STATIC, left: STATE_STATIC ,right: STATE_STATIC, bottom: STATE_STATIC },
             scrollState: { x: STATE_STATIC, y: STATE_STATIC }
         };
     },
@@ -270,19 +274,23 @@ main {
             }
 
             label {
-                width: 100%;
+                box-sizing: border-box;
+                width: 60%;
                 padding: 15px;
                 input {
+                    box-sizing: border-box;
                     display: block;
-                    width: 100%;
+                    width: 60%;
                     padding: 5px 15px;
                 }
                 textarea {
+                    box-sizing: border-box;
                     display: block;
-                    width: 100%;
+                    width: 60%;
                     padding: 5px 15px;
                 }
                 button {
+                    box-sizing: border-box;
                     padding: 5px 45px;
                 }
             }

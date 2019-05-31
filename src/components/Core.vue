@@ -30,7 +30,9 @@ import {
     STATE_DRAG_SCROLL,
     STATE_ANIMATE_SCROLL,
     STATE_BOUNCE_STRETCHED,
-    STATE_BOUNCE_SHRINK
+    STATE_BOUNCE_SHRINK,
+    DIRECTIONS_UPPERCASE,
+    DIRECTIONS_LOWERCASE
 } from '@/const.js';
 import AnyTouch from 'any-touch';
 import raf from 'raf';
@@ -112,8 +114,10 @@ export default {
             scrollXState: STATE_STATIC,
             scrollYState: STATE_STATIC,
             // 弹簧状态
-            bounceXState: STATE_STATIC,
-            bounceYState: STATE_STATIC
+            topBounceState: STATE_STATIC,
+            bottomBounceState: STATE_STATIC,
+            leftBounceState: STATE_STATIC,
+            rightBounceState: STATE_STATIC
         };
     },
 
@@ -241,6 +245,13 @@ export default {
 
         outOfRightDistance() {
             return Math.max(0, this.scrollX - this.maxScrollX);
+        },
+
+        bounceXState() {
+            return this.leftBounceState || this.rightBounceState;
+        },
+        bounceYState() {
+            return this.topBounceState || this.bottomBounceState;
         }
     },
 
@@ -254,11 +265,21 @@ export default {
         },
 
         bounceXState(x) {
-            this.$emit('bounce-state-change', { x, y: this.bounceYState });
+            this.$emit('bounce-state-change', {
+                top: this.topBounceState,
+                right: this.rightBounceState,
+                bottom: this.bottomBounceState,
+                left: this.leftBounceState
+            });
         },
 
         bounceYState(y) {
-            this.$emit('bounce-state-change', { x: this.bounceXState, y });
+            this.$emit('bounce-state-change', {
+                top: this.topBounceState,
+                right: this.rightBounceState,
+                bottom: this.bottomBounceState,
+                left: this.leftBounceState
+            });
         },
 
         scrollXState(value) {
@@ -271,12 +292,12 @@ export default {
 
         // 监控scrollTop, 防止滑出有效区域
         scrollY(scrollY) {
-            this.watchScrollXYHandler('Y', scrollY);
+            this.watchScrollXYHandler(scrollY);
         },
 
         // 监控scrollLeft, 防止滑出有效区域
         scrollX(scrollX) {
-            this.watchScrollXYHandler('X', scrollX);
+            this.watchScrollXYHandler(scrollX);
         }
     },
 
@@ -296,6 +317,7 @@ export default {
         // 第一次触碰
         at.on('inputstart', (ev) => {
             this.stop();
+            this.$emit('stop-scroll');
         });
 
         // 第一次触碰
@@ -344,16 +366,19 @@ export default {
         /**
          * 通过观察scroll的值
          */
-        watchScrollXYHandler(axis, scrollPosition) {
+        watchScrollXYHandler(scrollPosition) {
+            console.log(123);
             // 响应弹簧的状态
-            if (this[`minScroll${axis}`] > scrollPosition || this[`maxScroll${axis}`] < scrollPosition) {
-                // SHRINK状态在snap函数中处理
-                if (STATE_BOUNCE_SHRINK !== this[`bounce${axis}State`]) {
-                    this[`bounce${axis}State`] = STATE_BOUNCE_STRETCHED;
+            DIRECTIONS_UPPERCASE.forEach((DIRECTION_UPPERCASE, index) => {
+                // topBounceState等
+                if (this[`isOutOf${DIRECTION_UPPERCASE}`]) {
+                    if (STATE_BOUNCE_SHRINK !== this[`${DIRECTIONS_LOWERCASE[index]}BounceState`]) {
+                        this[`${DIRECTIONS_LOWERCASE[index]}BounceState`] = STATE_BOUNCE_STRETCHED;
+                    }
+                } else {
+                    this[`${DIRECTIONS_LOWERCASE[index]}BounceState`] = STATE_STATIC;
                 }
-            } else {
-                this[`bounce${axis}State`] = STATE_STATIC;
-            }
+            });
             this.$emit('scroll', { scrollTop: this.scrollY, scrollLeft: this.scrollX });
         },
 
@@ -428,6 +453,7 @@ export default {
          * velocityX/Y的单位是px/ms
          */
         decelerate(ev) {
+            this.$emit('before-scroll', { scrollTop: this.scrollTop, scrollleft: this.scrollleft });
             raf.cancel(this.rafId);
             // this.scrollXState = STATE_STATIC;
             // this.scrollYState = STATE_STATIC;
@@ -459,6 +485,7 @@ export default {
             // let hasMoved = { x: 0, y: 0 };
             // 剩余滑动位移
             let remainDistance = { x: delta.x, y: delta.y };
+            this.$emit('scroll-start', { scrollTop: this.scrollTop, scrollleft: this.scrollleft });
             // 滑动到下一帧的scroll位置
             const _moveToNextFramePosition = () => {
                 // 过滤掉overflow限制的方向
@@ -513,6 +540,8 @@ export default {
                 // 2个轴都结束滑动, 那么标记为"静止"
                 if (!isFinish.x || !isFinish.y) {
                     this.rafId = raf(_moveToNextFramePosition);
+                } else {
+                    this.$emit('after-scroll', { scrollTop: this.scrollTop, scrollleft: this.scrollleft });
                 }
             };
             _moveToNextFramePosition();
@@ -520,8 +549,10 @@ export default {
 
         /**
          * 滚动指定位置
+         * 由于内部snap方法使用他
+         * 所以不包含$emit, 钩子都在scrollTo中
          */
-        scrollTo({ top, left, callback = () => {} }, duration = 300) {
+        _scrollTo({ top, left, callback = () => {} }, duration = 300) {
             const START_TIME = Date.now();
             const DIST_SCROLL = { X: left, Y: top };
             const START_SCROLL = {};
@@ -564,6 +595,25 @@ export default {
         },
 
         /**
+         * 对外暴露的scrollTo方法
+         */
+        scrollTo({ top, left, callback = () => {} }, duration = 300) {
+            this.$emit('before-scroll');
+            this.$emit('scroll-start');
+            scrollTo(
+                {
+                    top,
+                    left,
+                    callback: () => {
+                        this.$emit('scroll-end');
+                        callback();
+                    }
+                },
+                duration
+            );
+        },
+
+        /**
          * 吸附最近的边界位置
          * @param {String} 轴线,'x' | 'y'
          */
@@ -572,28 +622,34 @@ export default {
                 x: undefined,
                 y: undefined
             };
+
             const AXIS_LIST = undefined === axis ? ['x', 'y'] : [axis];
+
             AXIS_LIST.forEach((axis) => {
                 const AXIS_UPPERCASE = axis.toUpperCase();
                 if (this[`minScroll${AXIS_UPPERCASE}`] > this[`scroll${AXIS_UPPERCASE}`]) {
-                    this[`bounce${AXIS_UPPERCASE}State`] = STATE_BOUNCE_SHRINK;
+                    this[`${'x' === axis ? 'left' : 'top'}BounceState`] = STATE_BOUNCE_SHRINK;
                     POS[axis] = this[`minScroll${AXIS_UPPERCASE}`];
                 } else if (this[`maxScroll${AXIS_UPPERCASE}`] < this[`scroll${AXIS_UPPERCASE}`]) {
-                    this[`bounce${AXIS_UPPERCASE}State`] = STATE_BOUNCE_SHRINK;
+                    this[`${'x' === axis ? 'right' : 'bottom'}BounceState`] = STATE_BOUNCE_SHRINK;
                     POS[axis] = this[`maxScroll${AXIS_UPPERCASE}`];
                 }
             });
-            this.scrollTo(
-                {
-                    top: POS.y,
-                    left: POS.x,
-                    callback: () => {
-                        this.bounceXState = STATE_STATIC;
-                        this.bounceYState = STATE_STATIC;
-                    }
-                },
-                this.bounceTime
-            );
+
+            if (undefined !== POS.x || undefined !== POS.y) {
+                this._scrollTo(
+                    {
+                        top: POS.y,
+                        left: POS.x,
+                        callback: () => {
+                            DIRECTIONS_UPPERCASE.forEach((DIRECTION_UPPERCASE) => {
+                                this[`${DIRECTION_UPPERCASE}BounceState`] = STATE_STATIC;
+                            });
+                        }
+                    },
+                    this.bounceTime
+                );
+            }
         }
     }
 };
