@@ -31,8 +31,8 @@ import {
     STATE_ANIMATE_SCROLL,
     STATE_BOUNCE_STRETCHED,
     STATE_BOUNCE_SHRINK,
-    DIRECTIONS_UPPERCASE,
-    DIRECTIONS_LOWERCASE
+    POSITION_UPPERCASE_LIST,
+    POSITION_LOWERCASE_LIST
 } from '@/const.js';
 import AnyTouch from 'any-touch';
 import raf from 'raf';
@@ -369,14 +369,14 @@ export default {
         watchScrollXYHandler(scrollPosition) {
             console.log(123);
             // 响应弹簧的状态
-            DIRECTIONS_UPPERCASE.forEach((DIRECTION_UPPERCASE, index) => {
+            POSITION_UPPERCASE_LIST.forEach((DIRECTION_UPPERCASE, index) => {
                 // topBounceState等
                 if (this[`isOutOf${DIRECTION_UPPERCASE}`]) {
-                    if (STATE_BOUNCE_SHRINK !== this[`${DIRECTIONS_LOWERCASE[index]}BounceState`]) {
-                        this[`${DIRECTIONS_LOWERCASE[index]}BounceState`] = STATE_BOUNCE_STRETCHED;
+                    if (STATE_BOUNCE_SHRINK !== this[`${POSITION_LOWERCASE_LIST[index]}BounceState`]) {
+                        this[`${POSITION_LOWERCASE_LIST[index]}BounceState`] = STATE_BOUNCE_STRETCHED;
                     }
                 } else {
-                    this[`${DIRECTIONS_LOWERCASE[index]}BounceState`] = STATE_STATIC;
+                    this[`${POSITION_LOWERCASE_LIST[index]}BounceState`] = STATE_STATIC;
                 }
             });
             this.$emit('scroll', { scrollTop: this.scrollY, scrollLeft: this.scrollX });
@@ -642,7 +642,7 @@ export default {
                         top: POS.y,
                         left: POS.x,
                         callback: () => {
-                            DIRECTIONS_UPPERCASE.forEach((DIRECTION_UPPERCASE) => {
+                            POSITION_UPPERCASE_LIST.forEach((DIRECTION_UPPERCASE) => {
                                 this[`${DIRECTION_UPPERCASE}BounceState`] = STATE_STATIC;
                             });
                         }
