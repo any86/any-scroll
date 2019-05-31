@@ -1,12 +1,18 @@
 {
   "name": "any-scroll",
-  "version": "0.0.1",
+  "version": "0.0.2",
+  "main": "dist/AnyScroll.common.js",
+  "module": "dist/AnyScroll.common.js",
+  "browser": "dist/AnyScroll.umd.js",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "build:lib": "vue-cli-service build --target lib --name any-scroll ./src/components/AnyScroll.vue",
+    "build:lib": "vue-cli-service build --target lib --name AnyScroll ./src/components/Core.vue",
     "test:unit": "vue-cli-service test:unit"
   },
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "core-js": "^2.6.5",
     "any-touch": "^0.3.3",
