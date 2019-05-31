@@ -13,12 +13,10 @@
             :is-out-of-left="isOutOfLeft"
             :is-out-of-right="isOutOfRight"
             :is-out-of-bottom="isOutOfBottom"
-            :min-scrollX="minScrollX"
-            :max-scrollX="maxScrollX"
-            :min-scrollY="minScrollY"
-            :max-scrollY="maxScrollY"
-
-
+            :outOfTopDistance="outOfTopDistance"
+            :outOfBottomDistance="outOfBottomDistance"
+            :outOfRightDistance="outOfRightDistance"
+            :outOfLeftDistance="outOfLeftDistance"
         />
         <div ref="content" :style="contentStyle" class="any-scroll-view__content">
             <slot></slot>
@@ -227,6 +225,23 @@ export default {
         isOutOfRight() {
             return this.maxScrollX < this.scrollX;
         },
+
+        // 超出边界的距离
+        outOfTopDistance() {
+            return Math.max(0, this.minScrollY - this.scrollY);
+        },
+
+        outOfBottomDistance() {
+            return Math.max(0, this.scrollY - this.maxScrollY);
+        },
+
+        outOfLeftDistance() {
+            return Math.max(0, this.minScrollX - this.scrollX);
+        },
+
+        outOfRightDistance() {
+            return Math.max(0, this.scrollX - this.maxScrollX);
+        }
     },
 
     watch: {
@@ -285,7 +300,6 @@ export default {
 
         // 第一次触碰
         at.on('inputend', (ev) => {
-            console.warn('inputend');
             this.panendHandler();
         });
 
@@ -414,8 +428,6 @@ export default {
          * velocityX/Y的单位是px/ms
          */
         decelerate(ev) {
-            console.warn('decelerate', this.bounceXState, this.bounceYState);
-
             raf.cancel(this.rafId);
             // this.scrollXState = STATE_STATIC;
             // this.scrollYState = STATE_STATIC;
@@ -447,7 +459,6 @@ export default {
             // let hasMoved = { x: 0, y: 0 };
             // 剩余滑动位移
             let remainDistance = { x: delta.x, y: delta.y };
-            console.log(remainDistance, `remainDistance`);
             // 滑动到下一帧的scroll位置
             const _moveToNextFramePosition = () => {
                 // 过滤掉overflow限制的方向
@@ -470,15 +481,11 @@ export default {
                         this[`scroll${AXIS}State`] = STATE_ANIMATE_SCROLL;
                         // 待滑动距离
                         remainDistance[axis] = currentRemain;
-                        // this.q[axis] = this.q[axis] || 0;
-                        // this.q[axis] -= willMove;
-                        // console.log(JSON.stringify(this.q));
                         // hasMoved[axis] += willMove;
                         // 滑动
                         this[`scroll${AXIS}`] += willMove;
                     }
 
-                    // console.log(axis,willMove, this[`scroll${AXIS}`])
                     // 修正滑动, 限制在移动范围内
                     if (this[`minScroll${AXIS}WithBounce`] > this[`scroll${AXIS}`]) {
                         this[`scroll${AXIS}`] = this[`minScroll${AXIS}WithBounce`];
@@ -492,7 +499,6 @@ export default {
                 if (isFinish.x) {
                     this.scrollXState = STATE_STATIC;
                     if (STATE_BOUNCE_SHRINK !== this.bounceXState) {
-                        console.log('减速snapX');
                         this.snapToEdge('x');
                     }
                 }
@@ -500,8 +506,6 @@ export default {
                 if (isFinish.y) {
                     this.scrollYState = STATE_STATIC;
                     if (STATE_BOUNCE_SHRINK !== this.bounceYState) {
-                        console.log('减速snapY');
-
                         this.snapToEdge('y');
                     }
                 }
@@ -569,8 +573,6 @@ export default {
                 y: undefined
             };
             const AXIS_LIST = undefined === axis ? ['x', 'y'] : [axis];
-            console.log(AXIS_LIST, `snap`);
-
             AXIS_LIST.forEach((axis) => {
                 const AXIS_UPPERCASE = axis.toUpperCase();
                 if (this[`minScroll${AXIS_UPPERCASE}`] > this[`scroll${AXIS_UPPERCASE}`]) {
@@ -581,7 +583,6 @@ export default {
                     POS[axis] = this[`maxScroll${AXIS_UPPERCASE}`];
                 }
             });
-            console.log('POS', POS);
             this.scrollTo(
                 {
                     top: POS.y,

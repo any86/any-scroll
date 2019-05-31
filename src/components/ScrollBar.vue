@@ -76,19 +76,20 @@ export default {
             type: Boolean
         },
 
-        minScrollX: {
+        // 超出边界的距离
+        outOfTopDistance: {
             type: Number
         },
 
-        maxScrollX: {
+        outOfBottomDistance: {
             type: Number
         },
 
-        minScrollY: {
+        outOfRightDistance: {
             type: Number
         },
 
-        maxScrollY: {
+        outOfLeftDistance: {
             type: Number
         }
     },
@@ -116,27 +117,47 @@ export default {
 
         // x轴滚动条样式
         styleX() {
+            // 大于0 小于100
+            const progress = Math.min(100, Math.max(0, this.progressX));
+            let scale = 1;
+            let transformOrigin = '';
+
+            if (this.isOutOfLeft) {
+                transformOrigin = 'left';
+                scale = this.viewWidth / (this.viewWidth + Math.abs(this.outOfLeftDistance));
+            } else if (this.isOutOfRight) {
+                transformOrigin = 'right';
+                scale = this.viewWidth / (this.viewWidth + Math.abs(this.outOfRightDistance));
+            }
+
             return {
                 ...this.commonStyle,
                 opacity: STATE_STATIC === this.scrollXState ? 0 : 1,
                 borderRadius: `${this.height}px`,
                 bottom: 0,
-                left: `${this.progressX}%`,
+                left: `${progress}%`,
                 height: `${this.height}px`,
                 width: `${this.viewWidth * 0.2}px`,
-                transform: `translateX(${0 - this.progressX}%)`
+                transform: `translateX(${0 - progress}%) scaleX(${scale})`,
+                transformOrigin
             };
         },
 
         // y轴滚动条样式
         styleY() {
-            const progress = Math.max(0, this.progressY);
-            const scale =
-                this.isOutOfTop || this.isOutOfBottom
-                    ? this.viewHeight / (this.viewHeight + Math.abs(this.scrollY))
-                    : 1;
+            // 大于0 小于100
+            const progress = Math.min(100, Math.max(0, this.progressY));
+            let scale = 1;
+            let transformOrigin = '';
 
-            const transformOrigin = this.isOutOfTop;
+            if (this.isOutOfTop) {
+                transformOrigin = 'top';
+                scale = this.viewHeight / (this.viewHeight + Math.abs(this.outOfTopDistance));
+            } else if (this.isOutOfBottom) {
+                transformOrigin = 'bottom';
+                scale = this.viewHeight / (this.viewHeight + Math.abs(this.outOfBottomDistance));
+            }
+
             return {
                 ...this.commonStyle,
                 opacity: STATE_STATIC === this.scrollYState ? 0 : 1,
@@ -146,7 +167,7 @@ export default {
                 height: `${this.viewHeight * 0.2}px`,
                 width: `${this.width}px`,
                 transform: `translateY(${0 - progress}%) scaleY(${scale})`,
-                transformOrigin: this.isOutOfTop ? 'top' : 'bottom'
+                transformOrigin
             };
         }
     }
