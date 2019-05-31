@@ -1,19 +1,27 @@
 {
   "name": "any-scroll",
-  "version": "0.0.1",
+  "version": "0.0.2",
+  "main": "dist/AnyScroll.common.js",
+  "module": "dist/AnyScroll.common.js",
+  "browser": "dist/AnyScroll.umd.js",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "build:lib": "vue-cli-service build --target lib --name any-scroll ./src/components/AnyScroll.vue",
+    "build:lib": "vue-cli-service build --target lib --name AnyScroll ./src/components/Core.vue",
     "test:unit": "vue-cli-service test:unit"
   },
+  "files": [
+    "dist"
+  ],
   "dependencies": {
-    "core-js": "^2.6.5",
     "any-touch": "^0.3.3",
+    "chalk": "^2.4.2",
+    "core-js": "^2.6.5",
+    "gh-pages": "^2.0.1",
+    "shelljs": "^0.8.3",
     "vue": "^2.6.6"
   },
   "devDependencies": {
-    "raf": "^3.4.1",
     "@vue/cli-plugin-babel": "^3.5.0",
     "@vue/cli-plugin-unit-jest": "^3.5.0",
     "@vue/cli-service": "^3.5.0",
@@ -21,6 +29,7 @@
     "babel-core": "7.0.0-bridge.0",
     "babel-jest": "^23.6.0",
     "node-sass": "^4.9.0",
+    "raf": "^3.4.1",
     "sass-loader": "^7.1.0",
     "vue-template-compiler": "^2.5.21"
   }

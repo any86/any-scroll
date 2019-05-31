@@ -140,7 +140,7 @@ export default {
     data() {
         return {
             data: [],
-            height: undefined,
+            height: '80vh',
             width: undefined,
             bounceDistance: 150,
             overflowX: false,
