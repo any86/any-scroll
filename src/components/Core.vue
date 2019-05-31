@@ -1,6 +1,5 @@
 <template>
     <div :style="viewStyle" class="any-scroll-view">
-        <h1>{{rafId}} | {{scrollToRafId}} | {{maxScrollY}}</h1>
         <scroll-bar
             :scroll-x-state="scrollXState"
             :scroll-y-state="scrollYState"
@@ -660,12 +659,6 @@ export default {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    h1 {
-        position: absolute;
-        top: 0;
-        left: 0;
-        z-index: 999999;
-    }
     &__content {
         position: absolute;
         width: 100%;
