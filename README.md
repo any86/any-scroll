@@ -41,3 +41,15 @@ new Vue({
 
 内容会同步到到掘金
 https://juejin.im/post/5ca982aff265da24f741ec21
+
+
+## props
+|属性|数据类型|默认值||说明|
+|---|---|---|---|---|
+|height|`String`|500px|scrollView的高度,可以给`100%`让其填满父元素高度,或者`100vh`和浏览器一样高|
+|width|`String`|-|scrollView的宽度|
+|overflowX|`Boolean`|true|x轴是否可以滚动|
+|overflowY|`Boolean`|true|y轴是否可以滚动|
+|bounceDistance|`Number | Object`|150|4个边界的可拉伸距离, 如果是对象, 可以通过top/left/right/bottom单独配置每一边|
+|bounceTime|`Number`|100|回弹时间, 单位ms|
+|easeFunction|`Function`|`const t => (t - 1) ** 3 + 1`| 根据时间变化的输出的值从0到1的曲线
