@@ -1,8 +1,8 @@
 <template>
-    <div>
-        <div class="any-scroll__bar-x" :style="styleX"></div>
-        <div class="any-scroll__bar-y" :style="styleY"></div>
-    </div>
+  <div>
+    <div v-if="!overflowX" class="any-scroll__bar-x" :style="styleX"></div>
+    <div v-if="!overflowY" class="any-scroll__bar-y" :style="styleY"></div>
+  </div>
 </template>
 
 <script>
@@ -17,6 +17,14 @@ export default {
 
         scrollY: {
             type: Number
+        },
+
+        overflowX: {
+            type: Boolean
+        },
+
+        overflowY: {
+            type: Boolean
         },
 
         scrollXState: {
@@ -97,12 +105,12 @@ export default {
     computed: {
         // x进度
         progressX() {
-            return Math.round((this.scrollX / (this.contentWidth - this.viewWidth)) * 100);
+            return this.overflowX ? 0 : Math.round((this.scrollX / (this.contentWidth - this.viewWidth)) * 100);
         },
 
         // y进度
         progressY() {
-            return Math.round((this.scrollY / (this.contentHeight - this.viewHeight)) * 100);
+            return this.overflowY ? 0 : Math.round((this.scrollY / (this.contentHeight - this.viewHeight)) * 100);
         },
 
         // 通用样式
@@ -117,6 +125,7 @@ export default {
 
         // x轴滚动条样式
         styleX() {
+            if (this.overflowX) return;
             // 大于0 小于100
             const progress = Math.min(100, Math.max(0, this.progressX));
             let scale = 1;
@@ -145,6 +154,7 @@ export default {
 
         // y轴滚动条样式
         styleY() {
+            if (this.overflowY) return;
             // 大于0 小于100
             const progress = Math.min(100, Math.max(0, this.progressY));
             let scale = 1;
