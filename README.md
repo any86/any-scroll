@@ -11,11 +11,11 @@
 
 
 ## 掘金
-本插件的初衷是让更多人理解scroll-view的原理, 并可以自己动手写一个scroll-view. 
+本插件的初衷是让更多人理解**scroll-view的原理**, 并可以自己动手写一个scroll-view. 
 
-我个人觉得scroll-view的css和js逻辑如果理解了, 写其他UI组件会变得很简单(:zap: 编辑器除外).
+我个人觉得scroll-view的css和js逻辑如果理解了, **写其他UI组件会变得很简单(:zap: 编辑器除外)**.
 
-所以我也会在掘金写一些制作过程和使用的文章, 内容会同步到到https://juejin.im/post/5ca982aff265da24f741ec21,  希望大家喜欢, 多多捧场鼓励, 谢谢.
+所以我也会在掘金写一些制作过程和使用的文章, 内容会同步到到[掘金](https://juejin.im/post/5ca982aff265da24f741ec21),  希望大家喜欢, 多多捧场鼓励, 谢谢.
 
 ## 安装
 ```shell
