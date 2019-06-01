@@ -1,5 +1,5 @@
 # any-scroll  [![NPM Version][npm-image]][npm-url] [![NPM Downloads][downloads-image]][downloads-url] [![npm bundle size (minified + gzip)][size-image]][size-url] 
-
+模拟scrollview, 可加工成Tab/SwipeOut/Slider/Carousel等组件.
 
 [size-image]: https://img.shields.io/bundlephobia/minzip/any-scroll.svg
 [size-url]: https://bundlephobia.com/result?p=any-scroll
