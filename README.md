@@ -33,12 +33,12 @@ new Vue({
 
 
 ## 什么时候用
+
 1. 模拟scrollview, 规避ios下系统的scrollview拖拽到2端出现空白的bug.
 ...
 
-
-
 ## props
+
 |属性|数据类型|默认值|说明|
 |---|---|---|---|
 |height|`String`|500px|scrollView的高度,可以给`100%`让其填满父元素高度,或者`100vh`和浏览器一样高|
