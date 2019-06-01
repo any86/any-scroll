@@ -5,6 +5,8 @@
             :scroll-y-state="scrollYState"
             :scroll-x="scrollX"
             :scroll-y="scrollY"
+            :overflow-x="overflowX"
+            :overflow-y="overflowY"
             :content-width="contentWidth"
             :content-height="contentHeight"
             :view-width="viewWidth"
