@@ -53,6 +53,6 @@ new Vue({
 |width|`String`|-|scrollView的宽度|
 |overflowX|`Boolean`|true|x轴是否可以滚动|
 |overflowY|`Boolean`|true|y轴是否可以滚动|
-|bounceDistance|`Number | Object`|150|4个边界的可拉伸距离, 如果是对象, 可以通过top/left/right/bottom单独配置每一边|
+|bounceDistance|`Number或Object`|150|4个边界的可拉伸距离, 如果是对象, 可以通过top/left/right/bottom单独配置每一边|
 |bounceTime|`Number`|100|回弹时间, 单位ms|
 |easeFunction|`Function`|`const t => (t - 1) ** 3 + 1`| 根据时间变化的输出的值从0到1的曲线
