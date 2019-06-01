@@ -1,4 +1,4 @@
-# any-scroll  [![NPM Version][npm-image]][npm-url] [![NPM Downloads][downloads-image]][downloads-url] [![npm bundle size (minified + gzip)][size-image]][size-url] [![codecov](https://codecov.io/gh/383514580/any-scroll/branch/develop/graph/badge.svg)](https://codecov.io/gh/383514580/any-scroll)  [![CircleCI](https://circleci.com/gh/383514580/any-scroll.svg?style=svg)](https://circleci.com/gh/383514580/any-scroll)
+# any-scroll  [![NPM Version][npm-image]][npm-url] [![NPM Downloads][downloads-image]][downloads-url] [![npm bundle size (minified + gzip)][size-image]][size-url] 
 
 
 [size-image]: https://img.shields.io/bundlephobia/minzip/any-scroll.svg
