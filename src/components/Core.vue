@@ -1,29 +1,29 @@
 <template>
-    <div :style="viewStyle" class="any-scroll-view">
-        <scroll-bar
-            :scroll-x-state="scrollXState"
-            :scroll-y-state="scrollYState"
-            :scroll-x="scrollX"
-            :scroll-y="scrollY"
-            :overflow-x="overflowX"
-            :overflow-y="overflowY"
-            :content-width="contentWidth"
-            :content-height="contentHeight"
-            :view-width="viewWidth"
-            :view-height="viewHeight"
-            :is-out-of-top="isOutOfTop"
-            :is-out-of-left="isOutOfLeft"
-            :is-out-of-right="isOutOfRight"
-            :is-out-of-bottom="isOutOfBottom"
-            :outOfTopDistance="outOfTopDistance"
-            :outOfBottomDistance="outOfBottomDistance"
-            :outOfRightDistance="outOfRightDistance"
-            :outOfLeftDistance="outOfLeftDistance"
-        />
-        <div ref="content" :style="contentStyle" class="any-scroll-view__content">
-            <slot></slot>
-        </div>
+  <div :style="viewStyle" class="any-scroll-view">
+    <scroll-bar
+      :scroll-x-state="scrollXState"
+      :scroll-y-state="scrollYState"
+      :scroll-x="scrollX"
+      :scroll-y="scrollY"
+      :overflow-x="overflowX"
+      :overflow-y="overflowY"
+      :content-width="contentWidth"
+      :content-height="contentHeight"
+      :view-width="viewWidth"
+      :view-height="viewHeight"
+      :is-out-of-top="isOutOfTop"
+      :is-out-of-left="isOutOfLeft"
+      :is-out-of-right="isOutOfRight"
+      :is-out-of-bottom="isOutOfBottom"
+      :outOfTopDistance="outOfTopDistance"
+      :outOfBottomDistance="outOfBottomDistance"
+      :outOfRightDistance="outOfRightDistance"
+      :outOfLeftDistance="outOfLeftDistance"
+    />
+    <div ref="content" :style="contentStyle" class="any-scroll-view__content">
+      <slot></slot>
     </div>
+  </div>
 </template>
 
 <script>
@@ -303,14 +303,25 @@ export default {
     mounted() {
         const at = new AnyTouch(this.$el);
         this.updateSize();
-        const MutationObserver = MutationObserver || WebKitMutationObserver || MozMutationObserver;
-        const _observer = new MutationObserver(() => {
-            this.updateSize();
-        });
 
-        _observer.observe(this.$refs.content, {
-            subtree: true,
-            childList: true
+        try {
+            const MutationObserver = MutationObserver || WebKitMutationObserver || MozMutationObserver;
+            const _observer = new MutationObserver(() => {
+                this.updateSize();
+            });
+
+            _observer.observe(this.$refs.content, {
+                subtree: true,
+                childList: true
+            });
+        } catch (error) {}
+
+        // 销毁
+        this.$on('hook:destroy', () => {
+            at.destroy();
+            at = null;
+            _observer.disconnect();
+            _observer = null;
         });
 
         // 第一次触碰
@@ -355,10 +366,6 @@ export default {
         at.on('doubletap', (ev) => {
             this.$emit('doubletap');
         });
-
-        this.$on('hook:destroy', () => {
-            at.destroy();
-        });
     },
 
     methods: {
@@ -386,7 +393,6 @@ export default {
                 this.viewHeight = this.$el.offsetHeight;
                 this.contentWidth = this.$refs.content.scrollWidth;
                 this.contentHeight = this.$refs.content.scrollHeight;
-                console.warn('updateSize', this.viewHeight);
             });
         },
 
