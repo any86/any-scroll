@@ -44,7 +44,7 @@ https://juejin.im/post/5ca982aff265da24f741ec21
 
 
 ## props
-|属性|数据类型|默认值||说明|
+|属性|数据类型|默认值|说明|
 |---|---|---|---|
 |height|`String`|500px|scrollView的高度,可以给`100%`让其填满父元素高度,或者`100vh`和浏览器一样高|
 |width|`String`|-|scrollView的宽度|
