@@ -10,7 +10,7 @@
 [downloads-url]: https://npmjs.org/package/any-scroll
 
 
-## 掘金
+## 初衷
 本插件的初衷是让更多人理解**scroll-view的原理**, 并可以自己动手写一个scroll-view. 
 
 我个人觉得scroll-view的css和js逻辑如果理解了, **写其他UI组件会变得很简单(:zap: 编辑器除外)**.
