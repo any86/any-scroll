@@ -17,6 +17,24 @@
 npm i -S any-scroll
 ```
 
+## 使用
+```html
+<any-scroll>
+  <p>第一行</p>
+  <p>第二行</p>
+  ...
+</any-scroll>
+```
+
+``` javascript
+import AnyScroll from 'any-scroll'
+new Vue({
+  components: {AnyScroll}
+});
+```
+##
+
+
 ## 什么时候用
 1. 模拟scrollview, 规避ios下系统的scrollview拖拽到2端出现空白的bug.
 ...
