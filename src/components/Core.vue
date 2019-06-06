@@ -22,6 +22,7 @@
         />
         <div ref="content" :style="contentStyle" class="any-scroll-view__content">
             <slot></slot>
+            <!-- <h1>{{bounceXState}} | {{bounceYState}}</h1> -->
         </div>
     </div>
 </template>
@@ -247,10 +248,10 @@ export default {
         },
 
         bounceXState() {
-            return this.leftBounceState || this.rightBounceState;
+            return STATE_STATIC === this.leftBounceState ? this.rightBounceState : this.leftBounceState;
         },
         bounceYState() {
-            return this.topBounceState || this.bottomBounceState;
+            return STATE_STATIC === this.topBounceState ? this.bottomBounceState : this.topBounceState;
         }
     },
 
@@ -648,8 +649,9 @@ export default {
                         top: POS.y,
                         left: POS.x,
                         callback: () => {
-                            POSITION_UPPERCASE_LIST.forEach((DIRECTION_UPPERCASE) => {
-                                this[`${DIRECTION_UPPERCASE}BounceState`] = STATE_STATIC;
+                            POSITION_LOWERCASE_LIST.forEach((POSITION_LOWERCASE) => {
+                                console.log(`${POSITION_LOWERCASE}BounceState`)
+                                this[`${POSITION_LOWERCASE}BounceState`] = STATE_STATIC;
                             });
                         }
                     },
