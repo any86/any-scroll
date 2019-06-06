@@ -5,7 +5,7 @@
         </header>
 
         <article class="body">
-            <article v-if="false" class="props-form">
+            <article v-if="true" class="props-form">
                 <h1>设置</h1>
 
                 <label>
@@ -155,7 +155,7 @@ export default {
     async mounted() {
         const resp = await fetch('db.json');
         const { data } = await resp.json();
-        this.data = data.slice(0, 10);
+        this.data = data.slice(0, 100);
         this.$nextTick();
         this.$refs.scroll.updateSize();
     },

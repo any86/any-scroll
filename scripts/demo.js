@@ -7,7 +7,7 @@ const chalk = require('chalk');
 // shell.mkdir('-p','./demo/example');
 // shell.cp('-Rf', './example/*', './demo/example');
 // shell.cp('-Rf', './dist/*', './demo/dist');
-
+// shell.rm('-rf', './dist');
 
 // 发布
 ghpages.publish('./dist', {

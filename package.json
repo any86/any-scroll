@@ -7,6 +7,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "build:demo": "npm run build && node ./scripts/demo.js",
     "build:lib": "vue-cli-service build --target lib --name AnyScroll ./src/components/Core.vue",
     "test:unit": "vue-cli-service test:unit"
   },
