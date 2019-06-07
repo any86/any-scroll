@@ -1,139 +1,146 @@
 <template>
-    <main>
-        <header>
-            <h1>AnyScroll</h1>
-        </header>
+  <main>
+    <header>
+      <h1>AnyScroll</h1>
+    </header>
 
-        <article class="body">
-            <article v-if="true" class="props-form">
-                <h1>设置</h1>
+    <article class="body">
+      <article v-if="true" class="props-form">
+        <h1>设置</h1>
 
-                <label>
-                    height(高度)
-                    <input v-model="height" placeholder="scrollView的高度, 默认500px">
-                </label>
+        <label>
+          height(高度)
+          <input v-model="height" placeholder="scrollView的高度, 默认500px">
+        </label>
 
-                <label>
-                    width(宽度)
-                    <input v-model="width" placeholder="不指定宽度, 默认100%;">
-                </label>
+        <label>
+          width(宽度)
+          <input v-model="width" placeholder="不指定宽度, 默认100%;">
+        </label>
 
-                <label>
-                    bounceDistance(可拉伸距离)
-                    <input v-model="bounceDistance">
-                </label>
+        <label>
+          bounceDistance(可拉伸距离)
+          <input v-model="bounceDistance">
+        </label>
 
-                <label class="inline">
-                    overflowX(禁止x轴运动)
-                    <input type="checkbox" v-model="overflowX">
-                </label>
+        <label class="inline">
+          overflowX(禁止x轴运动)
+          <input type="checkbox" v-model="overflowX">
+        </label>
 
-                <label class="inline">
-                    overflowY(禁止y轴运动)
-                    <input type="checkbox" v-model="overflowY">
-                </label>
-            </article>
+        <label class="inline">
+          overflowY(禁止y轴运动)
+          <input type="checkbox" v-model="overflowY">
+        </label>
+      </article>
 
-            <any-scroll
-                ref="scroll"
-                :width="width"
-                :height="height"
-                :overflow-x="overflowX"
-                :overflow-y="overflowY"
-                :bounce-distance="bounceDistance"
-                :bounce-time="1000"
-                @bounce-state-change="bounceState=$event"
-                @scroll-state-change="scrollState=$event"
-                @scroll="scrollHandler"
-                class="scroll-view"
-            >   
-                <template #top="{scrollTop, scrollLeft}">
-                    <div class="header">scroll: {{scrollLeft}} | {{scrollTop}} | 我是插槽, slot="header"</div>
-                </template>
+      <any-scroll
+        ref="scroll"
+        :width="width"
+        :height="height"
+        :overflow-x="overflowX"
+        :overflow-y="overflowY"
+        :bounce-distance="bounceDistance"
+        :bounce-time="1000"
+        @bounce-state-change="bounceState=$event"
+        @scroll-state-change="scrollState=$event"
+        @scroll="scrollHandler"
+        class="scroll-view"
+      >
+        <template #top="{scrollTop, scrollLeft,directionY}">
+          <transition name="fade-up">
+            <div
+              v-if="0 >= scrollTop ||'up' === directionY"
+              class="header"
+            >scroll: {{scrollLeft}} | {{scrollTop}} 我是插槽, slot="top"</div>
+          </transition>
+        </template>
+        <template v-if="0 < data.length" #under>
+          <h1>我在后面</h1>
+        </template>
 
-                <template v-if="0 < data.length" #under>
-                    <h1>我在后面</h1>
-                </template>
+        <ul v-if="0 < data.length">
+          <li>
+            <label>
+              <input placeholder="请输入标题">
+            </label>
+          </li>
+          <li>
+            <label>
+              <textarea placeholder="请输入内容"></textarea>
+            </label>
+          </li>
+          <li>
+            <label>
+              <button>提交</button>
+            </label>
+          </li>
 
+          <li v-for="({title, author}, index) in data" :key="title+index">
+            <!-- <img :src="author.avatar_url"> -->
+            {{index}} | {{title}}
+          </li>
+        </ul>
+        <span v-else class="loading"></span>
+        <template #bottom="{scrollTop, scrollLeft,directionY}">
+          <transition name="fade-down">
+            <div
+                v-if="'down' === directionY"
+              class="footer"
+            >scroll: {{scrollLeft}} | {{scrollTop}} | 我是插槽, slot="bottom"</div>
+          </transition>
+        </template>
+      </any-scroll>
 
-                <ul v-if="0 < data.length">
-                    <li>
-                        <label>
-                            <input placeholder="请输入标题">
-                        </label>
-                    </li>
-                    <li>
-                        <label>
-                            <textarea placeholder="请输入内容"></textarea>
-                        </label>
-                    </li>
-                    <li>
-                        <label>
-                            <button>提交</button>
-                        </label>
-                    </li>
+      <!-- data -->
+      <article class="dataAndMethods">
+        <table>
+          <tr>
+            <td>🌀 弹簧状态</td>
+            <td>
+              顶部: {{bounceState.top}}
+              <br>
+              右侧: {{bounceState.right}}
+              <br>
+              底部: {{bounceState.bottom}}
+              <br>
+              左侧: {{bounceState.left}}
+            </td>
+          </tr>
+          <tr>
+            <td>🚂 滚动状态</td>
+            <td>
+              X轴: {{scrollState.x}}
+              <br>
+              Y轴: {{scrollState.y}}
+            </td>
+          </tr>
 
-                    <li v-for="({title, author}, index) in data" :key="title+index">
-                        <!-- <img :src="author.avatar_url"> -->
-                        {{index}} | {{title}}
-                    </li>
-                </ul>
-                <span v-else class="loading"></span>
-                <template #bottom="{scrollTop, scrollLeft}">
-                    <div>scroll: {{scrollLeft}} | {{scrollTop}} | 我是插槽, slot="footer"</div>
-                </template>
-                
-            </any-scroll>
+          <tr>
+            <td>↔ scrollLeft</td>
+            <td>{{scrollLeft}}</td>
+          </tr>
 
-            <!-- data -->
-            <article class="dataAndMethods">
-                <table>
-                    <tr>
-                        <td>🌀 弹簧状态</td>
-                        <td>
-                            顶部: {{bounceState.top}}
-                            <br>
-                            右侧: {{bounceState.right}}
-                            <br>
-                            底部: {{bounceState.bottom}}
-                            <br>
-                            左侧: {{bounceState.left}}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>🚂 滚动状态</td>
-                        <td>
-                            X轴: {{scrollState.x}}
-                            <br>
-                            Y轴: {{scrollState.y}}
-                        </td>
-                    </tr>
+          <tr>
+            <td>↕ scrollTop</td>
+            <td>{{scrollTop}}</td>
+          </tr>
+        </table>
 
-                    <tr>
-                        <td>↔ scrollLeft</td>
-                        <td>{{scrollLeft}}</td>
-                    </tr>
+        <!-- 表单 -->
+        <div class="form">
+          <button @click="test">测试</button>
 
-                    <tr>
-                        <td>↕ scrollTop</td>
-                        <td>{{scrollTop}}</td>
-                    </tr>
-                </table>
+          <button @click="scrollUp">模拟拖拽向上</button>
+          <button @click="scrollDown">模拟拖拽向下</button>
+          <button @click="scrollLeftHandler">模拟拖拽向左</button>
+          <button @click="scrollRightHandler">模拟拖拽向右</button>
 
-                <!-- 表单 -->
-                <div class="form">
-                    <button @click="test">测试</button>
-
-                    <button @click="scrollUp">模拟拖拽向上</button>
-                    <button @click="scrollDown">模拟拖拽向下</button>
-                    <button @click="scrollLeftHandler">模拟拖拽向左</button>
-                    <button @click="scrollRightHandler">模拟拖拽向右</button>
-
-                    <button @click="reset">复位</button>
-                </div>
-            </article>
-        </article>
-    </main>
+          <button @click="reset">复位</button>
+        </div>
+      </article>
+    </article>
+  </main>
 </template>
 
 <script>
@@ -160,7 +167,7 @@ export default {
             overflowY: false,
             scrollTop: 0,
             scrollLeft: 0,
-            bounceState: { top: STATE_STATIC, left: STATE_STATIC ,right: STATE_STATIC, bottom: STATE_STATIC },
+            bounceState: { top: STATE_STATIC, left: STATE_STATIC, right: STATE_STATIC, bottom: STATE_STATIC },
             scrollState: { x: STATE_STATIC, y: STATE_STATIC }
         };
     },
@@ -199,9 +206,8 @@ export default {
         },
 
         test(targetEl) {
-            const {body} = document
-            body.appendChild(this.$refs.scroll.$el)
-            
+            const { body } = document;
+            body.appendChild(this.$refs.scroll.$el);
         }
     }
 };
@@ -211,6 +217,26 @@ export default {
 * {
     padding: 0;
     margin: 0;
+}
+
+.fade-up-enter-active,
+.fade-up-leave-active {
+    transition: all 0.5s;
+}
+.fade-up-enter,
+.fade-up-leave-to {
+    opacity: 0;
+    transform: translateY(-30px);
+}
+
+.fade-down-enter-active,
+.fade-down-leave-active {
+    transition: all 0.5s;
+}
+.fade-down-enter,
+.fade-down-leave-to {
+    opacity: 0;
+    transform: translateY(30px);
 }
 
 main {
@@ -259,20 +285,20 @@ main {
             margin-left: 2%;
             box-shadow: 1px 2px 3px rgba(#000, 0.1), -1px -2px 3px rgba(#000, 0.1);
 
-            header{
-                padding:15px;
-                color:#fff;
-                background:rgba(0,0,0,0.4);
-                width:100%;
-                box-shadow: 1px 2px 1px rgba(0,0,0,0.2);
+            .header {
+                padding: 15px;
+                color: #fff;
+                background: rgba(0, 0, 0, 0.4);
+                width: 100%;
+                box-shadow: 1px 2px 1px rgba(0, 0, 0, 0.2);
             }
 
-            footer{
-                padding:15px;
-                color:#fff;
-                background:rgba(0,0,0,0.4);
-                width:100%;
-                box-shadow: 1px -2px 1px rgba(0,0,0,0.2);
+            .footer {
+                padding: 15px;
+                color: #fff;
+                background: rgba(0, 0, 0, 0.4);
+                width: 100%;
+                box-shadow: 1px -2px 1px rgba(0, 0, 0, 0.2);
             }
 
             .loading {

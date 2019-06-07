@@ -2,17 +2,17 @@
   <div :style="viewStyle" class="any-scroll-view">
     <!-- 固定头 -->
     <header v-if="$slots.top || $scopedSlots.top" class="any-scroll-view__top">
-      <slot name="top" :scrollTop="scrollY" :scrollLeft="scrollX"></slot>
+      <slot name="top"  :scrollTop="scrollY" :scrollLeft="scrollX" :directionX="directionX" :directionY="directionY"></slot>
     </header>
 
     <!-- 上层 -->
-    <section  v-if="$slots.upper || $scopedSlots.upper" class="any-scroll-view__upper">
-      <slot name="upper" :scrollTop="scrollY" :scrollLeft="scrollX"></slot>
+    <section v-if="$slots.upper || $scopedSlots.upper" class="any-scroll-view__upper">
+      <slot name="upper"  :scrollTop="scrollY" :scrollLeft="scrollX" :directionX="directionX" :directionY="directionY"></slot>
     </section>
 
     <!-- 下层 -->
     <section v-if="$slots.under || $scopedSlots.under" class="any-scroll-view__under">
-      <slot name="under" :scrollTop="scrollY" :scrollLeft="scrollX"></slot>
+      <slot name="under"  :scrollTop="scrollY" :scrollLeft="scrollX" :directionX="directionX" :directionY="directionY"></slot>
     </section>
 
     <!-- 滚动条 -->
@@ -39,12 +39,12 @@
 
     <!-- 内容 -->
     <div ref="content" :style="contentStyle" class="any-scroll-view__content">
-      <slot :scrollTop="scrollY" :scrollLeft="scrollX"></slot>
+      <slot  :scrollTop="scrollY" :scrollLeft="scrollX" :directionX="directionX" :directionY="directionY"></slot>
     </div>
 
     <!-- 底部固定 -->
     <footer v-if="$slots.bottom || $scopedSlots.bottom" class="any-scroll-view__bottom">
-      <slot name="bottom" :scrollTop="scrollY" :scrollLeft="scrollX"></slot>
+      <slot name="bottom"  :scrollTop="scrollY" :scrollLeft="scrollX" :directionX="directionX" :directionY="directionY"></slot>
     </footer>
   </div>
 </template>
@@ -57,7 +57,17 @@ import {
     STATE_BOUNCE_STRETCHED,
     STATE_BOUNCE_SHRINK,
     POSITION_UPPERCASE_LIST,
-    POSITION_LOWERCASE_LIST
+    POSITION_LOWERCASE_LIST,
+
+    // 方向
+    DIRECTION_UP_LOWERCASE,
+    DIRECTION_RIGHT_LOWERCASE,
+    DIRECTION_LEFT_LOWERCASE,
+    DIRECTION_DOWN_LOWERCASE,
+
+    // X/Y
+    AXIS_X,
+    AXIS_Y
 } from '@/const.js';
 import AnyTouch from 'any-touch';
 import raf from 'raf';
@@ -135,7 +145,11 @@ export default {
             topBounceState: STATE_STATIC,
             bottomBounceState: STATE_STATIC,
             leftBounceState: STATE_STATIC,
-            rightBounceState: STATE_STATIC
+            rightBounceState: STATE_STATIC,
+
+            // 当前方向
+            directionX: undefined,
+            directionY: undefined
         };
     },
 
@@ -313,13 +327,15 @@ export default {
         },
 
         // 监控scrollTop, 防止滑出有效区域
-        scrollY(scrollY) {
-            this.watchScrollXYHandler(scrollY);
+        scrollY(scrollY, prevScrollY) {
+            this.directionY = scrollY > prevScrollY ? DIRECTION_UP_LOWERCASE : DIRECTION_DOWN_LOWERCASE;
+            this.watchScrollXYHandler(scrollY, prevScrollY, AXIS_Y);
         },
 
         // 监控scrollLeft, 防止滑出有效区域
-        scrollX(scrollX) {
-            this.watchScrollXYHandler(scrollX);
+        scrollX(scrollX, prevScrollX) {
+            this.directionX = scrollX > prevScrollX ? DIRECTION_LEFT_LOWERCASE : DIRECTION_RIGHT_LOWERCASE;
+            this.watchScrollXYHandler(scrollX, prevScrollX, AXIS_X);
         }
     },
 
@@ -394,8 +410,12 @@ export default {
         /**
          * 通过观察scroll的值
          */
-        watchScrollXYHandler(scrollPosition) {
+        watchScrollXYHandler() {
+            // 通知方向变化
+            this.$emit('direction-change', { x: this.directionX, y: this.directionY });
+
             // 响应弹簧的状态
+            // POSITION_UPPERCASE_LIST === ['Top', 'Right', 'Bottom', 'Left'];
             POSITION_UPPERCASE_LIST.forEach((DIRECTION_UPPERCASE, index) => {
                 // topBounceState等
                 if (this[`isOutOf${DIRECTION_UPPERCASE}`]) {
@@ -700,24 +720,28 @@ $underZIndex: 1;
         top: 0;
         left: 0;
         z-index: $topZIndex;
+        width: 100%;
     }
     &__upper {
         position: absolute;
         top: 0;
         left: 0;
         z-index: $upperZIndex;
+        width: 100%;
     }
     &__under {
         position: absolute;
         top: 0;
         left: 0;
         z-index: $underZIndex;
+        width: 100%;
     }
     &__bottom {
         position: absolute;
         bottom: 0;
         left: 0;
         z-index: $bottomZIndex;
+        width: 100%;
     }
 
     &__content {
