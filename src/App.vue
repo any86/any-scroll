@@ -198,8 +198,10 @@ export default {
             this.$refs.scroll.scrollTo({ top: 0, left: 0 });
         },
 
-        test() {
-            this.$refs.scroll.decelerate({ speedX: 1, speedY: 2 });
+        test(targetEl) {
+            const {body} = document
+            body.appendChild(this.$refs.scroll.$el)
+            
         }
     }
 };

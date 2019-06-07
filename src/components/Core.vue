@@ -1,17 +1,17 @@
 <template>
   <div :style="viewStyle" class="any-scroll-view">
     <!-- 固定头 -->
-    <header class="any-scroll-view__top">
+    <header v-if="$slots.top || $scopedSlots.top" class="any-scroll-view__top">
       <slot name="top" :scrollTop="scrollY" :scrollLeft="scrollX"></slot>
     </header>
 
     <!-- 上层 -->
-    <section  class="any-scroll-view__upper">
+    <section  v-if="$slots.upper || $scopedSlots.upper" class="any-scroll-view__upper">
       <slot name="upper" :scrollTop="scrollY" :scrollLeft="scrollX"></slot>
     </section>
 
     <!-- 下层 -->
-    <section class="any-scroll-view__under">
+    <section v-if="$slots.under || $scopedSlots.under" class="any-scroll-view__under">
       <slot name="under" :scrollTop="scrollY" :scrollLeft="scrollX"></slot>
     </section>
 
@@ -43,7 +43,7 @@
     </div>
 
     <!-- 底部固定 -->
-    <footer class="any-scroll-view__bottom">
+    <footer v-if="$slots.bottom || $scopedSlots.bottom" class="any-scroll-view__bottom">
       <slot name="bottom" :scrollTop="scrollY" :scrollLeft="scrollX"></slot>
     </footer>
   </div>
@@ -324,10 +324,8 @@ export default {
     },
 
     mounted() {
-        console.log(this.$slots)
         const at = new AnyTouch(this.$el);
         this.updateSize();
-
         try {
             const MutationObserver = MutationObserver || WebKitMutationObserver || MozMutationObserver;
             const _observer = new MutationObserver(() => {
@@ -673,7 +671,6 @@ export default {
                         left: POS.x,
                         callback: () => {
                             POSITION_LOWERCASE_LIST.forEach((POSITION_LOWERCASE) => {
-                                console.log(`${POSITION_LOWERCASE}BounceState`);
                                 this[`${POSITION_LOWERCASE}BounceState`] = STATE_STATIC;
                             });
                         }
