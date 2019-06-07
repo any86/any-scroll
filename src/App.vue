@@ -161,7 +161,7 @@ export default {
         return {
             data: [],
             height: '80vh',
-            width: undefined,
+            width: 360,
             bounceDistance: 150,
             overflowX: false,
             overflowY: false,

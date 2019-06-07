@@ -2,17 +2,35 @@
   <div :style="viewStyle" class="any-scroll-view">
     <!-- 固定头 -->
     <header v-if="$slots.top || $scopedSlots.top" class="any-scroll-view__top">
-      <slot name="top"  :scrollTop="scrollY" :scrollLeft="scrollX" :directionX="directionX" :directionY="directionY"></slot>
+      <slot
+        name="top"
+        :scrollTop="scrollY"
+        :scrollLeft="scrollX"
+        :directionX="directionX"
+        :directionY="directionY"
+      ></slot>
     </header>
 
     <!-- 上层 -->
     <section v-if="$slots.upper || $scopedSlots.upper" class="any-scroll-view__upper">
-      <slot name="upper"  :scrollTop="scrollY" :scrollLeft="scrollX" :directionX="directionX" :directionY="directionY"></slot>
+      <slot
+        name="upper"
+        :scrollTop="scrollY"
+        :scrollLeft="scrollX"
+        :directionX="directionX"
+        :directionY="directionY"
+      ></slot>
     </section>
 
     <!-- 下层 -->
     <section v-if="$slots.under || $scopedSlots.under" class="any-scroll-view__under">
-      <slot name="under"  :scrollTop="scrollY" :scrollLeft="scrollX" :directionX="directionX" :directionY="directionY"></slot>
+      <slot
+        name="under"
+        :scrollTop="scrollY"
+        :scrollLeft="scrollX"
+        :directionX="directionX"
+        :directionY="directionY"
+      ></slot>
     </section>
 
     <!-- 滚动条 -->
@@ -39,12 +57,23 @@
 
     <!-- 内容 -->
     <div ref="content" :style="contentStyle" class="any-scroll-view__content">
-      <slot  :scrollTop="scrollY" :scrollLeft="scrollX" :directionX="directionX" :directionY="directionY"></slot>
+      <slot
+        :scrollTop="scrollY"
+        :scrollLeft="scrollX"
+        :directionX="directionX"
+        :directionY="directionY"
+      ></slot>
     </div>
 
     <!-- 底部固定 -->
     <footer v-if="$slots.bottom || $scopedSlots.bottom" class="any-scroll-view__bottom">
-      <slot name="bottom"  :scrollTop="scrollY" :scrollLeft="scrollX" :directionX="directionX" :directionY="directionY"></slot>
+      <slot
+        name="bottom"
+        :scrollTop="scrollY"
+        :scrollLeft="scrollX"
+        :directionX="directionX"
+        :directionY="directionY"
+      ></slot>
     </footer>
   </div>
 </template>
@@ -106,12 +135,13 @@ export default {
         },
 
         width: {
-            type: [Number, String]
+            type: [Number, String],
+            default: 320
         },
 
         height: {
             type: [Number, String],
-            default: `500px`
+            default: 500
         },
 
         overflowX: {
@@ -155,7 +185,9 @@ export default {
 
     computed: {
         viewStyle() {
-            return { height: this.height && `${this.height}`, width: this.width && `${this.width}` };
+            const height = this.height == parseInt(this.height) ? `${this.height}px` : this.height;
+            const width = this.width == parseInt(this.width) ? `${this.width}px` : this.width;
+            return { height, width };
         },
 
         contentStyle() {
@@ -398,11 +430,11 @@ export default {
         });
 
         at.on('tap', (ev) => {
-            this.$emit('tap',ev);
+            this.$emit('tap', ev);
         });
 
         at.on('doubletap', (ev) => {
-            this.$emit('doubletap',ev);
+            this.$emit('doubletap', ev);
         });
     },
 
@@ -646,7 +678,7 @@ export default {
          * 对外暴露的scrollTo方法
          */
         scrollTo({ top, left, callback = () => {} }, duration = 300) {
-            this.$emit('before-scroll',this.scrollData);
+            this.$emit('before-scroll', this.scrollData);
             this.$emit('scroll-start', this.scrollData);
             scrollTo(
                 {
