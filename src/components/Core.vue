@@ -365,7 +365,7 @@ export default {
         // 第一次触碰
         at.on('inputstart', (ev) => {
             this.stop();
-            this.$emit('stop-scroll');
+            this.$emit('stop-scroll', this.$scrollData);
         });
 
         // 第一次触碰
@@ -398,11 +398,11 @@ export default {
         });
 
         at.on('tap', (ev) => {
-            this.$emit('tap');
+            this.$emit('tap',ev);
         });
 
         at.on('doubletap', (ev) => {
-            this.$emit('doubletap');
+            this.$emit('doubletap',ev);
         });
     },
 
@@ -646,14 +646,14 @@ export default {
          * 对外暴露的scrollTo方法
          */
         scrollTo({ top, left, callback = () => {} }, duration = 300) {
-            this.$emit('before-scroll');
-            this.$emit('scroll-start');
+            this.$emit('before-scroll',this.scrollData);
+            this.$emit('scroll-start', this.scrollData);
             scrollTo(
                 {
                     top,
                     left,
                     callback: () => {
-                        this.$emit('scroll-end');
+                        this.$emit('scroll-end', this.scrollData);
                         callback();
                     }
                 },
