@@ -1,30 +1,52 @@
 <template>
-    <div :style="viewStyle" class="any-scroll-view">
-        <scroll-bar
-            :scroll-x-state="scrollXState"
-            :scroll-y-state="scrollYState"
-            :scroll-x="scrollX"
-            :scroll-y="scrollY"
-            :overflow-x="overflowX"
-            :overflow-y="overflowY"
-            :content-width="contentWidth"
-            :content-height="contentHeight"
-            :view-width="viewWidth"
-            :view-height="viewHeight"
-            :is-out-of-top="isOutOfTop"
-            :is-out-of-left="isOutOfLeft"
-            :is-out-of-right="isOutOfRight"
-            :is-out-of-bottom="isOutOfBottom"
-            :outOfTopDistance="outOfTopDistance"
-            :outOfBottomDistance="outOfBottomDistance"
-            :outOfRightDistance="outOfRightDistance"
-            :outOfLeftDistance="outOfLeftDistance"
-        />
-        <div ref="content" :style="contentStyle" class="any-scroll-view__content">
-            <slot></slot>
-            <!-- <h1>{{bounceXState}} | {{bounceYState}}</h1> -->
-        </div>
+  <div :style="viewStyle" class="any-scroll-view">
+    <!-- 固定头 -->
+    <header class="any-scroll-view__top">
+      <slot name="top" :scrollTop="scrollY" :scrollLeft="scrollX"></slot>
+    </header>
+
+    <!-- 上层 -->
+    <section  class="any-scroll-view__upper">
+      <slot name="upper" :scrollTop="scrollY" :scrollLeft="scrollX"></slot>
+    </section>
+
+    <!-- 下层 -->
+    <section class="any-scroll-view__under">
+      <slot name="under" :scrollTop="scrollY" :scrollLeft="scrollX"></slot>
+    </section>
+
+    <!-- 滚动条 -->
+    <scroll-bar
+      :scroll-x-state="scrollXState"
+      :scroll-y-state="scrollYState"
+      :scroll-x="scrollX"
+      :scroll-y="scrollY"
+      :overflow-x="overflowX"
+      :overflow-y="overflowY"
+      :content-width="contentWidth"
+      :content-height="contentHeight"
+      :view-width="viewWidth"
+      :view-height="viewHeight"
+      :is-out-of-top="isOutOfTop"
+      :is-out-of-left="isOutOfLeft"
+      :is-out-of-right="isOutOfRight"
+      :is-out-of-bottom="isOutOfBottom"
+      :outOfTopDistance="outOfTopDistance"
+      :outOfBottomDistance="outOfBottomDistance"
+      :outOfRightDistance="outOfRightDistance"
+      :outOfLeftDistance="outOfLeftDistance"
+    />
+
+    <!-- 内容 -->
+    <div ref="content" :style="contentStyle" class="any-scroll-view__content">
+      <slot :scrollTop="scrollY" :scrollLeft="scrollX"></slot>
     </div>
+
+    <!-- 底部固定 -->
+    <footer class="any-scroll-view__bottom">
+      <slot name="bottom" :scrollTop="scrollY" :scrollLeft="scrollX"></slot>
+    </footer>
+  </div>
 </template>
 
 <script>
@@ -302,6 +324,7 @@ export default {
     },
 
     mounted() {
+        console.log(this.$slots)
         const at = new AnyTouch(this.$el);
         this.updateSize();
 
@@ -650,7 +673,7 @@ export default {
                         left: POS.x,
                         callback: () => {
                             POSITION_LOWERCASE_LIST.forEach((POSITION_LOWERCASE) => {
-                                console.log(`${POSITION_LOWERCASE}BounceState`)
+                                console.log(`${POSITION_LOWERCASE}BounceState`);
                                 this[`${POSITION_LOWERCASE}BounceState`] = STATE_STATIC;
                             });
                         }
@@ -664,13 +687,45 @@ export default {
 </script>
 
 <style lang="scss">
+$topZIndex: 4;
+$bottomZIndex: 4;
+$contentZIndex: 2;
+$upperZIndex: 3;
+$underZIndex: 1;
+
 .any-scroll-view {
     position: relative;
     width: 100%;
     height: 100%;
     overflow: hidden;
+    &__top {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: $topZIndex;
+    }
+    &__upper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: $upperZIndex;
+    }
+    &__under {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: $underZIndex;
+    }
+    &__bottom {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        z-index: $bottomZIndex;
+    }
+
     &__content {
         position: absolute;
+        z-index: $contentZIndex;
         width: 100%;
         height: 100%;
     }

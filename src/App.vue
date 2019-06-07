@@ -46,7 +46,16 @@
                 @scroll-state-change="scrollState=$event"
                 @scroll="scrollHandler"
                 class="scroll-view"
-            >
+            >   
+                <template #top="{scrollTop, scrollLeft}">
+                    <div class="header">scroll: {{scrollLeft}} | {{scrollTop}} | 我是插槽, slot="header"</div>
+                </template>
+
+                <template v-if="0 < data.length" #under>
+                    <h1>我在后面</h1>
+                </template>
+
+
                 <ul v-if="0 < data.length">
                     <li>
                         <label>
@@ -70,6 +79,10 @@
                     </li>
                 </ul>
                 <span v-else class="loading"></span>
+                <template #bottom="{scrollTop, scrollLeft}">
+                    <div>scroll: {{scrollLeft}} | {{scrollTop}} | 我是插槽, slot="footer"</div>
+                </template>
+                
             </any-scroll>
 
             <!-- data -->
@@ -243,6 +256,23 @@ main {
             flex-shrink: 0;
             margin-left: 2%;
             box-shadow: 1px 2px 3px rgba(#000, 0.1), -1px -2px 3px rgba(#000, 0.1);
+
+            header{
+                padding:15px;
+                color:#fff;
+                background:rgba(0,0,0,0.4);
+                width:100%;
+                box-shadow: 1px 2px 1px rgba(0,0,0,0.2);
+            }
+
+            footer{
+                padding:15px;
+                color:#fff;
+                background:rgba(0,0,0,0.4);
+                width:100%;
+                box-shadow: 1px -2px 1px rgba(0,0,0,0.2);
+            }
+
             .loading {
                 display: block;
                 width: 72px;
@@ -364,7 +394,7 @@ main {
                 margin-top: 15px;
                 margin-right: 15px;
                 padding: 10px 30px;
-                background: #aaa;
+                background: #e60044;
                 color: rgba(255, 255, 255, 1);
                 width: 100%;
                 box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.1);
