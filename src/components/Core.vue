@@ -680,7 +680,7 @@ export default {
         scrollTo({ top, left, callback = () => {} }, duration = 300) {
             this.$emit('before-scroll', this.scrollData);
             this.$emit('scroll-start', this.scrollData);
-            scrollTo(
+            this._scrollTo(
                 {
                     top,
                     left,

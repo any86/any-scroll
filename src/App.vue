@@ -85,7 +85,7 @@
         <template #bottom="{scrollTop, scrollLeft,directionY}">
           <transition name="fade-down">
             <div
-                v-if="'down' === directionY"
+              v-if="'down' === directionY"
               class="footer"
             >scroll: {{scrollLeft}} | {{scrollTop}} | 我是插槽, slot="bottom"</div>
           </transition>
