@@ -1,0 +1,13 @@
+node_modules
+coverage
+.vscode
+.cache
+false
+lib
+dist
+yarn-error.log
+packages/**/*.js
+packages/**/types
+packages/**/*.mjs
+lerna-debug.log
+example/uploads
