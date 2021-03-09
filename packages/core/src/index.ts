@@ -1,6 +1,5 @@
 import AnyTouch from 'any-touch'
-import raf = require('raf')
-console.log(raf);
+import raf from 'raf';
 
 const STYLE: Partial<CSSStyleDeclaration> = {
     overflow: 'hidden',
@@ -13,6 +12,8 @@ export default function (el: HTMLElement, options = {}) {
     // 内容元素当前位移
     let x = 0;
     let y = 0;
+
+    let rafID = 0;
 
     // 设置外容器样式
     for (const key in STYLE) {
@@ -38,12 +39,23 @@ export default function (el: HTMLElement, options = {}) {
         contentEl.style.setProperty('transform', `translate3d(${x}px, ${y}px, 0)`);
     });
 
+
+    at.on('at:start', e => {
+        raf.cancel(rafID)
+    });
+    
+    const swipe = at.get('swipe');
+    swipe && swipe.set({velocity:1});
+    
+    console.log(swipe);
     at.on('swipe', e => {
         let dx = e.speedX * 30;
         let dy = e.speedY * 30;
         _scroll(contentEl, [x, y], [dx, dy], 300, ([distX, distY]) => {
             x = distX;
             y = distY;
+        }, id => {
+            rafID = id;
         });
     });
 }
@@ -57,19 +69,21 @@ function _setContentTranslate(el: HTMLElement, [x, y]: [number, number]) {
     el.style.setProperty('transform', `translate3d(${x}px, ${y}px, 0)`);
 }
 
-function _scroll(el: HTMLElement, [x, y]: [number, number], [dx, dy]: [number, number], duration: number, done: ([x, y]: [number, number]) => void) {
+function _scroll(el: HTMLElement, [x, y]: [number, number], [dx, dy]: [number, number], duration: number, onScroll: ([x, y]: [number, number]) => void, onChangeRaf?: (id: number) => void) {
     let startTime = Date.now();
     function animate() {
         const timeDiff = Date.now() - startTime;
         if (duration > timeDiff) {
-            _setContentTranslate(el, [easeOut(timeDiff, x, dx, duration), easeOut(timeDiff, y, dy, duration)]);
-            raf(animate);
+            const distXY: [number, number] = [easeOut(timeDiff, x, dx, duration), easeOut(timeDiff, y, dy, duration)];
+            _setContentTranslate(el, distXY);
+            onChangeRaf && onChangeRaf(raf(animate));
+            onScroll && onScroll(distXY);
         } else {
-            const dist = [x + dx, y + dy] as [number, number];
-            _setContentTranslate(el, dist);
-            done && done(dist);
+            const distXY = [x + dx, y + dy] as [number, number];
+            _setContentTranslate(el, distXY);
+            onScroll && onScroll(distXY);
         }
-        console.log(el.style.transform, x + dx, y + dy);
+        // console.log(el.style.transform, x + dx, y + dy);
     }
     animate()
 }
