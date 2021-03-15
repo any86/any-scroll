@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,14 +8,41 @@
     <!-- <script src="https://unpkg.com/any-touch/dist/any-touch.umd.min.js"></script> -->
     <script src="../packages/any-scroll/dist/any-scroll.umd.js"></script>
     <title>Document</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        img {
+            display: block;
+        }
+    </style>
 </head>
+
 <body>
     <h1 id="h1"></h1>
     <h2 id="h2"></h2>
-    <div id="scroll" style="border:1px solid #ccc;width:300px;height: 400px;">
+    <div id="scroll" style="width:360px;height: 600px;margin:10vh auto;box-shadow: 1px 2px 15px 5px rgba(0,0,0,.1);">
         <div>
-            <h1>测试滚动</h1>
-            <img src="https://img11.360buyimg.com/babel/s590x470_jfs/t1/161913/8/8792/97057/603d9df0E9f3219cb/f47517542faa4994.jpg.webp" width="100%">
+            <h1 style=" background-image: linear-gradient(90deg, #c553a3, #5227b8);color:#fff;padding:50px;">测试滚动</h1>
+            <img src="https://images.unsplash.com/photo-1565559881319-fd630c362057?ixlib=rb-1.2.1&ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&auto=format&fit=crop&w=335&q=80"
+                width="505">
+            <img src="https://img11.360buyimg.com/babel/s590x470_jfs/t1/161913/8/8792/97057/603d9df0E9f3219cb/f47517542faa4994.jpg.webp"
+                width="100%">
+            <p style="background-image: linear-gradient(50deg, #ee89cc, #fff3af);color:#fff;padding:50px;letter-spacing: 1px;line-height:3">
+                京津冀山同脉、水同源、人相亲、地相连，原本就是“一家人”。7年前，习近平总书记站在中国版图前去审视这片广袤大地，作出将“京津冀协同发展”上升为国家战略的重大部署，要求三地“自觉打破自家‘一亩三分地’的思维定式，抱成团朝着顶层设计的目标一起做”。
+
+                “京津冀协同发展是一个系统工程，不可能一蹴而就，要做好长期作战的思想准备。”
+                
+                “要从全局的高度和更长远的考虑来认识和做好京津冀协同发展工作，增强协同发展的自觉性、主动性、创造性，保持历史耐心和战略定力，稳扎稳打，勇于担当，敢于创新，善作善成，下更大气力推动京津冀协同发展取得新的更大进展。”
+                
+                ............
+                
+                7年来，一趟趟调研、一次次论证，总书记跳出“一城一地”得失来思考发展路径，从国家发展全局的高度去擘画和推动，为京津冀协同发展指明方向。如今，京津冀从各自为政、各管一摊到相互扶持、彼此协助，从发展战略不清、功能重叠到优势互补、统筹布局……“一加一大于二、一加二大于三的效果”日渐显现。
+                
+                2021年是“十四五”规划开局之年，如何促进京津冀携手下好“一盘棋”，推动京津冀协同发展迈向更高水平？央视网《联播+》特梳理总书记相关讲话要点，与您一起学习。
+            </p>
         </div>
     </div>
     <script>
@@ -22,4 +50,5 @@
         anyScroll(el)
     </script>
 </body>
+
 </html>
