@@ -1,6 +1,7 @@
 import dist from 'any-event';
 import AnyTouch from 'any-touch'
 import raf from 'raf';
+import debounce from 'lodash/debounce';
 
 const STYLE: Partial<CSSStyleDeclaration> = {
     overflow: 'hidden',
@@ -13,7 +14,7 @@ export default function (el: HTMLElement, options = {}) {
     // 内容元素当前位移
     let x = 0;
     let y = 0;
-    let rafId = 0;
+    let isResting = false;
     let stopFns: [(() => any), (() => any)] = [() => void 0, () => void 0];
 
 
@@ -38,8 +39,8 @@ export default function (el: HTMLElement, options = {}) {
     // 加载手势
     const at = new AnyTouch(el);
     at.on('panmove', e => {
-        const { deltaX, deltaY } = e;
-        _setXY([x + deltaX, y + deltaY]);
+        // const { deltaX, deltaY } = e;
+        // _setXY([x + deltaX, y + deltaY]);
     });
 
     at.on('panend', e => {
@@ -55,15 +56,14 @@ export default function (el: HTMLElement, options = {}) {
     at.on('at:start', e => {
         stopFns[0]();
         stopFns[1]();
-        console.warn(111);
     });
 
     const swipe = at.get('swipe');
     swipe && swipe.set({ velocity: 1 });
 
     at.on('swipe', e => {
-        let dx = e.speedX * 300;
-        let dy = e.speedY * 300;
+        let dx = e.speedX * 1300;
+        let dy = e.speedY * 1300;
         stopFns = _scrollTo([x + dx, y + dy]);
         console.warn(stopFns);
     });
@@ -76,23 +76,39 @@ export default function (el: HTMLElement, options = {}) {
     }
 
     /**
-     * 滚动
-     * @param to 终点
+     * 
+     * @param dist 目标点
+     * @param onScroll 滚动回调
+     * @param damping 衰减系数
+     * @returns 停止滚动函数
      */
     function _scrollTo([distX, distY]: [number, number], onScroll: ([x, y]: [number, number]) => void = (([x, y]) => void 0), damping = 0.1): [() => void, () => void] {
+        // if(isResting) return [() => raf.cancel(rafIdX), () => raf.cancel(rafIdY)];
         const startX = x;
         const startY = y;
         let rafIdX = -1;
         let rafIdY = -1;
 
-        nextTick(distX - startX, (n, rafId) => {
-            rafIdX = rafId;
-            onScroll(_setXY([startX + n, y]));
-        }, damping);
+        // nextTick(distX - startX, (n, rafId) => {
+        //     rafIdX = rafId;
+        //     onScroll(_setXY([startX + n, y]));
+        // }, damping);
 
         nextTick(distY - startY, (n, rafId) => {
+            const currentY = startY + n;
             rafIdY = rafId;
-            onScroll(_setXY([x, startY + n]));
+            console.log(currentY);
+            onScroll(_setXY([x, Math.min(400, currentY)]));
+            if (400 < currentY && isResting == false) {
+                isResting = true;
+                raf.cancel(rafIdY)
+                console.warn('cancel');
+                _scrollTo([x, 0]);
+            }
+
+            if (0 === currentY) {
+                isResting = false;
+            }
         }, damping);
 
         return [() => raf.cancel(rafIdX), () => raf.cancel(rafIdY)];
@@ -279,6 +295,7 @@ function getResetPosition([el, contentEl]: [HTMLElement, HTMLElement], [x, y]: [
  * @param startValue 起始值
  */
 function nextTick(total: number, each: (n: number, rafId: number) => void, damping: number, startValue = 0) {
+    // total需要大于0.1
     let rafId = -1;
     startValue += damping * (total - startValue);
     if (0.1 < Math.abs(total - startValue)) {
