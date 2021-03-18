@@ -20,12 +20,6 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
     let y = 0;
     let rafIdX = -1;
     let rafIdY = -1;
-    let timeIdX = -1;
-    let timeIdY = -1;
-    let isShrinkingX = false;
-    let isShrinkingY = false;
-
-
 
     // 设置外容器样式
     for (const key in STYLE) {
@@ -44,21 +38,29 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
     }
     el.appendChild(contentEl);
 
+    const MIN_X = el.offsetWidth - contentEl.scrollWidth;
+    const MIN_Y = el.offsetHeight - contentEl.scrollHeight;
+
+
+
     // 加载手势
-    const at = new AnyTouch(el);
+    const at = new AnyTouch(el, { preventDefaultExclude: e=>{
+        console.log(e);
+        return false;
+    } });
     at.on('panmove', e => {
         const { deltaX, deltaY } = e;
-        // _setXY([x + deltaX, y + deltaY]);
+        _setXY([x + deltaX, y + deltaY]);
     });
 
-    at.on('panend', e => {
-
+    at.on('at:end', e => {
+        __snap();
     });
 
     at.on('at:start', e => {
-        // raf.cancel(rafIdX);
-        // raf.cancel(rafIdY);
-        _scrollTo([1110, 400]);
+        raf.cancel(rafIdX);
+        raf.cancel(rafIdY);
+        // _scrollTo([1110, 400]);
     });
 
     const swipe = at.get('swipe');
@@ -68,9 +70,6 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
         let dx = e.speedX * 300;
         let dy = e.speedY * 300;
         _scrollTo([x + dx, y + dy]);
-        // stopFns = _scrollTo([0, y + dy]);
-
-        // console.warn(stopFns);
     });
 
     /**
@@ -91,6 +90,9 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
         }, damping);
     }
 
+    function __snap() {
+        _scrollTo([clamp(x, MIN_X, 0), clamp(y, MIN_Y, 0)]);
+    }
 
     /**
      * 
@@ -127,7 +129,7 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
                 }
             });
         }
-        
+
         if (y !== distY) {
             raf.cancel(rafIdY)
             const startY = y;
@@ -151,20 +153,17 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
 
     }
 
-
-    /**
-     * 封装settimeout
-     * @param callback 
-     * @param duration 默认延迟96ms
-     */
-    function delay(callback: () => void, duration = 96) {
-        setTimeout(() => {
-            callback();
-        }, duration);
-    }
 }
-
-
+/**
+ * 封装settimeout
+ * @param callback 
+ * @param duration 默认延迟96ms
+ */
+function delay(callback: () => void, duration = 96) {
+    setTimeout(() => {
+        callback();
+    }, duration);
+}
 
 function getValidPostion([el, contentEl]: [HTMLElement, HTMLElement], [x, y]: [number, number], [dx, dy]: [number, number], tolerance: number = 50, damping = 0.5): [number, number] {
     // 目标坐标
