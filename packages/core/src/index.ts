@@ -2,6 +2,9 @@ import dist from 'any-event';
 import AnyTouch from 'any-touch'
 import raf from 'raf';
 import debounce from 'lodash/debounce';
+import clamp from 'lodash/clamp';
+import inRange from 'lodash/inRange';
+const { setTimeout } = window;
 
 const STYLE: Partial<CSSStyleDeclaration> = {
     overflow: 'hidden',
@@ -10,12 +13,18 @@ const CONTENT_STYLE: Partial<CSSStyleDeclaration> = {
     width: '100%'
 };
 
-export default function (el: HTMLElement, options = {}) {
+export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {}) {
+    const OVERFLOW_ANIMATE_DURATION = 96;
     // 内容元素当前位移
     let x = 0;
     let y = 0;
-    let isResting = false;
-    let stopFns: [(() => any), (() => any)] = [() => void 0, () => void 0];
+    let rafIdX = -1;
+    let rafIdY = -1;
+    let timeIdX = -1;
+    let timeIdY = -1;
+    let isShrinkingX = false;
+    let isShrinkingY = false;
+
 
 
     // 设置外容器样式
@@ -35,39 +44,40 @@ export default function (el: HTMLElement, options = {}) {
     }
     el.appendChild(contentEl);
 
-
     // 加载手势
     const at = new AnyTouch(el);
     at.on('panmove', e => {
-        // const { deltaX, deltaY } = e;
+        const { deltaX, deltaY } = e;
         // _setXY([x + deltaX, y + deltaY]);
     });
 
     at.on('panend', e => {
-        // const [distX, distY] = getResetPostion([el, contentEl], [x, y])
-        // _scrollByTime([el, contentEl], [x, y], [distX - x, distY - y], 300, ([distX, distY]) => {
-        //     x = distX;
-        //     y = distY;
-        // }, id => {
-        //     rafID = id;
-        // });
+
     });
 
     at.on('at:start', e => {
-        stopFns[0]();
-        stopFns[1]();
+        // raf.cancel(rafIdX);
+        // raf.cancel(rafIdY);
+        _scrollTo([1110, 400]);
     });
 
     const swipe = at.get('swipe');
     swipe && swipe.set({ velocity: 1 });
 
     at.on('swipe', e => {
-        let dx = e.speedX * 1300;
-        let dy = e.speedY * 1300;
-        stopFns = _scrollTo([x + dx, y + dy]);
-        console.warn(stopFns);
+        let dx = e.speedX * 300;
+        let dy = e.speedY * 300;
+        _scrollTo([x + dx, y + dy]);
+        // stopFns = _scrollTo([0, y + dy]);
+
+        // console.warn(stopFns);
     });
 
+    /**
+     * 设置xy
+     * @param distXY 目标点
+     * @returns 返回当前xy 
+     */
     function _setXY([distX, distY]: [number, number]): [number, number] {
         x = distX;
         y = distY;
@@ -75,45 +85,85 @@ export default function (el: HTMLElement, options = {}) {
         return [x, y];
     }
 
+    function __nextTick(from: number, to: number, callback: (value: number, rafId: number) => void) {
+        nextTick(to - from, (n, rafId2) => {
+            callback(from + n, rafId2);
+        }, damping);
+    }
+
+
     /**
      * 
-     * @param dist 目标点
+     * @param distXY 目标点
      * @param onScroll 滚动回调
-     * @param damping 衰减系数
-     * @returns 停止滚动函数
+     * @param isShrink 是否收缩滚动, 用来防止回滚中再次执行回滚
      */
-    function _scrollTo([distX, distY]: [number, number], onScroll: ([x, y]: [number, number]) => void = (([x, y]) => void 0), damping = 0.1): [() => void, () => void] {
-        // if(isResting) return [() => raf.cancel(rafIdX), () => raf.cancel(rafIdY)];
-        const startX = x;
-        const startY = y;
-        let rafIdX = -1;
-        let rafIdY = -1;
+    function _scrollTo(
+        [distX, distY]: [number, number],
+        onScroll = (([x, y]: [number, number]) => void 0),
+        isShrink = [false, false],
+    ) {
+        // y轴变化,也会触发scrollTo, 
+        // 如果x==distX, 
+        // 说明x轴不动
+        if (x !== distX) {
+            raf.cancel(rafIdX);
+            const startX = x;
+            const MIN_X = el.offsetWidth - contentEl.scrollWidth;
+            // console.warn(0,clamp(distY, MIN_Y - tolerance, tolerance));
+            __nextTick(startX, clamp(distX, MIN_X - tolerance, tolerance), (newX, rafId) => {
+                const currentX = newX;
+                rafIdX = rafId;
+                onScroll(_setXY([newX, y]));
+                if (!isShrink[0] && 0 < currentX) {
+                    delay(() => {
+                        0
+                        _scrollTo([0, y], onScroll, [true, isShrink[1]]);
+                    });
+                } else if (!isShrink[0] && MIN_X > currentX) {
+                    delay(() => {
+                        _scrollTo([MIN_X, y], onScroll, [true, isShrink[1]]);
+                    });
+                }
+            });
+        }
+        
+        if (y !== distY) {
+            raf.cancel(rafIdY)
+            const startY = y;
+            const MIN_Y = el.offsetHeight - contentEl.scrollHeight;
+            // console.warn(1,clamp(distY, MIN_Y - tolerance, tolerance));
+            __nextTick(startY, clamp(distY, MIN_Y - tolerance, tolerance), (newY, rafId) => {
+                const currentY = newY;
+                rafIdY = rafId;
+                onScroll(_setXY([x, newY]));
+                if (!isShrink[1] && 0 < currentY) {
+                    delay(() => {
+                        _scrollTo([x, 0], onScroll, [isShrink[0], true]);
+                    });
+                } else if (!isShrink[1] && MIN_Y > currentY) {
+                    delay(() => {
+                        _scrollTo([x, MIN_Y], onScroll, [isShrink[0], true]);
+                    });
+                }
+            });
+        }
 
-        // nextTick(distX - startX, (n, rafId) => {
-        //     rafIdX = rafId;
-        //     onScroll(_setXY([startX + n, y]));
-        // }, damping);
+    }
 
-        nextTick(distY - startY, (n, rafId) => {
-            const currentY = startY + n;
-            rafIdY = rafId;
-            console.log(currentY);
-            onScroll(_setXY([x, Math.min(400, currentY)]));
-            if (400 < currentY && isResting == false) {
-                isResting = true;
-                raf.cancel(rafIdY)
-                console.warn('cancel');
-                _scrollTo([x, 0]);
-            }
 
-            if (0 === currentY) {
-                isResting = false;
-            }
-        }, damping);
-
-        return [() => raf.cancel(rafIdX), () => raf.cancel(rafIdY)];
+    /**
+     * 封装settimeout
+     * @param callback 
+     * @param duration 默认延迟96ms
+     */
+    function delay(callback: () => void, duration = 96) {
+        setTimeout(() => {
+            callback();
+        }, duration);
     }
 }
+
 
 
 function getValidPostion([el, contentEl]: [HTMLElement, HTMLElement], [x, y]: [number, number], [dx, dy]: [number, number], tolerance: number = 50, damping = 0.5): [number, number] {
@@ -173,6 +223,7 @@ function _setContentTranslate([el, contentEl]: [HTMLElement, HTMLElement], [x, y
     let distY = y + dy;
 
     const MIN_X = el.offsetWidth - contentEl.scrollWidth - tolerance
+    const MIN_Y = el.offsetHeight - contentEl.scrollHeight - tolerance
     if (MIN_X > distX) {
         distX = MIN_X;
     } else if (MIN_X + tolerance > distX && MIN_X <= distX) {
@@ -184,7 +235,6 @@ function _setContentTranslate([el, contentEl]: [HTMLElement, HTMLElement], [x, y
     } else {
         distX = tolerance
     }
-    const MIN_Y = el.offsetHeight - contentEl.scrollHeight - tolerance
 
     // 超出容差
     if (MIN_Y > distY) {
@@ -306,4 +356,5 @@ function nextTick(total: number, each: (n: number, rafId: number) => void, dampi
         startValue = total;
     }
     each(startValue, rafId);
+    return () => { raf.cancel(rafId) };
 }
