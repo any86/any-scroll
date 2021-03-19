@@ -1,9 +1,10 @@
-import dist from 'any-event';
 import AnyTouch from 'any-touch'
 import raf from 'raf';
 import debounce from 'lodash/debounce';
 import clamp from 'lodash/clamp';
-import inRange from 'lodash/inRange';
+import Bar from '@any-scroll/bar';
+import { setStyle } from '@any-scroll/shared';
+
 const { setTimeout } = window;
 
 const STYLE: Partial<CSSStyleDeclaration> = {
@@ -12,12 +13,6 @@ const STYLE: Partial<CSSStyleDeclaration> = {
 const CONTENT_STYLE: Partial<CSSStyleDeclaration> = {
     width: '100%',
 };
-
-function setStyle(el: HTMLElement, styles: Partial<CSSStyleDeclaration>) {
-    for (const key in styles) {
-        el.style.setProperty(key, styles[key] as string);
-    }
-}
 
 
 function watchResize() { }
@@ -35,9 +30,23 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
     // 给按时间和距离滚动的函数使用
     let __rafId = -1;
 
+
+
+    /**
+     * 监听所有的滚动
+     * 用来扩展插件
+     * @param param0 
+     */
+    function __onScroll([x, y]: [number, number], [minX, minY]: [number, number]) {
+        const [update] = bar;
+        update([x, y], [minX, minY]);
+        // console.log(x, y);
+    }
+
+
     // 设置外容器样式
     setStyle(el, STYLE);
-
+    el.classList.add('any-scroll');
     // 生成内容器, 并把外容器内的dom移动到内容器
     const contentEl = document.createElement('div');
     while (el.firstChild) {
@@ -46,6 +55,11 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
     // 设置内容器样式
     setStyle(contentEl, CONTENT_STYLE);
     el.appendChild(contentEl);
+
+
+
+    const bar = Bar(el);
+
 
     // 建议用户不要给contentEl加边框
     let MIN_X = 0;
@@ -153,7 +167,9 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
             __nextTick(startX, clamp(distX, MIN_X - tolerance, tolerance), (newX, rafId) => {
                 const currentX = newX;
                 __rafIdX = rafId;
-                onScroll(__setXY([newX, __y]));
+                const _xy = __setXY([newX, __y]);
+                onScroll(_xy);
+                __onScroll(_xy, [MIN_X, MIN_Y]);
                 if (!isShrink[0] && 0 < currentX) {
                     delay(() => {
                         0
@@ -174,7 +190,9 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
             __nextTick(startY, clamp(distY, MIN_Y - tolerance, tolerance), (newY, rafId) => {
                 const currentY = newY;
                 __rafIdY = rafId;
-                onScroll(__setXY([__x, newY]));
+                const _xy = __setXY([__x, newY]);
+                onScroll(_xy);
+                __onScroll(_xy, [MIN_X, MIN_Y]);
                 if (!isShrink[1] && 0 < currentY) {
                     delay(() => {
                         __scrollTo([__x, 0], onScroll, [isShrink[0], true]);
@@ -186,27 +204,35 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
                 }
             });
         }
-
     }
 
+    /**
+     * 按时间滚动
+     * @param distX 
+     * @param distY 
+     * @param duration 
+     * @param done 
+     */
     function scrollTo(distX: number, distY: number, duration: number, done?: () => void) {
         raf.cancel(__rafId);
         const startTime = Date.now();
         const distanceX = clamp(distX, MIN_X, 0) - __x;
         const distanceY = clamp(distY, MIN_Y, 0) - __y;
-        _scrollToOnTime([__x, __y], [distanceX, distanceY], startTime, duration);
+        __scrollToOnTime([__x, __y], [distanceX, distanceY], startTime, duration);
     }
 
-    function _scrollToOnTime([startX, startY]: [number, number], [distanceX, distanceY]: [number, number], startTime: number, duration: number) {
+
+    function __scrollToOnTime([startX, startY]: [number, number], [distanceX, distanceY]: [number, number], startTime: number, duration: number) {
         const elapse = Date.now() - startTime;
         const progress = Math.min(1, easeOutCubic(elapse / duration));
         const distX = startX + distanceX * progress;
         const distY = startY + distanceY * progress;
         // console.log(distX, distY, elapse);
+        __onScroll([distX, distY], [MIN_X, MIN_Y]);
         if (duration >= elapse) {
             __setXY([distX, distY]);
             __rafId = raf(() => {
-                _scrollToOnTime([startX, startY], [distanceX, distanceY], startTime, duration);
+                __scrollToOnTime([startX, startY], [distanceX, distanceY], startTime, duration);
             });
         }
     }
