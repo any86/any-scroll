@@ -38,8 +38,7 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
      * @param param0 
      */
     function __onScroll([x, y]: [number, number], [minX, minY]: [number, number]) {
-        const [update] = bar;
-        update([x, y], [minX, minY]);
+        updateBar([x, y], [el.clientWidth,el.clientHeight, minX, minY]);
         // console.log(x, y);
     }
 
@@ -58,7 +57,7 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
 
 
 
-    const bar = Bar(el);
+    const updateBar = Bar(el);
 
 
     // 建议用户不要给contentEl加边框

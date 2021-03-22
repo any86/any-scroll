@@ -1,5 +1,5 @@
-import { setStyle } from '@any-scroll/shared';
-import insertCss from 'insert-css';
+import { setStyle, setTranslate } from '@any-scroll/shared';
+import { insertCss } from 'insert-css';
 
 
 const BAR_CSS = `
@@ -11,9 +11,7 @@ const BAR_CSS = `
 .any-scroll > .scroll-bar-track{
     position:absolute;
     right:0;
-    top:0;
     bottom:0;
-    width:10px;
     background: #ddd;
 }
 
@@ -23,25 +21,63 @@ const BAR_CSS = `
     background: #aaa;
     border-radius:4px;
 }
+
+.any-scroll > .scroll-bar-track-x{
+    left:0;
+    height:10px;
+}
+
+.any-scroll > .scroll-bar-track-y{
+    top:0;
+    width:10px;
+}
 `;
 
 
+/**
+ * 创建滚动条
+ * @param el 容器元素
+ * @returns 
+ */
 export default function (el: HTMLElement) {
-    const trackEl = document.createElement('div');
-    const thumbEl = document.createElement('div');
-    trackEl.className = 'scroll-bar-track';
-    thumbEl.className = 'scroll-bar-thumb';
-    trackEl.appendChild(thumbEl);
-    el.appendChild(trackEl);
-    // trackEl
     insertCss(BAR_CSS);
+    const [trackElX, thumbElX] = createScrollBar(el);
 
-    function update([x, y]: [number, number],[minX,minY]: [number, number]) {
-        thumbEl.style.setProperty('transform', `translate3d(${0}px, ${y/minY*100}px, 0)`);
-        console.log(x, y,minX,minY);
+    function updateX([x, y]: [number, number], [width, height, minX, minY]: [number, number, number, number]) {
+        const thumbWidth = Math.abs(width / minX * width);
+        setStyle(thumbElX, { width: `${thumbWidth}px` });
+        setTranslate(thumbElX, x / (minX) * (width - thumbWidth), 0);
     }
 
+    const [trackElY, thumbElY] = createScrollBar(el, 'y');
 
-    return [update];
+    function updateY([x, y]: [number, number], [width, height, minX, minY]: [number, number, number, number]) {
+        const thumbHeight = Math.abs(height / minY * height);
+        setStyle(thumbElY, { height: `${thumbHeight}px` });
+        setTranslate(thumbElY, 0, y / minY * (height - thumbHeight));
+    }
+
+    function update([x, y]: [number, number], [width, height, minX, minY]: [number, number, number, number]){
+        updateX([x,y],[width, height, minX, minY]);
+        updateY([x,y],[width, height, minX, minY]);
+    }
+
+    return update;
+}
+
+
+
+const TRACK_CLASS_NAME = 'scroll-bar-track';
+const THUMB_CLASS_NAME = 'scroll-bar-thumb';
+
+
+function createScrollBar(el: HTMLElement, axis: 'x' | 'y' = 'x') {
+    const trackEl = document.createElement('div');
+    const thumbEl = document.createElement('div');
+    trackEl.className = `${TRACK_CLASS_NAME} scroll-bar-track-${axis}`;
+    thumbEl.className = `${THUMB_CLASS_NAME} ${THUMB_CLASS_NAME}-${axis}`;
+    trackEl.appendChild(thumbEl);
+    el.appendChild(trackEl);
+    return [trackEl, thumbEl];
 }
 

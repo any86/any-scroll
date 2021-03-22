@@ -4,6 +4,10 @@ export function setStyle(el: HTMLElement, styles: Partial<CSSStyleDeclaration>) 
     }
 }
 
+export function setTranslate(el:HTMLElement,x:number,y:number){
+    setStyle(el,{transform:`translate3d(${x}px, ${y}px,0)`});
+}
+
 export function appendStyleToHTML(style: string) {
     const styleEl = document.createElement('style');
     styleEl.textContent = style;
