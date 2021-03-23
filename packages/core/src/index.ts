@@ -2,8 +2,11 @@ import AnyTouch from 'any-touch'
 import raf from 'raf';
 import debounce from 'lodash/debounce';
 import clamp from 'lodash/clamp';
-import Bar from '@any-scroll/bar';
+import createBar from '@any-scroll/bar';
 import { setStyle } from '@any-scroll/shared';
+
+declare const WebKitMutationObserver: MutationObserver;
+declare const MozMutationObserver: MutationObserver;
 
 const { setTimeout } = window;
 
@@ -13,10 +16,6 @@ const STYLE: Partial<CSSStyleDeclaration> = {
 const CONTENT_STYLE: Partial<CSSStyleDeclaration> = {
     width: '100%',
 };
-
-
-function watchResize() { }
-
 
 const SHRINK_DELAY_TIME = 96;
 
@@ -31,15 +30,13 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
     let __rafId = -1;
 
 
-
     /**
      * 监听所有的滚动
      * 用来扩展插件
      * @param param0 
      */
     function __onScroll([x, y]: [number, number], [minX, minY]: [number, number]) {
-        updateBar([x, y], [el.clientWidth,el.clientHeight, minX, minY]);
-        // console.log(x, y);
+        __updateBar([x, y], [el.clientWidth, el.clientHeight, minX, minY]);
     }
 
 
@@ -55,52 +52,58 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
     setStyle(contentEl, CONTENT_STYLE);
     el.appendChild(contentEl);
 
+    const __updateBar = createBar(el, (x,y,thumbWidth,thumbHeight) => {
+        __setXY(
+            x / (el.clientWidth - thumbWidth) * MIN_X, 
+            y / (el.clientHeight - thumbHeight)* MIN_Y);
+    });
 
-
-    const updateBar = Bar(el);
-
-
-    // 建议用户不要给contentEl加边框
     let MIN_X = 0;
     let MIN_Y = 0;
 
-
-    function update() {
-        MIN_X = el.clientWidth - contentEl.scrollWidth;
-        MIN_Y = el.clientHeight - contentEl.scrollHeight;
-    }
-    update();
-
-
-    el.addEventListener('resize', e => {
-        console.log(e);
-    })
-
-    const global: any = window;
-    const MutationObserver = global.MutationObserver || global.WebKitMutationObserver || global.MozMutationObserver;
-
-    // observe
-    if (typeof MutationObserver === 'function') {
-        const _observer = new MutationObserver(() => {
-            update();
-
-        });
-
-        _observer.observe(contentEl, {
-            subtree: true,
-            childList: true,
-        });
+    /**
+     * 更新尺寸
+     */
+    function __updateSize() {
+        console.log('update-size');
+        // 保留边框
+        // 参考smooth-scroll
+        const contentWidth = contentEl.offsetWidth - contentEl.clientWidth + contentEl.scrollWidth;
+        const contentHeight = contentEl.offsetHeight - contentEl.clientHeight + contentEl.scrollHeight;
+        MIN_X = el.clientWidth - contentWidth;
+        MIN_Y = el.clientHeight - contentHeight;
     }
 
-    //     const a = conteclient - contentEl.clientWidth
-    // console.log(a);
+    /**
+     * 注册监听
+     */
+    function __registerObserver() {
+        window.addEventListener('resize', __updateSize);
+        const Observer = MutationObserver || WebKitMutationObserver || MozMutationObserver;
+        // observe
+        if (typeof Observer === 'function') {
+            const ob = new Observer(__updateSize);
+            ob.observe(contentEl, {
+                subtree: true,
+                childList: true,
+            });
+        }
+    }
+
+    __updateSize();
+    __registerObserver();
 
 
     // 加载手势
     const at = new AnyTouch(el);
     at.on('panmove', e => {
-        const { deltaX, deltaY } = e;
-        __setXY([__x + deltaX, __y + deltaY]);
+        const is = (e.target as HTMLElement).classList.contains('scroll-bar-track') ||
+            (e.target as HTMLElement).classList.contains('scroll-bar-thumb')
+        console.log(e.target);
+        if (!is) {
+            const { deltaX, deltaY } = e;
+            __setXY(__x + deltaX, __y + deltaY);
+        }
     });
 
     at.on('at:end', e => {
@@ -127,7 +130,7 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
      * @param distXY 目标点
      * @returns 返回当前xy 
      */
-    function __setXY([distX, distY]: [number, number]): [number, number] {
+    function __setXY(distX: number, distY: number): [number, number] {
         __x = distX;
         __y = distY;
         contentEl.style.setProperty('transform', `translate3d(${__x}px, ${__y}px, 0)`);
@@ -166,7 +169,7 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
             __nextTick(startX, clamp(distX, MIN_X - tolerance, tolerance), (newX, rafId) => {
                 const currentX = newX;
                 __rafIdX = rafId;
-                const _xy = __setXY([newX, __y]);
+                const _xy = __setXY(newX, __y);
                 onScroll(_xy);
                 __onScroll(_xy, [MIN_X, MIN_Y]);
                 if (!isShrink[0] && 0 < currentX) {
@@ -189,7 +192,7 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
             __nextTick(startY, clamp(distY, MIN_Y - tolerance, tolerance), (newY, rafId) => {
                 const currentY = newY;
                 __rafIdY = rafId;
-                const _xy = __setXY([__x, newY]);
+                const _xy = __setXY(__x, newY);
                 onScroll(_xy);
                 __onScroll(_xy, [MIN_X, MIN_Y]);
                 if (!isShrink[1] && 0 < currentY) {
@@ -229,7 +232,7 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
         // console.log(distX, distY, elapse);
         __onScroll([distX, distY], [MIN_X, MIN_Y]);
         if (duration >= elapse) {
-            __setXY([distX, distY]);
+            __setXY(distX, distY);
             __rafId = raf(() => {
                 __scrollToOnTime([startX, startY], [distanceX, distanceY], startTime, duration);
             });
