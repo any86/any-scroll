@@ -4,6 +4,7 @@ import debounce from 'lodash/debounce';
 import clamp from 'lodash/clamp';
 import createBar from '@any-scroll/bar';
 import { setStyle } from '@any-scroll/shared';
+import watchWheel from './wheel';
 
 declare const WebKitMutationObserver: MutationObserver;
 declare const MozMutationObserver: MutationObserver;
@@ -52,15 +53,25 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
     setStyle(contentEl, CONTENT_STYLE);
     el.appendChild(contentEl);
 
-    const __updateBar = createBar(el, (x,y,thumbWidth,thumbHeight) => {
+    const __updateBar = createBar(el, (x, y, thumbWidth, thumbHeight) => {
         __setXY(
-            x / (el.clientWidth - thumbWidth) * MIN_X, 
-            y / (el.clientHeight - thumbHeight)* MIN_Y);
+            x / (el.clientWidth - thumbWidth) * MIN_X,
+            y / (el.clientHeight - thumbHeight) * MIN_Y);
     });
 
     let MIN_X = 0;
     let MIN_Y = 0;
 
+    watchWheel(el, ({ type, deltaY,v }) => {
+        if('start' === type){
+            __stop();
+        }else if ('move' === type) {
+            __setXY(__x, __y + deltaY);
+        } else if ('end' === type) {
+            console.log(v);
+            __scrollTo([__x,__y + v*100])
+        }
+    });
     /**
      * 更新尺寸
      */
@@ -111,9 +122,7 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
     });
 
     at.on('at:start', e => {
-        raf.cancel(__rafId);
-        raf.cancel(__rafIdX);
-        raf.cancel(__rafIdY);
+        __stop();
     });
 
     const swipe = at.get('swipe');
@@ -133,14 +142,22 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
     function __setXY(distX: number, distY: number): [number, number] {
         __x = distX;
         __y = distY;
+        const distXY: [number, number] = [__x, __y];
+        __onScroll(distXY, [MIN_X, MIN_Y]);
         contentEl.style.setProperty('transform', `translate3d(${__x}px, ${__y}px, 0)`);
-        return [__x, __y];
+        return distXY;
     }
 
     function __nextTick(from: number, to: number, callback: (value: number, rafId: number) => void) {
         nextTick(to - from, (n, rafId) => {
             callback(from + n, rafId);
         }, damping);
+    }
+
+    function __stop(){
+        raf.cancel(__rafId);
+        raf.cancel(__rafIdX);
+        raf.cancel(__rafIdY);
     }
 
     function __snap() {
@@ -171,7 +188,7 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
                 __rafIdX = rafId;
                 const _xy = __setXY(newX, __y);
                 onScroll(_xy);
-                __onScroll(_xy, [MIN_X, MIN_Y]);
+                // __onScroll(_xy, [MIN_X, MIN_Y]);
                 if (!isShrink[0] && 0 < currentX) {
                     delay(() => {
                         0
@@ -194,7 +211,7 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
                 __rafIdY = rafId;
                 const _xy = __setXY(__x, newY);
                 onScroll(_xy);
-                __onScroll(_xy, [MIN_X, MIN_Y]);
+                // __onScroll(_xy, [MIN_X, MIN_Y]);
                 if (!isShrink[1] && 0 < currentY) {
                     delay(() => {
                         __scrollTo([__x, 0], onScroll, [isShrink[0], true]);
