@@ -62,14 +62,16 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
     let MIN_X = 0;
     let MIN_Y = 0;
 
-    watchWheel(el, ({ type, deltaY,v }) => {
-        if('start' === type){
+    watchWheel(el, ({ type, deltaY, v }) => {
+        if ('start' === type) {
             __stop();
-        }else if ('move' === type) {
-            __setXY(__x, __y + deltaY);
+        } else if ('move' === type) {
+            __setXY(__x, __y + deltaY*2);
         } else if ('end' === type) {
             console.log(v);
-            __scrollTo([__x,__y + v*100])
+            if (5 < Math.abs(v)) {
+                __scrollTo([__x, __y + v * 200])
+            }
         }
     });
     /**
@@ -110,7 +112,6 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
     at.on('panmove', e => {
         const is = (e.target as HTMLElement).classList.contains('scroll-bar-track') ||
             (e.target as HTMLElement).classList.contains('scroll-bar-thumb')
-        console.log(e.target);
         if (!is) {
             const { deltaX, deltaY } = e;
             __setXY(__x + deltaX, __y + deltaY);
@@ -154,7 +155,7 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
         }, damping);
     }
 
-    function __stop(){
+    function __stop() {
         raf.cancel(__rafId);
         raf.cancel(__rafIdX);
         raf.cancel(__rafIdY);
@@ -255,7 +256,7 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
             });
         }
     }
-    scrollTo(-1000, -100, 1000)
+    // scrollTo(-1000, -100, 1000)
 }
 
 /**

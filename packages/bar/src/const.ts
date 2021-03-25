@@ -1,8 +1,8 @@
 
 const __ANY_SCROLL = '.any-scroll';
 const TRACK_WIDTH = `8px`;
-const TRACK_COLOR = '#d0d0d0';
-const THUMB_COLOR = '#777';
+const TRACK_COLOR = 'rgba(177,177,177,0.6)';
+const THUMB_COLOR = 'rgba(55,55,55,0.6)';
 
 export const TRACK_CLASS_NAME = 'scroll-bar-track';
 export const THUMB_CLASS_NAME = 'scroll-bar-thumb';
