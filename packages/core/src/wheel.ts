@@ -19,16 +19,16 @@ export default function (el: HTMLElement, onScroll: (e: any) => void) {
             lastWheelTime = void 0;
             deltaYCounter = 0;
             el.dispatchEvent(new Event('wheelend', {}));
-            onScroll({ type: 'end', v });
+            onScroll({ target:e.target,type: 'end', v, });
         }, 100);
 
 
         if (void 0 === lastWheelTime) {
-            onScroll('start');
+            onScroll({target:e.target, type: 'start', deltaY });
             el.dispatchEvent(new Event('wheelstart', {}));
         } else {
             el.dispatchEvent(new Event('wheelmove', {}));
-            onScroll({ type: 'move', deltaY });
+            onScroll({target:e.target, type: 'move', deltaY });
         }
         lastWheelTime = Date.now();
         // e.preventDefault();

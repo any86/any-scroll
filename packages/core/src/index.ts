@@ -1,10 +1,15 @@
 import AnyTouch from 'any-touch'
 import raf from 'raf';
 import debounce from 'lodash/debounce';
+
 import clamp from 'lodash/clamp';
 import createBar from '@any-scroll/bar';
 import { setStyle } from '@any-scroll/shared';
 import watchWheel from './wheel';
+const CLASS_NAME_ANY_SCROLL = 'any-scroll';
+function inRange(n: number, start: number, end: number) {
+    return n >= start && n <= end;
+}
 
 declare const WebKitMutationObserver: MutationObserver;
 declare const MozMutationObserver: MutationObserver;
@@ -19,8 +24,16 @@ const CONTENT_STYLE: Partial<CSSStyleDeclaration> = {
 };
 
 const SHRINK_DELAY_TIME = 96;
+declare global {
+    interface Window {
+        __SCROLL__MAP: any
+    }
+}
+window.__SCROLL__MAP = new WeakMap();
 
-export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {}) {
+export default function (el: HTMLElement, { tolerance = 0, damping = 0.1 } = {}) {
+    const { __SCROLL__MAP: __SCROLL_VIEW__MAP } = window;
+    __SCROLL_VIEW__MAP.set(el, {});
     // 内容元素当前位移
     let __x = 0;
     let __y = 0;
@@ -30,6 +43,7 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
     // 给按时间和距离滚动的函数使用
     let __rafId = -1;
 
+    let __tolerance = tolerance;
 
     /**
      * 监听所有的滚动
@@ -43,7 +57,7 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
 
     // 设置外容器样式
     setStyle(el, STYLE);
-    el.classList.add('any-scroll');
+    el.classList.add(CLASS_NAME_ANY_SCROLL);
     // 生成内容器, 并把外容器内的dom移动到内容器
     const contentEl = document.createElement('div');
     while (el.firstChild) {
@@ -61,12 +75,18 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
 
     let MIN_X = 0;
     let MIN_Y = 0;
+    let CONTENT_WIDTH = 0;
+    let CONTENT_HEIGHT = 0;
+    el.setAttribute('x', String(__x));
+    el.setAttribute('y', String(__y));
 
-    watchWheel(el, ({ type, deltaY, v }) => {
+    watchWheel(el, ({ type, deltaY, v, target }) => {
+        // const p = findActiveParentScroll(target as HTMLElement);
+        // if (p !== el) return;
         if ('start' === type) {
             __stop();
         } else if ('move' === type) {
-            __setXY(__x, __y + deltaY*2);
+            __setXY(__x, __y + deltaY * 2);
         } else if ('end' === type) {
             console.log(v);
             if (5 < Math.abs(v)) {
@@ -78,13 +98,15 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
      * 更新尺寸
      */
     function __updateSize() {
-        console.log('update-size');
         // 保留边框
         // 参考smooth-scroll
-        const contentWidth = contentEl.offsetWidth - contentEl.clientWidth + contentEl.scrollWidth;
-        const contentHeight = contentEl.offsetHeight - contentEl.clientHeight + contentEl.scrollHeight;
-        MIN_X = el.clientWidth - contentWidth;
-        MIN_Y = el.clientHeight - contentHeight;
+        CONTENT_WIDTH = contentEl.offsetWidth - contentEl.clientWidth + contentEl.scrollWidth;
+        CONTENT_HEIGHT = contentEl.offsetHeight - contentEl.clientHeight + contentEl.scrollHeight;
+        MIN_X = el.clientWidth - CONTENT_WIDTH;
+        MIN_Y = el.clientHeight - CONTENT_HEIGHT;
+        el.dataset.minX = String(MIN_X);
+        el.dataset.minY = String(MIN_Y);
+        console.log('update-size', el.id, { CONTENT_HEIGHT, MIN_Y });
     }
 
     /**
@@ -107,16 +129,86 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
     __registerObserver();
 
 
+    function willOut(el: HTMLElement, deltaX: number, deltaY: number) {
+        const willX = Number(el.getAttribute('x')) + deltaX
+        const willY = Number(el.getAttribute('y')) + deltaY;
+        const isOut =
+            0 < willY
+            || Number(el.dataset.minY) > willY
+            || 0 < willX
+            || Number(el.dataset.minX) > willX
+        console.log(el.id, isOut, willX, willY, Number(el.dataset.minX), Number(el.dataset.minY));
+        return isOut;
+    }
+
+
     // 加载手势
     const at = new AnyTouch(el);
-    at.on('panmove', e => {
-        const is = (e.target as HTMLElement).classList.contains('scroll-bar-track') ||
-            (e.target as HTMLElement).classList.contains('scroll-bar-thumb')
-        if (!is) {
-            const { deltaX, deltaY } = e;
-            __setXY(__x + deltaX, __y + deltaY);
+
+    function __findFirstParentScrollElement(targetEl: HTMLElement, className = CLASS_NAME_ANY_SCROLL) {
+        let activeElement: HTMLElement | null = targetEl;
+
+        while (null !== activeElement && (!activeElement.classList.contains(className) || isLockScroll(activeElement))) {
+            activeElement = activeElement.parentElement;
         }
+
+        return activeElement;
+    }
+
+    /**
+     * 当前滚动元素是否可以滚动
+     * @param scrollViewEl 
+     * @returns 
+     */
+    function isLockScroll(scrollViewEl: HTMLElement) {
+        const { willX, willY, x, y, minX, minY ,deltaX,deltaY} = __SCROLL_VIEW__MAP.get(scrollViewEl);
+        const isLockX = willX === x && (0 === willX || minX === willX) && deltaX!==0;
+        const isLockY = willY === y && (0 === willY || minY === willY)&& deltaY!==0;
+        // console.log(el.id,isLockX , isLockY,scrollViewEl.id,{ willX, willY, x, y, minX, minY } );
+        return isLockX || isLockY;
+    }
+
+    at.on('panstart', e => {
+        const { deltaX, deltaY } = e;
+
+        const data = __SCROLL_VIEW__MAP.get(el);
+        __SCROLL_VIEW__MAP.set(el, { ...data, willX: __x + deltaX, willY: __y + deltaY });
+
+        // const willX = clamp(__x + deltaX, MIN_X - __tolerance, __tolerance);
+        // const willY = clamp(__y + deltaY, MIN_Y - __tolerance, __tolerance);
+
+        // const scrollEl = __findFirstParentScrollElement(e.target as HTMLElement);
+        // __canScroll = el === scrollEl && canScroll(willX, willY)
     });
+
+    at.on('panmove', e => {
+        // console.log(e.currentTarget.id);
+        const { deltaX, deltaY } = e;
+        const willX = clamp(__x + deltaX, MIN_X - __tolerance, __tolerance);
+        const willY = clamp(__y + deltaY, MIN_Y - __tolerance, __tolerance);
+
+        const data = __SCROLL_VIEW__MAP.get(el);
+        __SCROLL_VIEW__MAP.set(el, { ...data, willX, willY, x: __x, y: __y, minX: MIN_X, minY: MIN_Y,deltaX, deltaY });
+
+        const scrollEl = __findFirstParentScrollElement(e.target as HTMLElement);
+        // console.log(el === scrollEl, scrollEl?.id, el.id, { deltaX, deltaY });
+console.warn(scrollEl?.id);
+
+        if (el === scrollEl) {
+
+            const is = (e.target as HTMLElement).classList.contains('scroll-bar-track') ||
+                (e.target as HTMLElement).classList.contains('scroll-bar-thumb')
+            if (!is) {
+                __setXY(willX, willY);
+            }
+        }
+        // const scrollElement = findActiveScrollElement(e.target as HTMLElement, deltaX, deltaY);
+        // if (scrollElement !== el) return;
+    });
+
+    at.on('panend', e => {
+        el.removeAttribute('scroll');
+    })
 
     at.on('at:end', e => {
         __snap();
@@ -130,9 +222,10 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
     swipe && swipe.set({ velocity: 1 });
 
     at.on('swipe', e => {
-        let dx = e.speedX * 300;
-        let dy = e.speedY * 300;
-        __scrollTo([__x + dx, __y + dy]);
+        let deltaX = e.speedX * 300;
+        let deltaY = e.speedY * 300;
+
+        // __scrollTo([__x + deltaX, __y + deltaY]);
     });
 
     /**
@@ -141,11 +234,16 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
      * @returns 返回当前xy 
      */
     function __setXY(distX: number, distY: number): [number, number] {
+
         __x = distX;
         __y = distY;
         const distXY: [number, number] = [__x, __y];
         __onScroll(distXY, [MIN_X, MIN_Y]);
         contentEl.style.setProperty('transform', `translate3d(${__x}px, ${__y}px, 0)`);
+
+        el.setAttribute('x', String(__x));
+        el.setAttribute('y', String(__y));
+
         return distXY;
     }
 
@@ -177,6 +275,9 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
         onScroll = (([x, y]: [number, number]) => void 0),
         isShrink = [false, false],
     ) {
+        // const scrollElement = findActiveScrollElement(e.target as HTMLElement, deltaX, deltaY);
+        // if (scrollElement !== el) return;
+
         // y轴变化,也会触发scrollTo, 
         // 如果x==distX, 
         // 说明x轴不动
@@ -184,7 +285,7 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
             raf.cancel(__rafIdX);
             const startX = __x;
             // console.warn(0,clamp(distY, MIN_Y - tolerance, tolerance));
-            __nextTick(startX, clamp(distX, MIN_X - tolerance, tolerance), (newX, rafId) => {
+            __nextTick(startX, clamp(distX, MIN_X - __tolerance, __tolerance), (newX, rafId) => {
                 const currentX = newX;
                 __rafIdX = rafId;
                 const _xy = __setXY(newX, __y);
@@ -207,12 +308,11 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
             raf.cancel(__rafIdY)
             const startY = __y;
             // console.warn(1,clamp(distY, MIN_Y - tolerance, tolerance));
-            __nextTick(startY, clamp(distY, MIN_Y - tolerance, tolerance), (newY, rafId) => {
+            __nextTick(startY, clamp(distY, MIN_Y - __tolerance, __tolerance), (newY, rafId) => {
                 const currentY = newY;
                 __rafIdY = rafId;
                 const _xy = __setXY(__x, newY);
                 onScroll(_xy);
-                // __onScroll(_xy, [MIN_X, MIN_Y]);
                 if (!isShrink[1] && 0 < currentY) {
                     delay(() => {
                         __scrollTo([__x, 0], onScroll, [isShrink[0], true]);
