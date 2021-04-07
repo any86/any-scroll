@@ -44,12 +44,13 @@ export default function (el: HTMLElement, onChange: (x: number, y: number, width
 
     function updateBarX([x, y]: [number, number], [width, height, minX, minY]: [number, number, number, number]) {
         let scale = 1;
-        thumbWidth = Math.abs(width / minX * width);
+        thumbWidth = Math.abs(width / (minX-width) * width);
         if (0 < x) {
             scale = 1 - (x / width);
         } else if (minX > x) {
             scale = 1 - (minX - x) / width
         }
+
         thumbWidth *= scale
 
         setStyle(thumbElX, { width: `${thumbWidth}px` });
@@ -60,7 +61,7 @@ export default function (el: HTMLElement, onChange: (x: number, y: number, width
 
     function updateBarY([x, y]: [number, number], [width, height, minX, minY]: [number, number, number, number]) {
         let scale = 1;
-        thumbHeight = Math.abs(height / minY * height);
+        thumbHeight = Math.abs(height / (minY-height) * height);
         if (0 < y) {
             scale = 1 - (y / height);
         } else if (minY > y) {

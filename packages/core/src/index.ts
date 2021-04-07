@@ -29,7 +29,8 @@ declare global {
         __SCROLL__MAP: any
     }
 }
-window.__SCROLL__MAP = new WeakMap();
+// 全局注册
+window.__SCROLL__MAP = window.__SCROLL__MAP || new WeakMap();
 
 export default function (el: HTMLElement, { tolerance = 0, damping = 0.1 } = {}) {
     const { __SCROLL__MAP: __SCROLL_VIEW__MAP } = window;
@@ -104,9 +105,7 @@ export default function (el: HTMLElement, { tolerance = 0, damping = 0.1 } = {})
         CONTENT_HEIGHT = contentEl.offsetHeight - contentEl.clientHeight + contentEl.scrollHeight;
         MIN_X = el.clientWidth - CONTENT_WIDTH;
         MIN_Y = el.clientHeight - CONTENT_HEIGHT;
-        el.dataset.minX = String(MIN_X);
-        el.dataset.minY = String(MIN_Y);
-        console.log('update-size', el.id, { CONTENT_HEIGHT, MIN_Y });
+        console.log('update-size', el.id, { CONTENT_WIDTH, MIN_X ,CONTENT_HEIGHT, MIN_Y });
     }
 
     /**
@@ -129,26 +128,13 @@ export default function (el: HTMLElement, { tolerance = 0, damping = 0.1 } = {})
     __registerObserver();
 
 
-    function willOut(el: HTMLElement, deltaX: number, deltaY: number) {
-        const willX = Number(el.getAttribute('x')) + deltaX
-        const willY = Number(el.getAttribute('y')) + deltaY;
-        const isOut =
-            0 < willY
-            || Number(el.dataset.minY) > willY
-            || 0 < willX
-            || Number(el.dataset.minX) > willX
-        console.log(el.id, isOut, willX, willY, Number(el.dataset.minX), Number(el.dataset.minY));
-        return isOut;
-    }
-
-
     // 加载手势
     const at = new AnyTouch(el);
 
     function __findFirstParentScrollElement(targetEl: HTMLElement, className = CLASS_NAME_ANY_SCROLL) {
         let activeElement: HTMLElement | null = targetEl;
 
-        while (null !== activeElement && (!activeElement.classList.contains(className) || isLockScroll(activeElement))) {
+        while (null !== activeElement && (!activeElement.classList.contains(className) || isScrollOnEdge(activeElement))) {
             activeElement = activeElement.parentElement;
         }
 
@@ -156,59 +142,45 @@ export default function (el: HTMLElement, { tolerance = 0, damping = 0.1 } = {})
     }
 
     /**
-     * 当前滚动元素是否可以滚动
-     * @param scrollViewEl 
-     * @returns 
+     * 当前滚动元素是否已经到达边际
+     * willY===y 表示目标位置就是当前位置
+     * 0 === willY || minY === willY 表示目标位置就在边界
+     * deltaY !== 0 表示有拖拽动作, 区分当前轴是否有滚动意图, 比如在边际拖拽不发生位移
+     * @param scrollViewEl any-touch元素
+     * @returns 是否有一个轴已经到达边界
      */
-    function isLockScroll(scrollViewEl: HTMLElement) {
-        const { willX, willY, x, y, minX, minY ,deltaX,deltaY} = __SCROLL_VIEW__MAP.get(scrollViewEl);
-        const isLockX = willX === x && (0 === willX || minX === willX) && deltaX!==0;
-        const isLockY = willY === y && (0 === willY || minY === willY)&& deltaY!==0;
+    function isScrollOnEdge(scrollViewEl: HTMLElement) {
+        const { willX, willY, x, y, minX, minY, deltaX, deltaY } = __SCROLL_VIEW__MAP.get(scrollViewEl);
+        const isLockX = willX === x && (0 === willX || minX === willX) && deltaX !== 0;
+        const isLockY = willY === y && (0 === willY || minY === willY) && deltaY !== 0;
         // console.log(el.id,isLockX , isLockY,scrollViewEl.id,{ willX, willY, x, y, minX, minY } );
         return isLockX || isLockY;
     }
 
-    at.on('panstart', e => {
-        const { deltaX, deltaY } = e;
 
-        const data = __SCROLL_VIEW__MAP.get(el);
-        __SCROLL_VIEW__MAP.set(el, { ...data, willX: __x + deltaX, willY: __y + deltaY });
-
-        // const willX = clamp(__x + deltaX, MIN_X - __tolerance, __tolerance);
-        // const willY = clamp(__y + deltaY, MIN_Y - __tolerance, __tolerance);
-
-        // const scrollEl = __findFirstParentScrollElement(e.target as HTMLElement);
-        // __canScroll = el === scrollEl && canScroll(willX, willY)
-    });
-
-    at.on('panmove', e => {
+    at.on('pan', e => {
         // console.log(e.currentTarget.id);
         const { deltaX, deltaY } = e;
         const willX = clamp(__x + deltaX, MIN_X - __tolerance, __tolerance);
         const willY = clamp(__y + deltaY, MIN_Y - __tolerance, __tolerance);
 
         const data = __SCROLL_VIEW__MAP.get(el);
-        __SCROLL_VIEW__MAP.set(el, { ...data, willX, willY, x: __x, y: __y, minX: MIN_X, minY: MIN_Y,deltaX, deltaY });
+        __SCROLL_VIEW__MAP.set(el, { ...data, willX, willY, x: __x, y: __y, minX: MIN_X, minY: MIN_Y, deltaX, deltaY });
 
         const scrollEl = __findFirstParentScrollElement(e.target as HTMLElement);
         // console.log(el === scrollEl, scrollEl?.id, el.id, { deltaX, deltaY });
-console.warn(scrollEl?.id);
+        console.warn(scrollEl?.id);
 
         if (el === scrollEl) {
-
             const is = (e.target as HTMLElement).classList.contains('scroll-bar-track') ||
                 (e.target as HTMLElement).classList.contains('scroll-bar-thumb')
             if (!is) {
                 __setXY(willX, willY);
             }
         }
-        // const scrollElement = findActiveScrollElement(e.target as HTMLElement, deltaX, deltaY);
-        // if (scrollElement !== el) return;
+
     });
 
-    at.on('panend', e => {
-        el.removeAttribute('scroll');
-    })
 
     at.on('at:end', e => {
         __snap();
