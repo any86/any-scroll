@@ -1,5 +1,5 @@
-import Core from 'packages/core/src/index.old'
+import Core from 'packages/core/src/index'
 
 export default function(el:HTMLElement){
-    return  Core(el);
+    return  new Core(el);
 }

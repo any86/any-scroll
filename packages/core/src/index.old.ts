@@ -205,9 +205,6 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
         __scrollTo([clamp(__x, __minXY[0], 0), clamp(__y, __minXY[1], 0)]);
     }
 
-
-
-
     /**
      * 手势对应的滚动逻辑
      * 和对外的scrollTo的区别是:与时间无关的迭代衰减
@@ -227,12 +224,10 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
         let dist = [distX, distY];
         let realDist = [distX, distY];
         let isOut = [false, false];
-
         let __xy = [__x, __y];
 
 
         for (let i = 0; i < 2; i++) {
-            console.log({ i });
             if (__xy[i] !== dist[i]) {
                 raf.cancel(__rafIdXY[i]);
                 const startValue = __xy[i];
@@ -240,33 +235,29 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
                 realDist[i] = clamp(dist[i], __minXY[i] - tolerance, tolerance);
                 isOut[i] = __xy[i] >= 0 && __xy[i] <= __minXY[i];
                 __nextTick(startValue, realDist[i], (newValue, rafId) => {
-                    const currentValue = newValue;
-
                     isAnimateScrollStop[i] = newValue === realDist[i];
-                    if (isAnimateScrollStop.every(is => is) && !isOut[0] && !isOut[1]) {
+                    if (isAnimateScrollStop.every(is => is) && isOut.every(is=>!is)) {
                         __onScrollEnd()
                     }
 
                     __rafIdXY[i] = rafId;
-                    const newXY = [__x, __y];
+                    const newXY: [number, number] = [__x, __y];
                     newXY[i] = newValue;
-                    const _xy = __setXY(newXY[0], newXY[1]);
-
+                    const _xy = __setXY(...newXY);
                     onScroll(_xy);
 
                     if (!isShrink[i]) {
                         // 准备收缩
-                        const isShrinks = [isShrink[0], isShrink[1]];
+                        const isShrinks = [...isShrink];
                         isShrinks[i] = true;
 
-                        if (0 < currentValue) {
+                        if (0 < newValue) {
                             delay(() => {
                                 const toXY: [number, number] = [__x, __y];
-
                                 toXY[i] = 0;
                                 __scrollTo(toXY, onScroll, isShrinks);
                             });
-                        } else if (__minXY[i] > currentValue) {
+                        } else if (__minXY[i] > newValue) {
                             delay(() => {
                                 const toXY: [number, number] = [__x, __y];
                                 toXY[i] = __minXY[i];
@@ -274,82 +265,9 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
                             });
                         }
                     }
-
-
                 });
             }
         }
-
-        // if (__x !== distX) {
-        //     raf.cancel(__rafIdXY[0]);
-        //     // 容差范围内的distX
-        //     realDist[0] = clamp(distX, __minXY[0] - tolerance, tolerance);
-        //     isOut[0] = __x >= 0 && __x <= __minXY[0];
-
-        //     __nextTick(__x, realDist[0], (newValue, rafId) => {
-        //         isAnimateScrollStop[0] = newValue === realDist[0];
-        //         if (isAnimateScrollStop.every(is => is) && isOut.every(is => !is)) {
-        //             __onScrollEnd()
-        //         }
-
-        //         __rafIdXY[0] = rafId;
-        //         const _xy = __setXY(newValue, __y);
-
-        //         onScroll(_xy);
-
-        //         if (!isShrink[0]) {
-        //             let __isShrinks = [isShrink[0], isShrink[1]];
-        //             __isShrinks[0] = true;
-
-        //             // 准备收缩
-        //             if (0 < newValue) {
-        //                 delay(() => {
-        //                     let to: [number, number] = [__x, __y];
-        //                     to[0] = 0;
-        //                     __scrollTo(to, onScroll, __isShrinks);
-        //                 });
-        //             } else if (__minXY[0] > newValue) {
-        //                 delay(() => {
-        //                     let to: [number, number] = [__x, __y];
-        //                     to[0] = __minXY[0]
-        //                     __scrollTo(to, onScroll, __isShrinks);
-        //                 });
-        //             }
-        //         }
-        //     });
-        // }
-
-
-        // if (__y !== distY) {
-        //     // 关闭前一个未完成的滚动动画
-        //     raf.cancel(__rafIdXY[1])
-        //     // 容差范围内
-        //     realDist[1] = clamp(distY, __minXY[1] - tolerance, tolerance)
-        //     isOut[1] = __y >= 0 && __y <= __minXY[1];
-
-        //     __nextTick(__y, realDist[1], (newValue, rafId) => {
-
-        //         isAnimateScrollStop[1] = newValue === realDist[1];
-        //         if (isAnimateScrollStop.every(is => is) && isOut.every(is => !is)) {
-        //             __onScrollEnd()
-        //         }
-        //         __rafIdXY[1] = rafId;
-        //         const _xy = __setXY(__x, newValue);
-        //         onScroll(_xy);
-        //         if (!isShrink[1] && 0 < newValue) {
-        //             // 收缩
-        //             delay(() => {
-        //                 __scrollTo([__x, 0], onScroll, [isShrink[0], true]);
-        //             });
-        //         } else if (!isShrink[1] && __minXY[1] > newValue) {
-        //             delay(() => {
-        //                 __scrollTo([__x, __minXY[1]], onScroll, [isShrink[0], true]);
-        //             });
-        //         } else {
-
-        //         }
-        //     });
-        // }
     }
 
     /**

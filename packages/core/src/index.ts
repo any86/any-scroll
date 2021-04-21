@@ -15,10 +15,7 @@ declare const MozMutationObserver: MutationObserver;
 
 
 
-let isAnimateScrollStopX = true;
-let isAnimateScrollStopY = true;
-let __rafIdX = -1;
-let __rafIdY = -1;
+let isAnimateScrollStop = [true, true];
 
 /**
  * 构造DOM结构
@@ -55,10 +52,12 @@ export default class extends AnyTouch {
     __updateBar: any;
     el: HTMLElement;
     contentEl: HTMLElement;
-    id = -1;
+    scrollEndTimeId = -1;
 
     constructor(el: HTMLElement, options?: Options) {
         super(el);
+        console.log('class');
+
         this.el = el;
         this.contentEl = __initDOM(el);
         this.__options = { ...options, ...DEFAULT_OPTIONS };
@@ -82,7 +81,7 @@ export default class extends AnyTouch {
 
 
         this.on('panend', e => {
-            this.id = setTimeout(() => {
+            this.scrollEndTimeId = setTimeout(() => {
                 // __onScrollEnd();
             }, SHRINK_DELAY_TIME)
         })
@@ -101,9 +100,9 @@ export default class extends AnyTouch {
         const swipe = this.get('swipe');
         swipe && swipe.set({ velocity: 1 });
         this.on('swipe', e => {
-            clearTimeout(this.id)
-            let deltaX = e.speedX * 30;
-            let deltaY = e.speedY * 30;
+            clearTimeout(this.scrollEndTimeId)
+            let deltaX = e.speedX * 100;
+            let deltaY = e.speedY * 100;
             this.__scrollTo([this.__xy[0] + deltaX, this.__xy[1] + deltaY]);
         });
 
@@ -112,9 +111,11 @@ export default class extends AnyTouch {
 
 
     __stop() {
+        console.log(`stop`);
         raf.cancel(this.__rafId);
-        raf.cancel(__rafIdX);
-        raf.cancel(__rafIdY);
+        raf.cancel(this.__rafIdXY[0]);
+        raf.cancel(this.__rafIdXY[1]);
+
     }
 
     __snap() {
@@ -147,64 +148,57 @@ export default class extends AnyTouch {
      * @param onScroll 滚动回调
      * @param isShrink 是否收缩滚动, 用来防止回滚中再次执行回滚
      */
-    private __scrollTo2(
-        distXY: [number, number],
+    private __scrollTo(
+        dist: [number, number],
         onScroll = (([x, y]: [number, number]) => void 0),
         isShrink = [false, false],
     ) {
         // y轴变化,也会触发scrollTo, 
         // 如果x==distX, 
         // 说明x轴不动
-        clearTimeout(this.id)
-        let realDistXY = distXY;
-        let isOutXY = [false, false];
+        clearTimeout(this.scrollEndTimeId)
+        let _realDist = [...dist];
+        let _isOutXY = [false, false];
+        const { __minXY, __xy } = this;
         const { tolerance } = this.__options;
         for (let i = 0; i < 2; i++) {
-
-            if (this.__xy[i] !== distXY[i]) {
-                // 关闭前一个未完成的滚动动画
-                raf.cancel(this.__rafIdXY[i])
-                const start = this.__xy[i];
-                // 容差范围内
-                realDistXY[i] = clamp(distXY[i], this.__minXY[i] - tolerance, tolerance)
-                isOutXY[i] = this.__xy[i] >= 0 && this.__xy[i] <= this.__minXY[i];
-
-                __nextTick(start, realDistXY[i], (newValue, rafId) => {
-                    const currentValue = newValue;
-
-                    this.__isAnimateScrollStop[i] = newValue === realDistXY[i];
-                    if (this.__isAnimateScrollStop[0] && this.__isAnimateScrollStop[1] && !isOutXY[0] && !isOutXY[1]) {
+            if (__xy[i] !== dist[i]) {
+                raf.cancel(this.__rafIdXY[i]);
+                // 容差范围内的dist[i]
+                _realDist[i] = clamp(dist[i], __minXY[i] - tolerance, tolerance);
+                _isOutXY[i] = __xy[i] >= 0 && __xy[i] <= __minXY[i];
+                __nextTick(__xy[i], _realDist[i], (newValue, rafId) => {
+                    console.log(newValue);
+                    isAnimateScrollStop[i] = newValue === _realDist[i];
+                    if (isAnimateScrollStop.every(is => is) && _isOutXY.every(is => !is)) {
                         // __onScrollEnd()
-                        this.emit('scroll-end', this.__xy);
+                        console.log('end');
                     }
 
-
                     this.__rafIdXY[i] = rafId;
-
                     const newXY: [number, number] = [...this.__xy];
                     newXY[i] = newValue;
-
                     const _xy = this.__setXY(...newXY);
+                    onScroll(_xy);
 
-                    if (!isShrink[i] && 0 < currentValue) {
-                        // 收缩
-                        delay(() => {
-                            const to: [number, number] = [...this.__xy];
-                            const shrinkList = [...isShrink];
-                            to[1 ^ i] = 0;
-                            shrinkList[1 ^ i] = true;
-                            this.__scrollTo(to, onScroll, shrinkList);
-                        });
-                    } else if (!isShrink[i] && this.__minXY[i] > currentValue) {
-                        delay(() => {
-                            const to: [number, number] = [...this.__xy];
-                            const shrinkList = [...isShrink];
-                            to[1 ^ i] = this.__minXY[i];
-                            shrinkList[1 ^ i] = true;
-                            this.__scrollTo(to, onScroll, shrinkList);
-                        });
-                    } else {
+                    if (!isShrink[i]) {
+                        // 准备收缩
+                        const isShrinks = [...isShrink];
+                        isShrinks[i] = true;
 
+                        if (0 < newValue) {
+                            delay(() => {
+                                const toXY: [number, number] = [...this.__xy];
+                                toXY[i] = 0;
+                                this.__scrollTo(toXY, onScroll, isShrinks);
+                            });
+                        } else if (__minXY[i] > newValue) {
+                            delay(() => {
+                                const toXY: [number, number] = [...this.__xy];
+                                toXY[i] = __minXY[i];
+                                this.__scrollTo(toXY, onScroll, isShrinks);
+                            });
+                        }
                     }
                 });
             }
@@ -212,105 +206,6 @@ export default class extends AnyTouch {
 
     }
 
-    /**
-     * 手势对应的滚动逻辑
-     * 和对外的scrollTo的区别是:与时间无关的迭代衰减
-     * @param distXY 目标点
-     * @param onScroll 滚动回调
-     * @param isShrink 是否收缩滚动, 用来防止回滚中再次执行回滚
-     */
-    __scrollTo(
-        [distX, distY]: [number, number],
-        onScroll = (([x, y]: [number, number]) => void 0),
-        isShrink = [false, false],
-    ) {
-        // y轴变化,也会触发scrollTo, 
-        // 如果x==distX, 
-        // 说明x轴不动
-        clearTimeout(this.id)
-        let realDistX = distX;
-        let realDistY = distY;
-        let isOutX = false;
-        let isOutY = false;
-
-        const [__x, __y] = this.__xy;
-        const [__MIN_X, __MIN_Y] = this.__minXY;
-        const { tolerance } = this.__options;
-
-        if (__x !== distX) {
-            raf.cancel(__rafIdX);
-            const startX = __x;
-            // 容差范围内的distX
-            realDistX = clamp(distX, __MIN_X - tolerance, tolerance);
-            isOutX = __x >= 0 && __x <= __MIN_X;
-
-            __nextTick(startX, realDistX, (newX, rafId) => {
-                const currentX = newX;
-
-
-                isAnimateScrollStopX = newX === realDistX;
-                if (isAnimateScrollStopX && isAnimateScrollStopY && !isOutX && !isOutY) {
-                    // __onScrollEnd()
-                }
-
-                __rafIdX = rafId;
-                const _xy = this.__setXY(newX, __y);
-
-                onScroll(_xy);
-
-                if (!isShrink[0]) {
-                    // 准备收缩
-                    if (0 < currentX) {
-                        delay(() => {
-                            this.__scrollTo([0, __y], onScroll, [true, isShrink[1]]);
-                        });
-                    } else if (__MIN_X > currentX) {
-                        delay(() => {
-                            this.__scrollTo([__MIN_X, __y], onScroll, [true, isShrink[1]]);
-                        });
-                    }
-                }
-
-
-            });
-        }
-
-
-        if (__y !== distY) {
-            // 关闭前一个未完成的滚动动画
-            raf.cancel(__rafIdY)
-            const startY = __y;
-            // 容差范围内
-            realDistY = clamp(distY, __MIN_Y - tolerance, tolerance)
-            isOutY = __y >= 0 && __y <= __MIN_Y;
-
-            __nextTick(startY, realDistY, (newY, rafId) => {
-                const currentY = newY;
-
-                isAnimateScrollStopY = newY === realDistY;
-                if (isAnimateScrollStopX && isAnimateScrollStopY && !isOutX && !isOutY) {
-                    // __onScrollEnd()
-                }
-
-
-                __rafIdY = rafId;
-                const _xy = this.__setXY(__x, newY);
-
-                if (!isShrink[1] && 0 < currentY) {
-                    // 收缩
-                    delay(() => {
-                        this.__scrollTo([__x, 0], onScroll, [isShrink[0], true]);
-                    });
-                } else if (!isShrink[1] && __MIN_Y > currentY) {
-                    delay(() => {
-                        this.__scrollTo([__x, __MIN_Y], onScroll, [isShrink[0], true]);
-                    });
-                } else {
-
-                }
-            });
-        }
-    }
 
 
     /**
