@@ -11,36 +11,21 @@ const { setTimeout } = window;
 
 declare const WebKitMutationObserver: MutationObserver;
 declare const MozMutationObserver: MutationObserver;
-declare global {
-    interface Window {
-        __SCROLL_VIEW__MAP: any
-    }
-}
-// 全局注册
-window.__SCROLL_VIEW__MAP = window.__SCROLL_VIEW__MAP || new WeakMap();
-
-export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {}) {
-    // 内容元素当前位移
-    let __x = 0;
-    let __y = 0;
-    // 给按距离滚动的函数使用
-    let __rafIdX = -1;
-    let __rafIdY = -1;
-    // 给按时间和距离滚动的函数使用
-    let __rafId = -1;
-
-    let __MIN_X = 0;
-    let __MIN_Y = 0;
-    let __CONTENT_WIDTH = 0;
-    let __CONTENT_HEIGHT = 0;
-
-    let __isScrolling = [false, false];
-
-    let isAnimateScrollStopX = true;
-    let isAnimateScrollStopY = true;
 
 
 
+
+let isAnimateScrollStopX = true;
+let isAnimateScrollStopY = true;
+let __rafIdX = -1;
+let __rafIdY = -1;
+
+/**
+ * 构造DOM结构
+ * @param el 外壳元素
+ * @returns 内部容器元素
+ */
+function __initDOM(el: HTMLElement): HTMLElement {
     // 设置外容器样式
     setStyle(el, STYLE);
     el.classList.add(CLASS_NAME_ANY_SCROLL);
@@ -52,167 +37,108 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
     // 设置内容器样式
     setStyle(contentEl, CONTENT_STYLE);
     el.appendChild(contentEl);
+    return contentEl;
+}
 
-    const __updateBar = createBar(el, (x, y, thumbWidth, thumbHeight) => {
-        __setXY(
-            x / (el.clientWidth - thumbWidth) * __MIN_X,
-            y / (el.clientHeight - thumbHeight) * __MIN_Y);
-    });
+interface Options { tolerance: number, damping: number };
+const DEFAULT_OPTIONS = { tolerance: 100, damping: 0.1 };
+
+export default class extends AnyTouch {
+    private __xy: [number, number] = [0, 0];
+    private __rafIdXY: [number, number] = [-1, -1];
+    // 给按时间和距离滚动的函数使用
+    private __rafId = -1;
+    private __minXY: [number, number] = [0, 0];
+    private __contentSize: [number, number] = [0, 0];
+    private __isAnimateScrollStop: [boolean, boolean] = [true, true];
+    private __options: Options;
+    __updateBar: any;
+    el: HTMLElement;
+    contentEl: HTMLElement;
+    id = -1;
+
+    constructor(el: HTMLElement, options?: Options) {
+        super(el);
+        this.el = el;
+        this.contentEl = __initDOM(el);
+        this.__options = { ...options, ...DEFAULT_OPTIONS };
+        this.__updateBar = createBar(el, (x, y, thumbWidth, thumbHeight) => {
+            this.__setXY(
+                x / (el.clientWidth - thumbWidth) * this.__minXY[0],
+                y / (el.clientHeight - thumbHeight) * this.__minXY[1]);
+        });
+        this.__updateSize();
 
 
+        this.on('panmove', e => {
+            const { deltaX, deltaY } = e;
+            const is = (e.target as HTMLElement).classList.contains('scroll-bar-track') ||
+                (e.target as HTMLElement).classList.contains('scroll-bar-thumb')
+            if (!is) {
 
-    watchWheel(el, ({ type, deltaY, v, target }) => {
-        if ('start' === type) {
-            __stop();
-        } else if ('move' === type) {
-            __setXY(__x, __y + deltaY * 2);
-        } else if ('end' === type) {
-            if (5 < Math.abs(v)) {
-                __scrollTo([__x, __y + v * 200])
-            } else {
-                __snap()
+                this.__setXY(this.__xy[0] + deltaX, this.__xy[1] + deltaY);
             }
-        }
-    });
+        });
 
 
-    __updateSize();
-    // 要__updateBar要放在__updateSize后
-    __updateBar([__x, __y], [el.clientWidth, el.clientHeight, __MIN_X, __MIN_Y]);
-    __registerObserver();
+        this.on('panend', e => {
+            this.id = setTimeout(() => {
+                // __onScrollEnd();
+            }, SHRINK_DELAY_TIME)
+        })
 
-    // 加载手势
-    const at = new AnyTouch(el);
+        this.on('at:end', e => {
+            this.__snap();
+        });
 
-    at.on('panstart', e => {
-        const { deltaX, deltaY } = e;
-        const is = (e.target as HTMLElement).classList.contains('scroll-bar-track') ||
-            (e.target as HTMLElement).classList.contains('scroll-bar-thumb')
-        if (!is) {
-            __setXY(__x + deltaX, __y + deltaY);
-        }
-    });
+        this.on('at:start', e => {
+            this.__stop();
+        });
 
-    at.on('panmove', e => {
-        const { deltaX, deltaY } = e;
-        const is = (e.target as HTMLElement).classList.contains('scroll-bar-track') ||
-            (e.target as HTMLElement).classList.contains('scroll-bar-thumb')
-        if (!is) {
-            __setXY(__x + deltaX, __y + deltaY);
-        }
-    });
 
-    let id = 0;
-    at.on('panend', e => {
-        id = setTimeout(() => {
-            __onScrollEnd();
-        }, 200)
-    })
 
-    at.on('at:end', e => {
-        __snap();
-    });
 
-    at.on('at:start', e => {
-        __stop();
-    });
+        const swipe = this.get('swipe');
+        swipe && swipe.set({ velocity: 1 });
+        this.on('swipe', e => {
+            clearTimeout(this.id)
+            let deltaX = e.speedX * 30;
+            let deltaY = e.speedY * 30;
+            this.__scrollTo([this.__xy[0] + deltaX, this.__xy[1] + deltaY]);
+        });
 
-    const swipe = at.get('swipe');
-    swipe && swipe.set({ velocity: 1 });
-    at.on('swipe', e => {
-        clearTimeout(id)
-        let deltaX = e.speedX * 30;
-        let deltaY = e.speedY * 30;
-        __scrollTo([__x + deltaX, __y + deltaY]);
-    });
-
-    /**
-     * 设置xy
-     * @param distXY 目标点
-     * @returns 返回当前xy 
-     */
-    function __setXY(x: number, y: number): [number, number] {
-        const distX = clamp(x, __MIN_X - tolerance, tolerance);
-        const distY = clamp(y, __MIN_Y - tolerance, tolerance);
-
-        __isScrolling = [__x !== x, __y !== y];
-
-        // 同步
-        __x = distX;
-        __y = distY;
-
-        const distXY: [number, number] = [__x, __y];
-
-        // 钩子
-        __onScroll(distXY, [__MIN_X, __MIN_Y]);
-        setTranslate(contentEl, __x, __y);
-        return distXY;
-    }
-
-    function __nextTick(from: number, to: number, callback: (value: number, rafId: number) => void) {
-        nextTick(to - from, (n, rafId) => {
-            callback(from + n, rafId);
-        }, damping);
     }
 
 
-    /**
-     * 更新尺寸
-     */
-    function __updateSize() {
-        // 保留边框
-        // 参考smooth-scroll
-        __CONTENT_WIDTH = contentEl.offsetWidth - contentEl.clientWidth + contentEl.scrollWidth;
-        __CONTENT_HEIGHT = contentEl.offsetHeight - contentEl.clientHeight + contentEl.scrollHeight;
-        __MIN_X = el.clientWidth - __CONTENT_WIDTH;
-        __MIN_Y = el.clientHeight - __CONTENT_HEIGHT;
-        console.log('update-size', el.id, { CONTENT_WIDTH: __CONTENT_WIDTH, MIN_X: __MIN_X, CONTENT_HEIGHT: __CONTENT_HEIGHT, MIN_Y: __MIN_Y });
-    }
 
-    /**
-     * 监听所有的滚动
-     * 用来扩展插件
-     * @param param0 
-     */
-    function __onScroll([x, y]: [number, number], [minX, minY]: [number, number]) {
-        // __isScrolling = true;
-        __updateBar([x, y], [el.clientWidth, el.clientHeight, minX, minY]);
-    }
-
-
-    function __onScrollEnd() {
-        // __isScrolling = false;
-        console.log(`__onScrollEnd`);
-    }
-
-    /**
-     * 注册监听
-     */
-    function __registerObserver() {
-        window.addEventListener('resize', __updateSize);
-        const Observer = MutationObserver || WebKitMutationObserver || MozMutationObserver;
-        // observe
-        if (typeof Observer === 'function') {
-            const ob = new Observer(__updateSize);
-            ob.observe(contentEl, {
-                subtree: true,
-                childList: true,
-            });
-        }
-    }
-
-    function __stop() {
-        raf.cancel(__rafId);
+    __stop() {
+        raf.cancel(this.__rafId);
         raf.cancel(__rafIdX);
         raf.cancel(__rafIdY);
     }
 
-    function __snap() {
-        __scrollTo([clamp(__x, __MIN_X, 0), clamp(__y, __MIN_Y, 0)]);
+    __snap() {
+        this.__scrollTo([clamp(this.__xy[0], this.__minXY[0], 0), clamp(this.__xy[1], this.__minXY[1], 0)]);
     }
 
 
 
+    private __setXY(x: number, y: number): [number, number] {
+        const distX = clamp(x, this.__minXY[0] - this.__options.tolerance, this.__options.tolerance);
+        const distY = clamp(y, this.__minXY[1] - this.__options.tolerance, this.__options.tolerance);
+
+        // __isScrolling = [this.__xy[0] !== x, this.__xy[1] !== y];
+
+        // 同步
+        this.__xy = [distX, distY];
+
+        // 钩子
+        this.emit('scroll', this.__xy);
+        const { clientWidth, clientHeight } = this.el;
+        this.__updateBar([x, y], [clientWidth, clientHeight, ...this.__minXY]);
+        setTranslate(this.contentEl, ...this.__xy);
+        return this.__xy;
+    }
 
     /**
      * 手势对应的滚动逻辑
@@ -221,7 +147,79 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
      * @param onScroll 滚动回调
      * @param isShrink 是否收缩滚动, 用来防止回滚中再次执行回滚
      */
-    function __scrollTo(
+    private __scrollTo2(
+        distXY: [number, number],
+        onScroll = (([x, y]: [number, number]) => void 0),
+        isShrink = [false, false],
+    ) {
+        // y轴变化,也会触发scrollTo, 
+        // 如果x==distX, 
+        // 说明x轴不动
+        clearTimeout(this.id)
+        let realDistXY = distXY;
+        let isOutXY = [false, false];
+        const { tolerance } = this.__options;
+        for (let i = 0; i < 2; i++) {
+
+            if (this.__xy[i] !== distXY[i]) {
+                // 关闭前一个未完成的滚动动画
+                raf.cancel(this.__rafIdXY[i])
+                const start = this.__xy[i];
+                // 容差范围内
+                realDistXY[i] = clamp(distXY[i], this.__minXY[i] - tolerance, tolerance)
+                isOutXY[i] = this.__xy[i] >= 0 && this.__xy[i] <= this.__minXY[i];
+
+                __nextTick(start, realDistXY[i], (newValue, rafId) => {
+                    const currentValue = newValue;
+
+                    this.__isAnimateScrollStop[i] = newValue === realDistXY[i];
+                    if (this.__isAnimateScrollStop[0] && this.__isAnimateScrollStop[1] && !isOutXY[0] && !isOutXY[1]) {
+                        // __onScrollEnd()
+                        this.emit('scroll-end', this.__xy);
+                    }
+
+
+                    this.__rafIdXY[i] = rafId;
+
+                    const newXY: [number, number] = [...this.__xy];
+                    newXY[i] = newValue;
+
+                    const _xy = this.__setXY(...newXY);
+
+                    if (!isShrink[i] && 0 < currentValue) {
+                        // 收缩
+                        delay(() => {
+                            const to: [number, number] = [...this.__xy];
+                            const shrinkList = [...isShrink];
+                            to[1 ^ i] = 0;
+                            shrinkList[1 ^ i] = true;
+                            this.__scrollTo(to, onScroll, shrinkList);
+                        });
+                    } else if (!isShrink[i] && this.__minXY[i] > currentValue) {
+                        delay(() => {
+                            const to: [number, number] = [...this.__xy];
+                            const shrinkList = [...isShrink];
+                            to[1 ^ i] = this.__minXY[i];
+                            shrinkList[1 ^ i] = true;
+                            this.__scrollTo(to, onScroll, shrinkList);
+                        });
+                    } else {
+
+                    }
+                });
+            }
+        }
+
+    }
+
+    /**
+     * 手势对应的滚动逻辑
+     * 和对外的scrollTo的区别是:与时间无关的迭代衰减
+     * @param distXY 目标点
+     * @param onScroll 滚动回调
+     * @param isShrink 是否收缩滚动, 用来防止回滚中再次执行回滚
+     */
+    __scrollTo(
         [distX, distY]: [number, number],
         onScroll = (([x, y]: [number, number]) => void 0),
         isShrink = [false, false],
@@ -229,28 +227,34 @@ export default function (el: HTMLElement, { tolerance = 150, damping = 0.1 } = {
         // y轴变化,也会触发scrollTo, 
         // 如果x==distX, 
         // 说明x轴不动
-clearTimeout(id)
+        clearTimeout(this.id)
         let realDistX = distX;
         let realDistY = distY;
+        let isOutX = false;
+        let isOutY = false;
 
+        const [__x, __y] = this.__xy;
+        const [__MIN_X, __MIN_Y] = this.__minXY;
+        const { tolerance } = this.__options;
 
         if (__x !== distX) {
             raf.cancel(__rafIdX);
             const startX = __x;
             // 容差范围内的distX
             realDistX = clamp(distX, __MIN_X - tolerance, tolerance);
+            isOutX = __x >= 0 && __x <= __MIN_X;
 
             __nextTick(startX, realDistX, (newX, rafId) => {
                 const currentX = newX;
 
 
                 isAnimateScrollStopX = newX === realDistX;
-                if (isAnimateScrollStopX && isAnimateScrollStopY) {
-                    __onScrollEnd()
+                if (isAnimateScrollStopX && isAnimateScrollStopY && !isOutX && !isOutY) {
+                    // __onScrollEnd()
                 }
 
                 __rafIdX = rafId;
-                const _xy = __setXY(newX, __y);
+                const _xy = this.__setXY(newX, __y);
 
                 onScroll(_xy);
 
@@ -258,11 +262,11 @@ clearTimeout(id)
                     // 准备收缩
                     if (0 < currentX) {
                         delay(() => {
-                            __scrollTo([0, __y], onScroll, [true, isShrink[1]]);
+                            this.__scrollTo([0, __y], onScroll, [true, isShrink[1]]);
                         });
                     } else if (__MIN_X > currentX) {
                         delay(() => {
-                            __scrollTo([__MIN_X, __y], onScroll, [true, isShrink[1]]);
+                            this.__scrollTo([__MIN_X, __y], onScroll, [true, isShrink[1]]);
                         });
                     }
                 }
@@ -278,26 +282,28 @@ clearTimeout(id)
             const startY = __y;
             // 容差范围内
             realDistY = clamp(distY, __MIN_Y - tolerance, tolerance)
+            isOutY = __y >= 0 && __y <= __MIN_Y;
+
             __nextTick(startY, realDistY, (newY, rafId) => {
                 const currentY = newY;
 
                 isAnimateScrollStopY = newY === realDistY;
-                if (isAnimateScrollStopX && isAnimateScrollStopY) {
-                    __onScrollEnd()
+                if (isAnimateScrollStopX && isAnimateScrollStopY && !isOutX && !isOutY) {
+                    // __onScrollEnd()
                 }
 
 
                 __rafIdY = rafId;
-                const _xy = __setXY(__x, newY);
+                const _xy = this.__setXY(__x, newY);
 
                 if (!isShrink[1] && 0 < currentY) {
                     // 收缩
                     delay(() => {
-                        __scrollTo([__x, 0], onScroll, [isShrink[0], true]);
+                        this.__scrollTo([__x, 0], onScroll, [isShrink[0], true]);
                     });
                 } else if (!isShrink[1] && __MIN_Y > currentY) {
                     delay(() => {
-                        __scrollTo([__x, __MIN_Y], onScroll, [isShrink[0], true]);
+                        this.__scrollTo([__x, __MIN_Y], onScroll, [isShrink[0], true]);
                     });
                 } else {
 
@@ -306,35 +312,26 @@ clearTimeout(id)
         }
     }
 
+
     /**
-     * 按时间滚动
-     * @param distX 
-     * @param distY 
-     * @param duration 
-     * @param done 
+     * 更新尺寸
      */
-    function scrollTo(distX: number, distY: number, duration: number, done?: () => void) {
-        raf.cancel(__rafId);
-        const startTime = Date.now();
-        const distanceX = clamp(0 - distX, __MIN_X, 0) - __x;
-        const distanceY = clamp(0 - distY, __MIN_Y, 0) - __y;
-        __scrollToOnTime([__x, __y], [distanceX, distanceY], startTime, duration);
+    private __updateSize() {
+        // 保留边框
+        // 参考smooth-scroll
+        const { el, contentEl } = this;
+        const { offsetWidth, offsetHeight, clientWidth, clientHeight, scrollWidth, scrollHeight } = contentEl;
+        this.__contentSize = [offsetWidth - clientWidth + scrollWidth, offsetHeight - clientHeight + scrollHeight];
+        this.__minXY = [el.clientWidth - this.__contentSize[0], el.clientHeight - this.__contentSize[1]];
+        console.log('update-size');
     }
 
-    function __scrollToOnTime([startX, startY]: [number, number], [distanceX, distanceY]: [number, number], startTime: number, duration: number) {
-        const elapse = Date.now() - startTime;
-        const progress = Math.min(1, easeOutCubic(elapse / duration));
-        const distX = startX + distanceX * progress;
-        const distY = startY + distanceY * progress;
+}
 
-        if (duration >= elapse) {
-            __setXY(distX, distY);
-            __rafId = raf(() => {
-                __scrollToOnTime([startX, startY], [distanceX, distanceY], startTime, duration);
-            });
-        } else {
-            __onScrollEnd();
-        }
-    }
-    return [scrollTo];
+
+function __nextTick(from: number, to: number, callback: (value: number, rafId: number) => void) {
+    nextTick(to - from, (n, rafId) => {
+        callback(from + n, rafId);
+        // }, this.__options.damping);
+    }, 0.1);
 }
