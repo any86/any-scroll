@@ -15,7 +15,6 @@ declare const MozMutationObserver: MutationObserver;
 
 
 
-let isAnimateScrollStop = [true, true];
 
 /**
  * 构造DOM结构
@@ -56,50 +55,45 @@ export default class extends AnyTouch {
 
     constructor(el: HTMLElement, options?: Options) {
         super(el);
-        console.log('class');
+        console.warn('class');
 
         this.el = el;
         this.contentEl = __initDOM(el);
         this.__options = { ...options, ...DEFAULT_OPTIONS };
         this.__updateBar = createBar(el, (x, y, thumbWidth, thumbHeight) => {
-            this.__setXY(
+            this.setXY(
                 x / (el.clientWidth - thumbWidth) * this.__minXY[0],
                 y / (el.clientHeight - thumbHeight) * this.__minXY[1]);
         });
+
+        // const [watch,sync,thumbEl, barEl] = createBar();
+
         this.__updateSize();
 
+        const at = this.target(this.contentEl);
 
-        this.on('panmove', e => {
+        at.on('panmove', e => {
             const { deltaX, deltaY } = e;
-            const is = (e.target as HTMLElement).classList.contains('scroll-bar-track') ||
-                (e.target as HTMLElement).classList.contains('scroll-bar-thumb')
-            if (!is) {
-
-                this.__setXY(this.__xy[0] + deltaX, this.__xy[1] + deltaY);
-            }
+            this.setXY(this.__xy[0] + deltaX, this.__xy[1] + deltaY);
         });
 
 
-        this.on('panend', e => {
+        at.on('panend', e => {
+            this.snap();
+
             this.scrollEndTimeId = setTimeout(() => {
-                // __onScrollEnd();
+                this.emit('scroll-end', this.__xy);
             }, SHRINK_DELAY_TIME)
         })
 
-        this.on('at:end', e => {
-            this.__snap();
+
+        at.on('at:start', e => {
+            this.stop();
         });
-
-        this.on('at:start', e => {
-            this.__stop();
-        });
-
-
-
 
         const swipe = this.get('swipe');
         swipe && swipe.set({ velocity: 1 });
-        this.on('swipe', e => {
+        at.on('swipe', e => {
             clearTimeout(this.scrollEndTimeId)
             let deltaX = e.speedX * 100;
             let deltaY = e.speedY * 100;
@@ -108,23 +102,30 @@ export default class extends AnyTouch {
 
     }
 
-
-
-    __stop() {
-        console.log(`stop`);
+    /**
+     * 立即停止滑动
+     */
+    stop() {
         raf.cancel(this.__rafId);
         raf.cancel(this.__rafIdXY[0]);
         raf.cancel(this.__rafIdXY[1]);
-
     }
 
-    __snap() {
+    /**
+     * 吸附到最近的边缘
+     */
+    snap() {
         this.__scrollTo([clamp(this.__xy[0], this.__minXY[0], 0), clamp(this.__xy[1], this.__minXY[1], 0)]);
     }
 
 
-
-    private __setXY(x: number, y: number): [number, number] {
+    /**
+     * 设置位置
+     * @param x 
+     * @param y 
+     * @returns 
+     */
+    private setXY(x: number, y: number): [number, number] {
         const distX = clamp(x, this.__minXY[0] - this.__options.tolerance, this.__options.tolerance);
         const distY = clamp(y, this.__minXY[1] - this.__options.tolerance, this.__options.tolerance);
 
@@ -168,18 +169,16 @@ export default class extends AnyTouch {
                 _realDist[i] = clamp(dist[i], __minXY[i] - tolerance, tolerance);
                 _isOutXY[i] = __xy[i] >= 0 && __xy[i] <= __minXY[i];
                 __nextTick(__xy[i], _realDist[i], (newValue, rafId) => {
-                    console.log(newValue);
-                    isAnimateScrollStop[i] = newValue === _realDist[i];
-                    if (isAnimateScrollStop.every(is => is) && _isOutXY.every(is => !is)) {
-                        // __onScrollEnd()
-                        console.log('end');
+                    this.__isAnimateScrollStop[i] = newValue === _realDist[i];
+                    if (this.__isAnimateScrollStop.every(is => is) && _isOutXY.every(is => !is)) {
+                        this.emit('scroll-end', this.__xy);
                     }
 
                     this.__rafIdXY[i] = rafId;
                     const newXY: [number, number] = [...this.__xy];
                     newXY[i] = newValue;
-                    const _xy = this.__setXY(...newXY);
-                    onScroll(_xy);
+                    this.setXY(...newXY);
+                    onScroll(this.__xy);
 
                     if (!isShrink[i]) {
                         // 准备收缩
@@ -206,8 +205,6 @@ export default class extends AnyTouch {
 
     }
 
-
-
     /**
      * 更新尺寸
      */
@@ -220,9 +217,7 @@ export default class extends AnyTouch {
         this.__minXY = [el.clientWidth - this.__contentSize[0], el.clientHeight - this.__contentSize[1]];
         console.log('update-size');
     }
-
 }
-
 
 function __nextTick(from: number, to: number, callback: (value: number, rafId: number) => void) {
     nextTick(to - from, (n, rafId) => {

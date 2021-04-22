@@ -46,7 +46,7 @@
   "dependencies": {
     "@rollup/plugin-commonjs": "^17.1.0",
     "@rollup/plugin-node-resolve": "^11.2.0",
-    "any-touch": "^1.0.10",
+    "any-touch": "^1.0.12",
     "insert-css": "^2.0.0",
     "raf": "^3.4.1",
     "tslib": "^2.0.1"

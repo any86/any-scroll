@@ -55,9 +55,9 @@
         const el = document.getElementById('scroll');
         const as = anyScroll(el);
         // as.__scrollTo([-100,-100])
-        // as.on('scroll', e=>{
-        //     console.log(e);
-        // })
+        as.on('scroll-end', e=>{
+            console.log('scroll-end');
+        })
         // scrollTo(1000, 1100, 1000);
     </script>
 </body>

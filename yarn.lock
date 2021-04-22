@@ -2,94 +2,183 @@
 # yarn lockfile v1
 
 
-"@any-touch/compute@^1.0.10":
-  version "1.0.10"
-  resolved "https://registry.nlark.com/@any-touch/compute/download/@any-touch/compute-1.0.10.tgz#6a5650a3ec52bd3e8d10668d61f16ff444b4f9c6"
-  integrity sha1-alZQo+xSvT6NEGaNYfFv9ES0+cY=
+"@any-touch/compute@^1.0.11":
+  version "1.0.11"
+  resolved "https://registry.nlark.com/@any-touch/compute/download/@any-touch/compute-1.0.11.tgz#11f0e64499bfe5d323afbc75bfbf4bbc63fb878f"
+  integrity sha1-EfDmRJm/5dMjr7x1v79LvGP7h48=
   dependencies:
-    "@any-touch/shared" "^1.0.10"
-    "@any-touch/vector" "^1.0.10"
+    "@any-touch/shared" "^1.0.11"
+    "@any-touch/vector" "^1.0.11"
     tslib "^1.9.3"
 
-"@any-touch/core@^1.0.10":
-  version "1.0.10"
-  resolved "https://registry.npm.taobao.org/@any-touch/core/download/@any-touch/core-1.0.10.tgz#5d832d443a38cadbff612a63fd2df91aa0bf06aa"
-  integrity sha1-XYMtRDo4ytv/YSpj/S35GqC/Bqo=
+"@any-touch/compute@^1.0.12":
+  version "1.0.12"
+  resolved "https://registry.nlark.com/@any-touch/compute/download/@any-touch/compute-1.0.12.tgz#6a21ef0563611b23430b24b595c97780f4e44d3f"
+  integrity sha1-aiHvBWNhGyNDCyS1lcl3gPTkTT8=
   dependencies:
-    "@any-touch/shared" "^1.0.10"
-    any-event "^1.0.10"
+    "@any-touch/shared" "^1.0.12"
+    "@any-touch/vector" "^1.0.12"
+    tslib "^1.9.3"
 
-"@any-touch/pan@^1.0.10":
-  version "1.0.10"
-  resolved "https://registry.npm.taobao.org/@any-touch/pan/download/@any-touch/pan-1.0.10.tgz#e59549afad74197672e5d5dcbc9bab311ad15555"
-  integrity sha1-5ZVJr610GXZy5dXcvJurMRrRVVU=
+"@any-touch/core@^1.0.11":
+  version "1.0.11"
+  resolved "https://registry.nlark.com/@any-touch/core/download/@any-touch/core-1.0.11.tgz#d6c8977c7befcf3fd9b29ce89ec8b183b5738e10"
+  integrity sha1-1siXfHvvzz/Zspzonsixg7VzjhA=
   dependencies:
-    "@any-touch/compute" "^1.0.10"
-    "@any-touch/recognizer" "^1.0.10"
-    "@any-touch/shared" "^1.0.10"
+    "@any-touch/shared" "^1.0.11"
+    any-event "^1.0.11"
 
-"@any-touch/pinch@^1.0.10":
-  version "1.0.10"
-  resolved "https://registry.npm.taobao.org/@any-touch/pinch/download/@any-touch/pinch-1.0.10.tgz#4bfbd0cf9de54dd094e9d56a46214239cc0ccb38"
-  integrity sha1-S/vQz53lTdCU6dVqRiFCOcwMyzg=
+"@any-touch/core@^1.0.12":
+  version "1.0.12"
+  resolved "https://registry.nlark.com/@any-touch/core/download/@any-touch/core-1.0.12.tgz#b773eb5419e56bdbc3a1c09356bb98175fcc9fb0"
+  integrity sha1-t3PrVBnla9vDocCTVruYF1/Mn7A=
   dependencies:
-    "@any-touch/compute" "^1.0.10"
-    "@any-touch/recognizer" "^1.0.10"
+    "@any-touch/shared" "^1.0.12"
+    any-event "^1.0.12"
 
-"@any-touch/press@^1.0.10":
-  version "1.0.10"
-  resolved "https://registry.npm.taobao.org/@any-touch/press/download/@any-touch/press-1.0.10.tgz#a2243b287bb939376aea1ff38a8631da6cfeffab"
-  integrity sha1-oiQ7KHu5OTdq6h/zioYx2mz+/6s=
+"@any-touch/pan@^1.0.11":
+  version "1.0.11"
+  resolved "https://registry.nlark.com/@any-touch/pan/download/@any-touch/pan-1.0.11.tgz#bac80c7ea9e0670da970e6057445cd0f73214c73"
+  integrity sha1-usgMfqngZw2pcOYFdEXND3MhTHM=
   dependencies:
-    "@any-touch/compute" "^1.0.10"
-    "@any-touch/recognizer" "^1.0.10"
-    "@any-touch/shared" "^1.0.10"
+    "@any-touch/compute" "^1.0.11"
+    "@any-touch/recognizer" "^1.0.11"
+    "@any-touch/shared" "^1.0.11"
 
-"@any-touch/recognizer@^1.0.10":
-  version "1.0.10"
-  resolved "https://registry.nlark.com/@any-touch/recognizer/download/@any-touch/recognizer-1.0.10.tgz#aa37c482fc7fc5fbc9a196a8ce3de3951a180b1b"
-  integrity sha1-qjfEgvx/xfvJoZaozj3jlRoYCxs=
+"@any-touch/pan@^1.0.12":
+  version "1.0.12"
+  resolved "https://registry.nlark.com/@any-touch/pan/download/@any-touch/pan-1.0.12.tgz#365d2e612b857b18132f52d15eb630e3051d8d69"
+  integrity sha1-Nl0uYSuFexgTL1LRXrYw4wUdjWk=
   dependencies:
-    "@any-touch/shared" "^1.0.10"
+    "@any-touch/compute" "^1.0.12"
+    "@any-touch/recognizer" "^1.0.12"
+    "@any-touch/shared" "^1.0.12"
 
-"@any-touch/rotate@^1.0.10":
-  version "1.0.10"
-  resolved "https://registry.npm.taobao.org/@any-touch/rotate/download/@any-touch/rotate-1.0.10.tgz#01d2dc461ad39ed697ece84da64fd296de39939a"
-  integrity sha1-AdLcRhrTntaX7OhNpk/Slt45k5o=
+"@any-touch/pinch@^1.0.11":
+  version "1.0.11"
+  resolved "https://registry.nlark.com/@any-touch/pinch/download/@any-touch/pinch-1.0.11.tgz#98988bd2c4f016afc9999386fa12f29ceac7b661"
+  integrity sha1-mJiL0sTwFq/JmZOG+hLynOrHtmE=
   dependencies:
-    "@any-touch/compute" "^1.0.10"
-    "@any-touch/recognizer" "^1.0.10"
+    "@any-touch/compute" "^1.0.11"
+    "@any-touch/recognizer" "^1.0.11"
 
-"@any-touch/shared@^1.0.10":
-  version "1.0.10"
-  resolved "https://registry.npm.taobao.org/@any-touch/shared/download/@any-touch/shared-1.0.10.tgz#87a1f33270a698e2c93ce69449e64f99c0547c0f"
-  integrity sha1-h6HzMnCmmOLJPOaUSeZPmcBUfA8=
-
-"@any-touch/swipe@^1.0.10":
-  version "1.0.10"
-  resolved "https://registry.npm.taobao.org/@any-touch/swipe/download/@any-touch/swipe-1.0.10.tgz#0988ac55aee31b234a73a3ef01b2bf565972aba6"
-  integrity sha1-CYisVa7jGyNKc6PvAbK/Vllyq6Y=
+"@any-touch/pinch@^1.0.12":
+  version "1.0.12"
+  resolved "https://registry.nlark.com/@any-touch/pinch/download/@any-touch/pinch-1.0.12.tgz#d1e23b400d1c3b0881bc93b37821df3acb7f7f9d"
+  integrity sha1-0eI7QA0cOwiBvJOzeCHfOst/f50=
   dependencies:
-    "@any-touch/compute" "^1.0.10"
-    "@any-touch/recognizer" "^1.0.10"
-    "@any-touch/shared" "^1.0.10"
+    "@any-touch/compute" "^1.0.12"
+    "@any-touch/recognizer" "^1.0.12"
 
-"@any-touch/tap@^1.0.10":
-  version "1.0.10"
-  resolved "https://registry.npm.taobao.org/@any-touch/tap/download/@any-touch/tap-1.0.10.tgz#791baf1fa0a423aac06185e0f89ef46823eb970f"
-  integrity sha1-eRuvH6CkI6rAYYXg+J70aCPrlw8=
+"@any-touch/press@^1.0.11":
+  version "1.0.11"
+  resolved "https://registry.nlark.com/@any-touch/press/download/@any-touch/press-1.0.11.tgz#0e9ecdb79e2f945dfa4f33e0b9dba7c5dced10d9"
+  integrity sha1-Dp7Nt54vlF36TzPgudunxdztENk=
   dependencies:
-    "@any-touch/compute" "^1.0.10"
-    "@any-touch/recognizer" "^1.0.10"
-    "@any-touch/shared" "^1.0.10"
-    "@any-touch/vector" "^1.0.10"
+    "@any-touch/compute" "^1.0.11"
+    "@any-touch/recognizer" "^1.0.11"
+    "@any-touch/shared" "^1.0.11"
 
-"@any-touch/vector@^1.0.10":
-  version "1.0.10"
-  resolved "https://registry.npm.taobao.org/@any-touch/vector/download/@any-touch/vector-1.0.10.tgz#140870e814651607aff97b6bfabd3538f37788c3"
-  integrity sha1-FAhw6BRlFgev+Xtr+r01OPN3iMM=
+"@any-touch/press@^1.0.12":
+  version "1.0.12"
+  resolved "https://registry.nlark.com/@any-touch/press/download/@any-touch/press-1.0.12.tgz#a5f3385279b93a8a57340769e6d4cb5a2d6edf67"
+  integrity sha1-pfM4Unm5OopXNAdp5tTLWi1u32c=
   dependencies:
-    "@any-touch/shared" "^1.0.10"
+    "@any-touch/compute" "^1.0.12"
+    "@any-touch/recognizer" "^1.0.12"
+    "@any-touch/shared" "^1.0.12"
+
+"@any-touch/recognizer@^1.0.11":
+  version "1.0.11"
+  resolved "https://registry.nlark.com/@any-touch/recognizer/download/@any-touch/recognizer-1.0.11.tgz#9b2f630f5a5b84b322c7bea04eab24453e0710ee"
+  integrity sha1-my9jD1pbhLMix76gTqskRT4HEO4=
+  dependencies:
+    "@any-touch/shared" "^1.0.11"
+
+"@any-touch/recognizer@^1.0.12":
+  version "1.0.12"
+  resolved "https://registry.nlark.com/@any-touch/recognizer/download/@any-touch/recognizer-1.0.12.tgz#0b5fb345ba06e33afdaa57a0c55e506b315a5121"
+  integrity sha1-C1+zRboG4zr9qlegxV5QazFaUSE=
+  dependencies:
+    "@any-touch/shared" "^1.0.12"
+
+"@any-touch/rotate@^1.0.11":
+  version "1.0.11"
+  resolved "https://registry.nlark.com/@any-touch/rotate/download/@any-touch/rotate-1.0.11.tgz#30b895a306eb45204ab965ed90be84edaecde7d4"
+  integrity sha1-MLiVowbrRSBKuWXtkL6E7a7N59Q=
+  dependencies:
+    "@any-touch/compute" "^1.0.11"
+    "@any-touch/recognizer" "^1.0.11"
+
+"@any-touch/rotate@^1.0.12":
+  version "1.0.12"
+  resolved "https://registry.nlark.com/@any-touch/rotate/download/@any-touch/rotate-1.0.12.tgz#23c30c45eacf763a023e7871f0eceeaa5a39eddd"
+  integrity sha1-I8MMRerPdjoCPnhx8Ozuqlo57d0=
+  dependencies:
+    "@any-touch/compute" "^1.0.12"
+    "@any-touch/recognizer" "^1.0.12"
+
+"@any-touch/shared@^1.0.11":
+  version "1.0.11"
+  resolved "https://registry.nlark.com/@any-touch/shared/download/@any-touch/shared-1.0.11.tgz#e7c721a58406a5b1e9bf2b551f77e88064e2d288"
+  integrity sha1-58chpYQGpbHpvytVH3fogGTi0og=
+
+"@any-touch/shared@^1.0.12":
+  version "1.0.12"
+  resolved "https://registry.nlark.com/@any-touch/shared/download/@any-touch/shared-1.0.12.tgz#1071adf18839c78094d313d9a05611dfbe3a243e"
+  integrity sha1-EHGt8Yg5x4CU0xPZoFYR3746JD4=
+
+"@any-touch/swipe@^1.0.11":
+  version "1.0.11"
+  resolved "https://registry.nlark.com/@any-touch/swipe/download/@any-touch/swipe-1.0.11.tgz#5c145057191e069a593d7fd7295496d28e208239"
+  integrity sha1-XBRQVxkeBppZPX/XKVSW0o4ggjk=
+  dependencies:
+    "@any-touch/compute" "^1.0.11"
+    "@any-touch/recognizer" "^1.0.11"
+    "@any-touch/shared" "^1.0.11"
+
+"@any-touch/swipe@^1.0.12":
+  version "1.0.12"
+  resolved "https://registry.nlark.com/@any-touch/swipe/download/@any-touch/swipe-1.0.12.tgz#be44f1e8c56b17b91a3c02fc37ef6729e15f9223"
+  integrity sha1-vkTx6MVrF7kaPAL8N+9nKeFfkiM=
+  dependencies:
+    "@any-touch/compute" "^1.0.12"
+    "@any-touch/recognizer" "^1.0.12"
+    "@any-touch/shared" "^1.0.12"
+
+"@any-touch/tap@^1.0.11":
+  version "1.0.11"
+  resolved "https://registry.nlark.com/@any-touch/tap/download/@any-touch/tap-1.0.11.tgz#579b7d39dd7903aebaa8d482b800f416d0963089"
+  integrity sha1-V5t9Od15A666qNSCuAD0FtCWMIk=
+  dependencies:
+    "@any-touch/compute" "^1.0.11"
+    "@any-touch/recognizer" "^1.0.11"
+    "@any-touch/shared" "^1.0.11"
+    "@any-touch/vector" "^1.0.11"
+
+"@any-touch/tap@^1.0.12":
+  version "1.0.12"
+  resolved "https://registry.nlark.com/@any-touch/tap/download/@any-touch/tap-1.0.12.tgz#8a50422bf796bbfdd48f807c240774e362463cc8"
+  integrity sha1-ilBCK/eWu/3Uj4B8JAd042JGPMg=
+  dependencies:
+    "@any-touch/compute" "^1.0.12"
+    "@any-touch/recognizer" "^1.0.12"
+    "@any-touch/shared" "^1.0.12"
+    "@any-touch/vector" "^1.0.12"
+
+"@any-touch/vector@^1.0.11":
+  version "1.0.11"
+  resolved "https://registry.nlark.com/@any-touch/vector/download/@any-touch/vector-1.0.11.tgz#9bf2ed6fcf7c80341ecf217435289bcae6af832b"
+  integrity sha1-m/Ltb898gDQezyF0NSibyuavgys=
+  dependencies:
+    "@any-touch/shared" "^1.0.11"
+
+"@any-touch/vector@^1.0.12":
+  version "1.0.12"
+  resolved "https://registry.nlark.com/@any-touch/vector/download/@any-touch/vector-1.0.12.tgz#1df9a4db103258e0ccfd011af922bb03f909b05f"
+  integrity sha1-Hfmk2xAyWODM/QEa+SK7A/kJsF8=
+  dependencies:
+    "@any-touch/shared" "^1.0.12"
 
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.12.13", "@babel/code-frame@^7.5.5":
   version "7.12.13"
@@ -1662,10 +1751,17 @@ ansi-styles@^3.2.0, ansi-styles@^3.2.1:
   dependencies:
     color-convert "^1.9.0"
 
-any-event@^1.0.10:
-  version "1.0.10"
-  resolved "https://registry.nlark.com/any-event/download/any-event-1.0.10.tgz#fe47813ce727e356749d7f620569e4d4a16df347"
-  integrity sha1-/keBPOcn41Z0nX9iBWnk1KFt80c=
+any-event@^1.0.11:
+  version "1.0.11"
+  resolved "https://registry.nlark.com/any-event/download/any-event-1.0.11.tgz#aa46166b01bc3677b6648ba06672fa076d14b79a"
+  integrity sha1-qkYWawG8Nne2ZIugZnL6B20Ut5o=
+  dependencies:
+    tslib "^1.9.3"
+
+any-event@^1.0.12:
+  version "1.0.12"
+  resolved "https://registry.nlark.com/any-event/download/any-event-1.0.12.tgz#b391e1e4d62f5705b0f6e688958836c7872a1b91"
+  integrity sha1-s5Hh5NYvVwWw9uaIlYg2x4cqG5E=
   dependencies:
     tslib "^1.9.3"
 
@@ -1681,19 +1777,34 @@ any-promise@^1.0.0:
   resolved "https://registry.npm.taobao.org/any-promise/download/any-promise-1.3.0.tgz#abc6afeedcea52e809cdc0376aed3ce39635d17f"
   integrity sha1-q8av7tzqUugJzcA3au0845Y10X8=
 
-any-touch@^1.0.10:
-  version "1.0.10"
-  resolved "https://registry.npm.taobao.org/any-touch/download/any-touch-1.0.10.tgz#f79530133d8257c7b2b396fddceb57d1a585d217"
-  integrity sha1-95UwEz2CV8eys5b93OtX0aWF0hc=
+any-touch@^1.0.11:
+  version "1.0.11"
+  resolved "https://registry.nlark.com/any-touch/download/any-touch-1.0.11.tgz#6dce398131042c5558df4fd969a10b88b0a28469"
+  integrity sha1-bc45gTEELFVY30/ZaaELiLCihGk=
   dependencies:
-    "@any-touch/core" "^1.0.10"
-    "@any-touch/pan" "^1.0.10"
-    "@any-touch/pinch" "^1.0.10"
-    "@any-touch/press" "^1.0.10"
-    "@any-touch/rotate" "^1.0.10"
-    "@any-touch/swipe" "^1.0.10"
-    "@any-touch/tap" "^1.0.10"
-    any-event "^1.0.10"
+    "@any-touch/core" "^1.0.11"
+    "@any-touch/pan" "^1.0.11"
+    "@any-touch/pinch" "^1.0.11"
+    "@any-touch/press" "^1.0.11"
+    "@any-touch/rotate" "^1.0.11"
+    "@any-touch/swipe" "^1.0.11"
+    "@any-touch/tap" "^1.0.11"
+    any-event "^1.0.11"
+    tslib "^1.9.3"
+
+any-touch@^1.0.12:
+  version "1.0.12"
+  resolved "https://registry.nlark.com/any-touch/download/any-touch-1.0.12.tgz#8affc25664c0b677c4305eecb70f265deab6f390"
+  integrity sha1-iv/CVmTAtnfEMF7stw8mXeq285A=
+  dependencies:
+    "@any-touch/core" "^1.0.12"
+    "@any-touch/pan" "^1.0.12"
+    "@any-touch/pinch" "^1.0.12"
+    "@any-touch/press" "^1.0.12"
+    "@any-touch/rotate" "^1.0.12"
+    "@any-touch/swipe" "^1.0.12"
+    "@any-touch/tap" "^1.0.12"
+    any-event "^1.0.12"
     tslib "^1.9.3"
 
 anymatch@^2.0.0:
