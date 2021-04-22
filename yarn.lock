@@ -2,94 +2,94 @@
 # yarn lockfile v1
 
 
-"@any-touch/compute@^1.0.6":
-  version "1.0.6"
-  resolved "https://registry.npm.taobao.org/@any-touch/compute/download/@any-touch/compute-1.0.6.tgz#775ea4c228a193ce711bfc44826599abd0ccc0de"
-  integrity sha1-d16kwiihk85xG/xEgmWZq9DMwN4=
+"@any-touch/compute@^1.0.10":
+  version "1.0.10"
+  resolved "https://registry.nlark.com/@any-touch/compute/download/@any-touch/compute-1.0.10.tgz#6a5650a3ec52bd3e8d10668d61f16ff444b4f9c6"
+  integrity sha1-alZQo+xSvT6NEGaNYfFv9ES0+cY=
   dependencies:
-    "@any-touch/shared" "^1.0.6"
-    "@any-touch/vector" "^1.0.6"
+    "@any-touch/shared" "^1.0.10"
+    "@any-touch/vector" "^1.0.10"
     tslib "^1.9.3"
 
-"@any-touch/core@^1.0.6":
-  version "1.0.6"
-  resolved "https://registry.npm.taobao.org/@any-touch/core/download/@any-touch/core-1.0.6.tgz#66809e3f70892c6453162a58919c0301ffbf1925"
-  integrity sha1-ZoCeP3CJLGRTFipYkZwDAf+/GSU=
+"@any-touch/core@^1.0.10":
+  version "1.0.10"
+  resolved "https://registry.npm.taobao.org/@any-touch/core/download/@any-touch/core-1.0.10.tgz#5d832d443a38cadbff612a63fd2df91aa0bf06aa"
+  integrity sha1-XYMtRDo4ytv/YSpj/S35GqC/Bqo=
   dependencies:
-    "@any-touch/shared" "^1.0.6"
-    any-event "^1.0.6"
+    "@any-touch/shared" "^1.0.10"
+    any-event "^1.0.10"
 
-"@any-touch/pan@^1.0.6":
-  version "1.0.6"
-  resolved "https://registry.npm.taobao.org/@any-touch/pan/download/@any-touch/pan-1.0.6.tgz#47f59db9c4693e72b71d4f41d6b06a29f75bd8c7"
-  integrity sha1-R/WducRpPnK3HU9B1rBqKfdb2Mc=
+"@any-touch/pan@^1.0.10":
+  version "1.0.10"
+  resolved "https://registry.npm.taobao.org/@any-touch/pan/download/@any-touch/pan-1.0.10.tgz#e59549afad74197672e5d5dcbc9bab311ad15555"
+  integrity sha1-5ZVJr610GXZy5dXcvJurMRrRVVU=
   dependencies:
-    "@any-touch/compute" "^1.0.6"
-    "@any-touch/recognizer" "^1.0.6"
-    "@any-touch/shared" "^1.0.6"
+    "@any-touch/compute" "^1.0.10"
+    "@any-touch/recognizer" "^1.0.10"
+    "@any-touch/shared" "^1.0.10"
 
-"@any-touch/pinch@^1.0.6":
-  version "1.0.6"
-  resolved "https://registry.npm.taobao.org/@any-touch/pinch/download/@any-touch/pinch-1.0.6.tgz#ae762b39b269cf91066feb0d967140efb897a8d7"
-  integrity sha1-rnYrObJpz5EGb+sNlnFA77iXqNc=
+"@any-touch/pinch@^1.0.10":
+  version "1.0.10"
+  resolved "https://registry.npm.taobao.org/@any-touch/pinch/download/@any-touch/pinch-1.0.10.tgz#4bfbd0cf9de54dd094e9d56a46214239cc0ccb38"
+  integrity sha1-S/vQz53lTdCU6dVqRiFCOcwMyzg=
   dependencies:
-    "@any-touch/compute" "^1.0.6"
-    "@any-touch/recognizer" "^1.0.6"
+    "@any-touch/compute" "^1.0.10"
+    "@any-touch/recognizer" "^1.0.10"
 
-"@any-touch/press@^1.0.6":
-  version "1.0.6"
-  resolved "https://registry.npm.taobao.org/@any-touch/press/download/@any-touch/press-1.0.6.tgz#494c873e7de859a3845decd53c7aaa277368d0a1"
-  integrity sha1-SUyHPn3oWaOEXezVPHqqJ3No0KE=
+"@any-touch/press@^1.0.10":
+  version "1.0.10"
+  resolved "https://registry.npm.taobao.org/@any-touch/press/download/@any-touch/press-1.0.10.tgz#a2243b287bb939376aea1ff38a8631da6cfeffab"
+  integrity sha1-oiQ7KHu5OTdq6h/zioYx2mz+/6s=
   dependencies:
-    "@any-touch/compute" "^1.0.6"
-    "@any-touch/recognizer" "^1.0.6"
-    "@any-touch/shared" "^1.0.6"
+    "@any-touch/compute" "^1.0.10"
+    "@any-touch/recognizer" "^1.0.10"
+    "@any-touch/shared" "^1.0.10"
 
-"@any-touch/recognizer@^1.0.6":
-  version "1.0.6"
-  resolved "https://registry.npm.taobao.org/@any-touch/recognizer/download/@any-touch/recognizer-1.0.6.tgz#89ae7df8a6ffc72a3fe264eb0096fbe62eb9f476"
-  integrity sha1-ia59+Kb/xyo/4mTrAJb75i659HY=
+"@any-touch/recognizer@^1.0.10":
+  version "1.0.10"
+  resolved "https://registry.nlark.com/@any-touch/recognizer/download/@any-touch/recognizer-1.0.10.tgz#aa37c482fc7fc5fbc9a196a8ce3de3951a180b1b"
+  integrity sha1-qjfEgvx/xfvJoZaozj3jlRoYCxs=
   dependencies:
-    "@any-touch/shared" "^1.0.6"
+    "@any-touch/shared" "^1.0.10"
 
-"@any-touch/rotate@^1.0.6":
-  version "1.0.6"
-  resolved "https://registry.npm.taobao.org/@any-touch/rotate/download/@any-touch/rotate-1.0.6.tgz#665e048f7dad39914eb6ce1d1d0f3aef74ac6201"
-  integrity sha1-Zl4Ej32tOZFOts4dHQ8673SsYgE=
+"@any-touch/rotate@^1.0.10":
+  version "1.0.10"
+  resolved "https://registry.npm.taobao.org/@any-touch/rotate/download/@any-touch/rotate-1.0.10.tgz#01d2dc461ad39ed697ece84da64fd296de39939a"
+  integrity sha1-AdLcRhrTntaX7OhNpk/Slt45k5o=
   dependencies:
-    "@any-touch/compute" "^1.0.6"
-    "@any-touch/recognizer" "^1.0.6"
+    "@any-touch/compute" "^1.0.10"
+    "@any-touch/recognizer" "^1.0.10"
 
-"@any-touch/shared@^1.0.6":
-  version "1.0.6"
-  resolved "https://registry.npm.taobao.org/@any-touch/shared/download/@any-touch/shared-1.0.6.tgz#2a09b235b719619e4a833ba9ab86ff4ef54ad11b"
-  integrity sha1-KgmyNbcZYZ5Kgzupq4b/TvVK0Rs=
+"@any-touch/shared@^1.0.10":
+  version "1.0.10"
+  resolved "https://registry.npm.taobao.org/@any-touch/shared/download/@any-touch/shared-1.0.10.tgz#87a1f33270a698e2c93ce69449e64f99c0547c0f"
+  integrity sha1-h6HzMnCmmOLJPOaUSeZPmcBUfA8=
 
-"@any-touch/swipe@^1.0.6":
-  version "1.0.6"
-  resolved "https://registry.npm.taobao.org/@any-touch/swipe/download/@any-touch/swipe-1.0.6.tgz#049c3fbd8bfa5b2de5fd7dee302be2a06712ea2c"
-  integrity sha1-BJw/vYv6Wy3l/X3uMCvioGcS6iw=
+"@any-touch/swipe@^1.0.10":
+  version "1.0.10"
+  resolved "https://registry.npm.taobao.org/@any-touch/swipe/download/@any-touch/swipe-1.0.10.tgz#0988ac55aee31b234a73a3ef01b2bf565972aba6"
+  integrity sha1-CYisVa7jGyNKc6PvAbK/Vllyq6Y=
   dependencies:
-    "@any-touch/compute" "^1.0.6"
-    "@any-touch/recognizer" "^1.0.6"
-    "@any-touch/shared" "^1.0.6"
+    "@any-touch/compute" "^1.0.10"
+    "@any-touch/recognizer" "^1.0.10"
+    "@any-touch/shared" "^1.0.10"
 
-"@any-touch/tap@^1.0.6":
-  version "1.0.6"
-  resolved "https://registry.npm.taobao.org/@any-touch/tap/download/@any-touch/tap-1.0.6.tgz#ad8cabfc8456d2ae8de7e96ac6fbe9064aedc2bc"
-  integrity sha1-rYyr/IRW0q6N5+lqxvvpBkrtwrw=
+"@any-touch/tap@^1.0.10":
+  version "1.0.10"
+  resolved "https://registry.npm.taobao.org/@any-touch/tap/download/@any-touch/tap-1.0.10.tgz#791baf1fa0a423aac06185e0f89ef46823eb970f"
+  integrity sha1-eRuvH6CkI6rAYYXg+J70aCPrlw8=
   dependencies:
-    "@any-touch/compute" "^1.0.6"
-    "@any-touch/recognizer" "^1.0.6"
-    "@any-touch/shared" "^1.0.6"
-    "@any-touch/vector" "^1.0.6"
+    "@any-touch/compute" "^1.0.10"
+    "@any-touch/recognizer" "^1.0.10"
+    "@any-touch/shared" "^1.0.10"
+    "@any-touch/vector" "^1.0.10"
 
-"@any-touch/vector@^1.0.6":
-  version "1.0.6"
-  resolved "https://registry.npm.taobao.org/@any-touch/vector/download/@any-touch/vector-1.0.6.tgz#aafc4e0f1d0b874e8c3a20babbdaec5b5799a315"
-  integrity sha1-qvxODx0Lh06MOiC6u9rsW1eZoxU=
+"@any-touch/vector@^1.0.10":
+  version "1.0.10"
+  resolved "https://registry.npm.taobao.org/@any-touch/vector/download/@any-touch/vector-1.0.10.tgz#140870e814651607aff97b6bfabd3538f37788c3"
+  integrity sha1-FAhw6BRlFgev+Xtr+r01OPN3iMM=
   dependencies:
-    "@any-touch/shared" "^1.0.6"
+    "@any-touch/shared" "^1.0.10"
 
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.12.13", "@babel/code-frame@^7.5.5":
   version "7.12.13"
@@ -1463,6 +1463,11 @@
     "@types/minimatch" "*"
     "@types/node" "*"
 
+"@types/insert-css@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.npm.taobao.org/@types/insert-css/download/@types/insert-css-2.0.0.tgz#f323e1e1940c388e80fcf1e1b93de4b6dcefd431"
+  integrity sha1-8yPh4ZQMOI6A/PHhuT3kttzv1DE=
+
 "@types/istanbul-lib-coverage@*", "@types/istanbul-lib-coverage@^2.0.0":
   version "2.0.3"
   resolved "https://registry.npm.taobao.org/@types/istanbul-lib-coverage/download/@types/istanbul-lib-coverage-2.0.3.tgz#4ba8ddb720221f432e443bd5f9117fd22cfd4762"
@@ -1657,6 +1662,13 @@ ansi-styles@^3.2.0, ansi-styles@^3.2.1:
   dependencies:
     color-convert "^1.9.0"
 
+any-event@^1.0.10:
+  version "1.0.10"
+  resolved "https://registry.nlark.com/any-event/download/any-event-1.0.10.tgz#fe47813ce727e356749d7f620569e4d4a16df347"
+  integrity sha1-/keBPOcn41Z0nX9iBWnk1KFt80c=
+  dependencies:
+    tslib "^1.9.3"
+
 any-event@^1.0.6:
   version "1.0.6"
   resolved "https://registry.npm.taobao.org/any-event/download/any-event-1.0.6.tgz#84eed6aac31e17e42c1bf9c6e344707f1ea9cbb9"
@@ -1669,19 +1681,19 @@ any-promise@^1.0.0:
   resolved "https://registry.npm.taobao.org/any-promise/download/any-promise-1.3.0.tgz#abc6afeedcea52e809cdc0376aed3ce39635d17f"
   integrity sha1-q8av7tzqUugJzcA3au0845Y10X8=
 
-any-touch@^1.0.6:
-  version "1.0.6"
-  resolved "https://registry.npm.taobao.org/any-touch/download/any-touch-1.0.6.tgz#8fde47d4a2e9ce7091f127493acae82d531b7371"
-  integrity sha1-j95H1KLpznCR8SdJOsroLVMbc3E=
+any-touch@^1.0.10:
+  version "1.0.10"
+  resolved "https://registry.npm.taobao.org/any-touch/download/any-touch-1.0.10.tgz#f79530133d8257c7b2b396fddceb57d1a585d217"
+  integrity sha1-95UwEz2CV8eys5b93OtX0aWF0hc=
   dependencies:
-    "@any-touch/core" "^1.0.6"
-    "@any-touch/pan" "^1.0.6"
-    "@any-touch/pinch" "^1.0.6"
-    "@any-touch/press" "^1.0.6"
-    "@any-touch/rotate" "^1.0.6"
-    "@any-touch/swipe" "^1.0.6"
-    "@any-touch/tap" "^1.0.6"
-    any-event "^1.0.6"
+    "@any-touch/core" "^1.0.10"
+    "@any-touch/pan" "^1.0.10"
+    "@any-touch/pinch" "^1.0.10"
+    "@any-touch/press" "^1.0.10"
+    "@any-touch/rotate" "^1.0.10"
+    "@any-touch/swipe" "^1.0.10"
+    "@any-touch/tap" "^1.0.10"
+    any-event "^1.0.10"
     tslib "^1.9.3"
 
 anymatch@^2.0.0:
@@ -3954,6 +3966,11 @@ inquirer@^6.2.0:
     string-width "^2.1.0"
     strip-ansi "^5.1.0"
     through "^2.3.6"
+
+insert-css@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npm.taobao.org/insert-css/download/insert-css-2.0.0.tgz#eb5d1097b7542f4c79ea3060d3aee07d053880f4"
+  integrity sha1-610Ql7dUL0x56jBg067gfQU4gPQ=
 
 interpret@^1.0.0:
   version "1.4.0"
