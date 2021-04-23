@@ -18,12 +18,20 @@ export function appendStyleToHTML(style: string) {
 }
 
 
+export function createDOMDiv() {
+    return document.createElement(`div`);
+}
+
+export function hideDOM(el:HTMLElement){
+    setStyle(el,{display:'none'});
+}
+
 /**
  * 封装settimeout
  * @param callback 
  * @param duration 默认延迟96ms
  */
- export function delay(callback: () => void, duration = 96) {
+export function delay(callback: () => void, duration = 96) {
     setTimeout(() => {
         callback();
     }, duration);
@@ -36,7 +44,7 @@ export function appendStyleToHTML(style: string) {
  * @param damping 衰减系数,范围0~1
  * @param startValue 起始值
  */
- export function nextTick(total: number, each: (n: number, rafId: number) => void, damping: number, startValue = 0) {
+export function nextTick(total: number, each: (n: number, rafId: number) => void, damping: number, startValue = 0) {
     // total需要大于0.1
     let rafId = -1;
     startValue += damping * (total - startValue);

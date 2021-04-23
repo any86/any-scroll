@@ -1,82 +1,91 @@
-import { setStyle, setTranslate } from '@any-scroll/shared';
+import { setStyle, setTranslate, createDOMDiv, hideDOM } from '@any-scroll/shared';
 import { insertCss } from 'insert-css';
 import AnyTouch from 'any-touch'
 import { TRACK_CLASS_NAME, THUMB_CLASS_NAME, BAR_CSS, DIRECTION } from './const';
 import clamp from 'lodash/clamp';
+
+const sizeProps = ['width', 'height'];
 /**
  * 创建滚动条
  * @param el 容器元素
  * @returns 
  */
-export default function (el: HTMLElement, onChange: (x: number, y: number, width: number, height: number) => void) {
-    let __barX = 0;
-    let __barY = 0;
+export default function (el: HTMLElement) {
     insertCss(BAR_CSS);
-    const [trackElX, thumbElX] = __createScrollBar(el, DIRECTION.X, __barX);
-    const [trackElY, thumbElY] = __createScrollBar(el, DIRECTION.Y, __barY);
-    let thumbWidth = 0;
-    let thumbHeight = 0;
+    const barElementsXY = [DIRECTION.X, DIRECTION.Y].map(dir => {
+        return __createDOM(el, dir);
+    });
 
-
-    function __createScrollBar(el: HTMLElement, axis: 'x' | 'y' = DIRECTION.X, value = 0) {
-        const trackEl = document.createElement('div');
-        const thumbEl = document.createElement('div');
+    /**
+     * 创建指定轴的滚动条DOM
+     * @param el view元素
+     * @param axis 轴
+     * @returns [滚动条轨道,把手]
+     */
+    function __createDOM(el: HTMLElement, axis: 'x' | 'y' = DIRECTION.X) {
+        const trackEl = createDOMDiv();
+        const thumbEl = createDOMDiv();
         trackEl.className = `${TRACK_CLASS_NAME} ${TRACK_CLASS_NAME}-${axis}`;
         thumbEl.className = `${THUMB_CLASS_NAME} ${THUMB_CLASS_NAME}-${axis}`;
         trackEl.appendChild(thumbEl);
         el.appendChild(trackEl);
 
 
-        const at = new AnyTouch(thumbEl);
-        at.on('panmove', ({ deltaX, deltaY }) => {
-            if (DIRECTION.X === axis) {
-                __barX += deltaX;
-                setTranslate(thumbEl, __barX, 0);
-            } else {
-                __barY += deltaY;
-                setTranslate(thumbEl, 0, __barY);
-            }
-            onChange(__barX, __barY, thumbWidth, thumbHeight);
-        });
+        // const at = new AnyTouch(thumbEl);
+        // at.on('panmove', ({ deltaX, deltaY }) => {
+        //     if (DIRECTION.X === axis) {
+        //         newValue += deltaX;
+        //         setTranslate(thumbEl, newValue, 0);
+        //     } else {
+        //         __barY += deltaY;
+        //         setTranslate(thumbEl, 0, __barY);
+        //     }
+        //     onChange(newValue, __barY, thumbWidth, thumbHeight);
+        // });
 
         return [trackEl, thumbEl];
     }
 
-    function updateBarX([x, y]: [number, number], [width, height, minX, minY]: [number, number, number, number]) {
+
+    /**
+     * 计算滚动条把手的尺寸和位置
+     * @param position view的位置
+     * @param trackLength view的外框尺寸
+     * @param minValue view的最小位置
+     * @returns 把手的尺寸和位置
+     */
+    function __calcBar(position: number, trackLength: number, minValue: number): [number, number] {
         let scale = 1;
-        thumbWidth = Math.abs(width / (minX-width) * width);
-        if (0 < x) {
-            scale = 1 - (x / width);
-        } else if (minX > x) {
-            scale = 1 - (minX - x) / width
+        let thumbLength = Math.abs(trackLength / (minValue - trackLength) * trackLength);
+        if (0 < position) {
+            scale = 1 - (position / trackLength);
+        } else if (minValue > position) {
+            scale = 1 - (minValue - position) / trackLength
         }
-
-        thumbWidth *= scale
-
-        setStyle(thumbElX, { width: `${thumbWidth}px` });
-        __barX = clamp(x / (minX) * (width - thumbWidth), 0, width - thumbWidth);
-        setTranslate(thumbElX, __barX, 0);
-        return thumbWidth;
+        thumbLength *= scale
+        const newPosition = clamp(position / (minValue) * (trackLength - thumbLength), 0, trackLength - thumbLength);
+        return [thumbLength, newPosition];
     }
 
-    function updateBarY([x, y]: [number, number], [width, height, minX, minY]: [number, number, number, number]) {
-        let scale = 1;
-        thumbHeight = Math.abs(height / (minY-height) * height);
-        if (0 < y) {
-            scale = 1 - (y / height);
-        } else if (minY > y) {
-            scale = 1 - (minY - y) / height
+    /**
+     * 根据view的数据调整bar
+     * @param position view的xy
+     * @param warpSize view的外壳尺寸
+     * @param min view可以到达的最小xy
+     * @param contentSize 内容尺寸
+     */
+    function updateBar(position: [number, number], warpSize: [number, number], min: [number, number], contentSize: [number, number]) {
+        for (let i = 0; i < 2; i++) {
+            if (contentSize[i] > warpSize[i]) {
+                const [thumbLength, newPosition] = __calcBar(position[i], warpSize[i], min[i]);
+                const __thumbEl = barElementsXY[i][1];
+                const positionMaybe = [newPosition, 0];
+                setStyle(__thumbEl, { [sizeProps[i]]: `${thumbLength}px` });
+                setTranslate(__thumbEl, positionMaybe[i], positionMaybe[1 ^ i]);
+            } else {
+                hideDOM(barElementsXY[i][0]);
+            }
         }
-        thumbHeight *= scale
-        setStyle(thumbElY, { height: `${thumbHeight}px` });
-        __barY = clamp(y / minY * (height - thumbHeight), 0, height - thumbHeight);
-        setTranslate(thumbElY, 0, __barY);
-        return thumbHeight;
-    }
-
-    function updateBar([x, y]: [number, number], [width, height, minX, minY]: [number, number, number, number]) {
-        updateBarX([x, y], [width, height, minX, minY]);
-        updateBarY([x, y], [width, height, minX, minY]);
     }
 
     return updateBar;

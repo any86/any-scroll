@@ -4,16 +4,13 @@ import debounce from 'lodash/debounce';
 
 import clamp from 'lodash/clamp';
 import createBar from '@any-scroll/bar';
-import { setStyle, easeOutCubic, setTranslate, delay, nextTick } from '@any-scroll/shared';
+import { setStyle, easeOutCubic, setTranslate, delay, nextTick, createDOMDiv } from '@any-scroll/shared';
 import watchWheel from './wheel';
 import { STYLE, CONTENT_STYLE, SHRINK_DELAY_TIME, CLASS_NAME_ANY_SCROLL } from './const';
 const { setTimeout } = window;
 
 declare const WebKitMutationObserver: MutationObserver;
 declare const MozMutationObserver: MutationObserver;
-
-
-
 
 
 /**
@@ -26,7 +23,7 @@ function __initDOM(el: HTMLElement): HTMLElement {
     setStyle(el, STYLE);
     el.classList.add(CLASS_NAME_ANY_SCROLL);
     // 生成内容器, 并把外容器内的dom移动到内容器
-    const contentEl = document.createElement('div');
+    const contentEl = createDOMDiv();
     while (el.firstChild) {
         contentEl.appendChild(el.firstChild);
     }
@@ -46,6 +43,7 @@ export default class extends AnyTouch {
     private __rafId = -1;
     private __minXY: [number, number] = [0, 0];
     private __contentSize: [number, number] = [0, 0];
+    private __warpSize: [number, number] = [0, 0];
     private __isAnimateScrollStop: [boolean, boolean] = [true, true];
     private __options: Options;
     __updateBar: any;
@@ -60,15 +58,11 @@ export default class extends AnyTouch {
         this.el = el;
         this.contentEl = __initDOM(el);
         this.__options = { ...options, ...DEFAULT_OPTIONS };
-        this.__updateBar = createBar(el, (x, y, thumbWidth, thumbHeight) => {
-            this.setXY(
-                x / (el.clientWidth - thumbWidth) * this.__minXY[0],
-                y / (el.clientHeight - thumbHeight) * this.__minXY[1]);
-        });
-
+        this.__updateBar = createBar(el);
         // const [watch,sync,thumbEl, barEl] = createBar();
 
         this.__updateSize();
+        this.__updateBar(this.__xy, this.__warpSize, this.__minXY,this.__contentSize);
 
         const at = this.target(this.contentEl);
 
@@ -137,7 +131,7 @@ export default class extends AnyTouch {
         // 钩子
         this.emit('scroll', this.__xy);
         const { clientWidth, clientHeight } = this.el;
-        this.__updateBar([x, y], [clientWidth, clientHeight, ...this.__minXY]);
+        this.__updateBar(this.__xy, [clientWidth, clientHeight], this.__minXY,this.__contentSize);
         setTranslate(this.contentEl, ...this.__xy);
         return this.__xy;
     }
@@ -213,6 +207,7 @@ export default class extends AnyTouch {
         // 参考smooth-scroll
         const { el, contentEl } = this;
         const { offsetWidth, offsetHeight, clientWidth, clientHeight, scrollWidth, scrollHeight } = contentEl;
+        this.__warpSize = [el.clientWidth, el.clientHeight];
         this.__contentSize = [offsetWidth - clientWidth + scrollWidth, offsetHeight - clientHeight + scrollHeight];
         this.__minXY = [el.clientWidth - this.__contentSize[0], el.clientHeight - this.__contentSize[1]];
         console.log('update-size');
