@@ -1,4 +1,6 @@
 import AnyTouch from 'any-touch'
+import AnyEvent from 'any-event'
+
 import raf from 'raf';
 import debounce from 'lodash/debounce';
 
@@ -36,7 +38,7 @@ function __initDOM(el: HTMLElement): HTMLElement {
 interface Options { tolerance: number, damping: number };
 const DEFAULT_OPTIONS = { tolerance: 100, damping: 0.1 };
 
-export default class extends AnyTouch {
+export default class extends AnyEvent {
     private __xy: [number, number] = [0, 0];
     private __rafIdXY: [number, number] = [-1, -1];
     // 给按时间和距离滚动的函数使用
@@ -52,7 +54,7 @@ export default class extends AnyTouch {
     scrollEndTimeId = -1;
 
     constructor(el: HTMLElement, options?: Options) {
-        super(el);
+        super();
         console.warn('class');
 
         this.el = el;
@@ -63,8 +65,8 @@ export default class extends AnyTouch {
 
         this.__updateSize();
         this.__updateBar(this.__xy, this.__warpSize, this.__minXY,this.__contentSize);
-
-        const at = this.target(this.contentEl);
+        const at = new AnyTouch(el);
+        // const at1 = at.target(this.contentEl);
 
         at.on('panmove', e => {
             const { deltaX, deltaY } = e;
@@ -85,7 +87,7 @@ export default class extends AnyTouch {
             this.stop();
         });
 
-        const swipe = this.get('swipe');
+        const swipe = at.get('swipe');
         swipe && swipe.set({ velocity: 1 });
         at.on('swipe', e => {
             clearTimeout(this.scrollEndTimeId)
@@ -164,7 +166,8 @@ export default class extends AnyTouch {
                 _isOutXY[i] = __xy[i] >= 0 && __xy[i] <= __minXY[i];
                 __nextTick(__xy[i], _realDist[i], (newValue, rafId) => {
                     this.__isAnimateScrollStop[i] = newValue === _realDist[i];
-                    if (this.__isAnimateScrollStop.every(is => is) && _isOutXY.every(is => !is)) {
+                    // if (this.__isAnimateScrollStop.every(is => is) && _isOutXY.every(is => !is)) {
+                    if (this.__isAnimateScrollStop.every(is => is)) {
                         this.emit('scroll-end', this.__xy);
                     }
 
