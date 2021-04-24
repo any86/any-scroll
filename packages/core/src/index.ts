@@ -64,7 +64,7 @@ export default class extends AnyEvent {
         // const [watch,sync,thumbEl, barEl] = createBar();
 
         this.__updateSize();
-        this.__updateBar(this.__xy, this.__warpSize, this.__minXY,this.__contentSize);
+        this.__updateBar(this.__xy, this.__warpSize, this.__minXY, this.__contentSize);
         const at = new AnyTouch(el);
         // const at1 = at.target(this.contentEl);
 
@@ -94,6 +94,23 @@ export default class extends AnyEvent {
             let deltaX = e.speedX * 100;
             let deltaY = e.speedY * 100;
             this.__scrollTo([this.__xy[0] + deltaX, this.__xy[1] + deltaY]);
+        });
+
+
+
+
+        watchWheel(el, ({ type, deltaY, v, target }) => {
+            if ('start' === type) {
+                this.stop();
+            } else if ('move' === type) {
+                this.setXY(this.__xy[0], this.__xy[1] + deltaY );
+            } else if ('end' === type) {
+                if (5 < Math.abs(v)) {
+                    this.__scrollTo([this.__xy[0], this.__xy[1] + v * 200])
+                } else {
+                    this.snap()
+                }
+            }
         });
 
     }
@@ -133,7 +150,7 @@ export default class extends AnyEvent {
         // 钩子
         this.emit('scroll', this.__xy);
         const { clientWidth, clientHeight } = this.el;
-        this.__updateBar(this.__xy, [clientWidth, clientHeight], this.__minXY,this.__contentSize);
+        this.__updateBar(this.__xy, [clientWidth, clientHeight], this.__minXY, this.__contentSize);
         setTranslate(this.contentEl, ...this.__xy);
         return this.__xy;
     }
