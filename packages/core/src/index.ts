@@ -65,6 +65,7 @@ export default class extends AnyEvent {
 
         this.__updateSize();
         this.__updateBar(this.__xy, this.__warpSize, this.__minXY, this.__contentSize);
+        this.__registerObserver();
         const at = new AnyTouch(el);
         // const at1 = at.target(this.contentEl);
 
@@ -115,6 +116,25 @@ export default class extends AnyEvent {
 
     }
 
+    update(){
+        this.__updateSize();
+        this.__updateBar(this.__xy, this.__warpSize, this.__minXY, this.__contentSize);
+    }
+    /**
+     * 注册监听
+     */
+     __registerObserver() {
+        window.addEventListener('resize', this.update.bind(this));
+        const Observer = MutationObserver || WebKitMutationObserver || MozMutationObserver;
+        // observe
+        if (typeof Observer === 'function') {
+            const ob = new Observer(this.update);
+            ob.observe(this.contentEl, {
+                subtree: true,
+                childList: true,
+            });
+        }
+    }
     /**
      * 立即停止滑动
      */
