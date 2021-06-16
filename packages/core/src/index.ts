@@ -1,4 +1,4 @@
-import AnyTouch from 'any-touch'
+import AnyTouch from 'any-scroll'
 import AnyEvent from 'any-event'
 
 import raf from 'raf';

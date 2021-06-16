@@ -20,9 +20,9 @@ module.exports = {
     },
     moduleFileExtensions: ['ts', 'tsx', 'js', 'json'],
     moduleNameMapper: {
-        '^@any-touch/(.*?)$': '<rootDir>/packages/$1/src',
+        '^@any-scroll/(.*?)$': '<rootDir>/packages/$1/src',
         '^@testUtils$': '<rootDir>/testUtils/index.ts',
-        '^any-touch$': '<rootDir>/packages/any-touch/src',
+        '^any-scroll$': '<rootDir>/packages/any-scroll/src',
         '^any-event$': '<rootDir>/packages/any-event/src'
     },
 };

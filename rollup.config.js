@@ -21,9 +21,9 @@ export default {
             preventAssignment: true,
         }),
     ],
-    // external: ['raf', 'any-touch'],
+    // external: ['raf', 'any-scroll'],
     output: [{
-        // globals: { 'any-touch': 'AnyTouch',raf:'raf' },
+        // globals: { 'any-scroll': 'AnyTouch',raf:'raf' },
         format: 'umd',
         name: 'anyScroll',
         file: `./packages/any-scroll/dist/any-scroll.umd.js`,

@@ -27,7 +27,7 @@
 [AnyTouch.状态码](#AnyTouch状态码)
 
 ## AnyTouch([el], [options])
-:fire: 初始化 **any-touch**
+:fire: 初始化 **any-scroll**
 
 #### el
 目标元素,微信小程序下由于没有 DOM 元素, **可以无el初始化**, 然后通过[catchEvent](#catcheventevent)函数接收 touch 事件.
@@ -47,7 +47,7 @@ const at = AnyTouch(el);
 值为对象, 可以配置元素上定义的手势是否可以"取消"和"冒泡", 详细介绍可以参考[MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/Event/Event), 默认情况下**可取消 / 可冒泡**
 
 - preventDefaultExclude
-用来手动指定哪些情况下any-touch不阻止浏览器默认事件的触发, 比如:
+用来手动指定哪些情况下any-scroll不阻止浏览器默认事件的触发, 比如:
 
 ```javascript
 const at = AnyTouch(el, {
@@ -196,10 +196,10 @@ hook: (recognizer: Recognizer, next: () => void) => void
 举例实现"单击延迟 300ms, 如果双击没有触发才触发(默认手势事件都是并行触发)":
 
 ```javascript
-import AnyTouch from '@any-touch/core';
-import Tap from '@any-touch/tap';
+import AnyTouch from '@any-scroll/core';
+import Tap from '@any-scroll/tap';
 // 如果引入的是完整版, 那么STATUS_POSSIBLE等可以直接通过AnyTouch.STATUS_POSSIBLE获取
-import { STATUS_POSSIBLE, STATUS_FAILED } from '@any-touch/shared';
+import { STATUS_POSSIBLE, STATUS_FAILED } from '@any-scroll/shared';
 const at = AnyTouch(el);
 at.use(Tap);
 at.use(Tap, { name: 'doubletap', tapTimes: 2 });
@@ -256,22 +256,22 @@ at.destroy();
 
 手势识别器.
 
-如果是引入的完整版 **any-touch**, 那么可以通过 **AnyTouch** 获取到 **6** 个手势识别器:
+如果是引入的完整版 **any-scroll**, 那么可以通过 **AnyTouch** 获取到 **6** 个手势识别器:
 
 ```javascript
-import AnyTouch from 'any-touch`;
+import AnyTouch from 'any-scroll`;
 const {Tap, Pan,Swipe,Press,Pinch,Rotate} = AnyTouch;
 ```
 
 **此外**, 手势识别器均已做成独立的包, 从也可按需加载.
 | 名称 | 说明 |
 | - | - |
-| **@any-touch/tap** |[点击](../packages/tap/README.md)|
-| **@any-touch/pan** |[拖拽](../packages/pan/README.md)|
-| **@any-touch/swipe** |[划](../packages/swipe/README.md)|
-| **@any-touch/press** |[按压](../packages/press/README.md)|
-| **@any-touch/pinch** |[缩放](../packages/pinch/README.md)|
-| **@any-touch/rotate** |[旋转](../packages/rotate/README.md)|
+| **@any-scroll/tap** |[点击](../packages/tap/README.md)|
+| **@any-scroll/pan** |[拖拽](../packages/pan/README.md)|
+| **@any-scroll/swipe** |[划](../packages/swipe/README.md)|
+| **@any-scroll/press** |[按压](../packages/press/README.md)|
+| **@any-scroll/pinch** |[缩放](../packages/pinch/README.md)|
+| **@any-scroll/rotate** |[旋转](../packages/rotate/README.md)|
 
 [:rocket: 返回目录](#目录)
 
@@ -280,7 +280,7 @@ const {Tap, Pan,Swipe,Press,Pinch,Rotate} = AnyTouch;
 识别器状态,共有 6 种状态.
 
 ```javascript
-import AnyTouch from 'any-touch`;
+import AnyTouch from 'any-scroll`;
 const {STATUS_POSSIBLE, STATUS_RECOGNIZED} = AnyTouch;
 ```
 

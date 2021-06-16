@@ -5,6 +5,9 @@ const rollup = require('rollup');
 const typescript = require('@rollup/plugin-typescript');
 const json = require('@rollup/plugin-json');
 const replace = require('@rollup/plugin-replace');
+const {nodeResolve} = require('@rollup/plugin-node-resolve');
+const commonjs = require('@rollup/plugin-commonjs');
+
 const {
     gzipSync
 } = require('zlib');
@@ -29,6 +32,8 @@ module.exports = {
             input,
 
             plugins: [
+                // nodeResolve(),
+                // commonjs(),
                 typescript({
                     exclude: 'node_modules/**',
                     typescript: require('typescript'),
@@ -36,14 +41,8 @@ module.exports = {
                 }),
 
                 replace({
+                    preventAssignment:true,
                     __VERSION__: version,
-                    // 计算函数的id
-                    __ComputeAngle__: 'a',
-                    __ComputeDeltaXY__: 'b',
-                    __ComputeDistance__: 'c',
-                    __ComputeMaxLength__: 'd',
-                    __ComputeScale__: 'e',
-                    __ComputeVAndDir__: 'f',
                 }),
 
                 json(),

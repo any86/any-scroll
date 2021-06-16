@@ -1,5 +1,5 @@
-import AnyTouch from '@any-touch/core';
-import { GestureSimulator, sleep } from '@any-touch/simulator';
+import AnyTouch from '@any-scroll/core';
+import { GestureSimulator, sleep } from '@any-scroll/simulator';
 export function create() {
     AnyTouch.removeUse();
     const el = document.createElement('div');

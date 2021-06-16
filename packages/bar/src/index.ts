@@ -1,6 +1,6 @@
 import { setStyle, setTranslate, createDOMDiv, hideDOM } from '@any-scroll/shared';
 import { insertCss } from 'insert-css';
-import AnyTouch from 'any-touch'
+import AnyTouch from 'any-scroll'
 import { TRACK_CLASS_NAME, THUMB_CLASS_NAME, BAR_CSS, DIRECTION } from './const';
 import clamp from 'lodash/clamp';
 

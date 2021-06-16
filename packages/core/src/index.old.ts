@@ -1,4 +1,4 @@
-import AnyTouch from 'any-touch'
+import AnyTouch from 'any-scroll'
 import raf from 'raf';
 import debounce from 'lodash/debounce';
 
