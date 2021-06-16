@@ -9,6 +9,7 @@ walkPackageDirs((dirName) => {
     build({
         input: `./packages/${dirName}/src/index.ts`,
         output: {
+            sourcemap:true,
             file: `./packages/${dirName}/dist/index.es.js`,
             format: 'esm',
         },
