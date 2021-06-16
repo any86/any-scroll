@@ -22,7 +22,13 @@
     "homepage": "https://github.com/any86/any-scroll#readme",
     "dependencies": {
         "any-event": "^1.0.6",
-        "any-scroll": "^1.0.11"
+        "any-touch": "^1.0.11",
+        "lodash": "^4.17.15",
+        "raf": "^3.4.1"
+    },
+    "devDependencies": {
+        "@types/lodash": "^4.14.149",
+        "@types/raf": "^3.4.0"
     },
     "keywords": [
         "scroll"
