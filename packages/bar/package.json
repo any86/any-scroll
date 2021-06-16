@@ -1,6 +1,6 @@
 {
     "name": "@any-scroll/bar",
-    "version": "0.0.1",
+    "version": "0.1.0-alpha.0",
     "description": "虚拟滚动",
     "unpkg": "dist/any-scroll.js",
     "jsdelivr": "dist/any-scroll.js",
@@ -22,7 +22,7 @@
     "homepage": "https://github.com/any86/any-scroll#readme",
     "dependencies": {
         "any-event": "^1.0.6",
-        "any-touch": "^1.0.11"
+        "any-scroll": "^1.0.11"
     },
     "keywords": [
         "scroll"
