@@ -1,4 +1,6 @@
 const chalk = require('chalk');
+const {nodeResolve} = require('@rollup/plugin-node-resolve');
+const commonjs = require('@rollup/plugin-commonjs');
 const parseArgs = require('minimist')
 const {
     terser
@@ -6,9 +8,9 @@ const {
 const {
     build
 } = require('./build');
-const {compress} = require('minimist')(process.argv.slice(2));
+const { compress } = require('minimist')(process.argv.slice(2));
 
-console.log(chalk.blue(`🤖 正在${compress?'压缩':'生成'}umd模块!`));
+console.log(chalk.blue(`🤖 正在${compress ? '压缩' : '生成'}umd模块!`));
 
 const options = {
     input: `./packages/any-scroll/src/index.ts`,
@@ -25,9 +27,11 @@ const options = {
         output: {
             comments: false
         }
-    })
+    }),
+
+    prependPlugins: [nodeResolve(), commonjs()]
 }
-if(compress){
-    options.output.file =options.output.file.replace('.js', '.min.js');
+if (compress) {
+    options.output.file = options.output.file.replace('.js', '.min.js');
 }
 build(options);

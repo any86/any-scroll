@@ -55,8 +55,6 @@ export default class extends AnyEvent {
 
     constructor(el: HTMLElement, options?: Options) {
         super();
-        console.warn('class');
-
         this.el = el;
         this.contentEl = __initDOM(el);
         this.__options = { ...options, ...DEFAULT_OPTIONS };
@@ -250,7 +248,6 @@ export default class extends AnyEvent {
         this.__warpSize = [el.clientWidth, el.clientHeight];
         this.__contentSize = [offsetWidth - clientWidth + scrollWidth, offsetHeight - clientHeight + scrollHeight];
         this.__minXY = [el.clientWidth - this.__contentSize[0], el.clientHeight - this.__contentSize[1]];
-        console.log('update-size');
     }
 }
 

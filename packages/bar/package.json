@@ -22,7 +22,8 @@
     "homepage": "https://github.com/any86/any-scroll#readme",
     "dependencies": {
         "insert-css": "^2.0.0",
-        "lodash": "^4.17.15"
+        "lodash": "^4.17.15",
+        "tslib": "^2.3.0"
     },
     "devDependencies": {
         "@types/insert-css": "^2.0.0",

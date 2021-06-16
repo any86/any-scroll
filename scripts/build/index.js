@@ -5,8 +5,6 @@ const rollup = require('rollup');
 const typescript = require('@rollup/plugin-typescript');
 const json = require('@rollup/plugin-json');
 const replace = require('@rollup/plugin-replace');
-const {nodeResolve} = require('@rollup/plugin-node-resolve');
-const commonjs = require('@rollup/plugin-commonjs');
 
 const {
     gzipSync
@@ -26,12 +24,14 @@ module.exports = {
         output,
         tsConfig,
         terser,
-        external
+        external,
+        prependPlugins=[],
     } = {}) {
         const bundle = await rollup.rollup({
             input,
 
             plugins: [
+                ...prependPlugins,
                 // nodeResolve(),
                 // commonjs(),
                 typescript({

@@ -53,7 +53,7 @@
         // }
 
         const el = document.getElementById('scroll');
-        const as = anyScroll(el);
+        const as = new AnyScroll(el);
         // as.__scrollTo([-100,-100])
         as.on('scroll-end', e=>{
             console.log('scroll-end');

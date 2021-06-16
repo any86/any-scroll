@@ -25,7 +25,7 @@ export default {
     output: [{
         // globals: { 'any-scroll': 'AnyTouch',raf:'raf' },
         format: 'umd',
-        name: 'anyScroll',
+        name: 'AnyScroll',
         file: `./packages/any-scroll/dist/any-scroll.umd.js`,
         sourcemap: false,
     }]
