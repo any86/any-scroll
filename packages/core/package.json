@@ -1,6 +1,6 @@
 {
     "name": "@any-scroll/core",
-    "version": "0.1.5-alpha.0",
+    "version": "0.1.6-alpha.0",
     "description": "虚拟滚动",
     "unpkg": "dist/any-scroll.js",
     "jsdelivr": "dist/any-scroll.js",
@@ -21,12 +21,12 @@
     },
     "homepage": "https://github.com/any86/any-scroll#readme",
     "dependencies": {
+        "@any-scroll/bar": "^0.1.4-alpha.2",
         "any-event": "^1.0.6",
         "any-touch": "^1.0.11",
         "lodash": "^4.17.15",
         "raf": "^3.4.1",
-        "tslib": "^2.3.0",
-        "@any-scroll/bar": "^0.1.4-alpha.2"
+        "tslib": "^2.3.0"
     },
     "devDependencies": {
         "@types/lodash": "^4.14.149",
