@@ -1,6 +1,6 @@
 {
     "name": "@any-scroll/bar",
-    "version": "0.1.4-alpha.1",
+    "version": "0.1.4-alpha.2",
     "description": "虚拟滚动",
     "unpkg": "dist/any-scroll.js",
     "jsdelivr": "dist/any-scroll.js",
