@@ -1,5 +1,4 @@
 import AnyTouch from 'any-touch'
-import AnyEvent from 'any-event'
 
 import raf from 'raf';
 import debounce from 'lodash/debounce';
@@ -15,30 +14,18 @@ declare const WebKitMutationObserver: MutationObserver;
 declare const MozMutationObserver: MutationObserver;
 
 
-/**
- * 构造DOM结构
- * @param el 外壳元素
- * @returns 内部容器元素
- */
-function __initDOM(el: HTMLElement): HTMLElement {
-    // 设置外容器样式
-    setStyle(el, STYLE);
-    el.classList.add(CLASS_NAME_ANY_SCROLL);
-    // 生成内容器, 并把外容器内的dom移动到内容器
-    const contentEl = createDOMDiv();
-    while (el.firstChild) {
-        contentEl.appendChild(el.firstChild);
-    }
-    // 设置内容器样式
-    setStyle(contentEl, CONTENT_STYLE);
-    el.appendChild(contentEl);
-    return contentEl;
-}
+interface Options {
+    // 允许超过边界的最大距离
+    tolerance: number;
+    // 减速系数
+    damping: number;
+    // 允许X&Y轴线滑动
+    allow: [boolean, boolean];
+};
 
-interface Options { tolerance: number, damping: number };
-const DEFAULT_OPTIONS = { tolerance: 100, damping: 0.1 };
+const DEFAULT_OPTIONS = { tolerance: 100, damping: 0.1, allow: [true, false] as [boolean, boolean] };
 
-export default class extends AnyEvent {
+export default class extends AnyTouch {
     private __xy: [number, number] = [0, 0];
     private __rafIdXY: [number, number] = [-1, -1];
     // 给按时间和距离滚动的函数使用
@@ -54,7 +41,7 @@ export default class extends AnyEvent {
     scrollEndTimeId = -1;
 
     constructor(el: HTMLElement, options?: Options) {
-        super();
+        super(el);
         this.el = el;
         this.contentEl = __initDOM(el);
         this.__options = { ...options, ...DEFAULT_OPTIONS };
@@ -64,16 +51,13 @@ export default class extends AnyEvent {
         this.__updateSize();
         this.__updateBar(this.__xy, this.__warpSize, this.__minXY, this.__contentSize);
         this.__registerObserver();
-        const at = new AnyTouch(el);
-        // const at1 = at.target(this.contentEl);
 
-        at.on('panmove', e => {
+        this.on('panmove', e => {
             const { deltaX, deltaY } = e;
             this.setXY(this.__xy[0] + deltaX, this.__xy[1] + deltaY);
         });
 
-
-        at.on('panend', e => {
+        this.on('panend', e => {
             this.snap();
 
             this.scrollEndTimeId = setTimeout(() => {
@@ -82,13 +66,13 @@ export default class extends AnyEvent {
         })
 
 
-        at.on('at:start', e => {
+        this.on('at:start', e => {
             this.stop();
         });
 
-        const swipe = at.get('swipe');
+        const swipe = this.get('swipe');
         swipe && swipe.set({ velocity: 1 });
-        at.on('swipe', e => {
+        this.on('swipe', e => {
             clearTimeout(this.scrollEndTimeId)
             let deltaX = e.speedX * 100;
             let deltaY = e.speedY * 100;
@@ -96,16 +80,25 @@ export default class extends AnyEvent {
         });
 
 
-
-
+        const { allow } = this.__options;
+        // 滚动鼠标X轴滑动
+        const wheelX = allow[0] && !allow[1];
         watchWheel(el, ({ type, deltaY, v, target }) => {
             if ('start' === type) {
                 this.stop();
             } else if ('move' === type) {
-                this.setXY(this.__xy[0], this.__xy[1] + deltaY );
+                if (wheelX) {
+                    this.setXY(this.__xy[0] + deltaY, this.__xy[1]);
+                } else {
+                    this.setXY(this.__xy[0], this.__xy[1] + deltaY);
+                }
             } else if ('end' === type) {
                 if (5 < Math.abs(v)) {
-                    this.__scrollTo([this.__xy[0], this.__xy[1] + v * 200])
+                    if (wheelX) {
+                        this.__scrollTo([this.__xy[0] + v * 200, this.__xy[1]])
+                    } else {
+                        this.__scrollTo([this.__xy[0], this.__xy[1] + v * 200])
+                    }
                 } else {
                     this.snap()
                 }
@@ -114,14 +107,14 @@ export default class extends AnyEvent {
 
     }
 
-    update(){
+    update() {
         this.__updateSize();
         this.__updateBar(this.__xy, this.__warpSize, this.__minXY, this.__contentSize);
     }
     /**
      * 注册监听
      */
-     __registerObserver() {
+    __registerObserver() {
         window.addEventListener('resize', this.update.bind(this));
         const Observer = MutationObserver || WebKitMutationObserver || MozMutationObserver;
         // observe
@@ -149,7 +142,6 @@ export default class extends AnyEvent {
         this.__scrollTo([clamp(this.__xy[0], this.__minXY[0], 0), clamp(this.__xy[1], this.__minXY[1], 0)]);
     }
 
-
     /**
      * 设置位置
      * @param x 
@@ -157,20 +149,26 @@ export default class extends AnyEvent {
      * @returns 
      */
     private setXY(x: number, y: number): [number, number] {
-        const distX = clamp(x, this.__minXY[0] - this.__options.tolerance, this.__options.tolerance);
-        const distY = clamp(y, this.__minXY[1] - this.__options.tolerance, this.__options.tolerance);
+        const { allow } = this.__options;
 
-        // __isScrolling = [this.__xy[0] !== x, this.__xy[1] !== y];
+        if (allow[0]) {
+            // 同步
+            this.__xy[0] = clamp(x, this.__minXY[0] - this.__options.tolerance, this.__options.tolerance);
+        }
 
-        // 同步
-        this.__xy = [distX, distY];
+        if (allow[1]) {
+            this.__xy[1] = clamp(y, this.__minXY[1] - this.__options.tolerance, this.__options.tolerance);
+        }
 
-        // 钩子
-        this.emit('scroll', this.__xy);
-        const { clientWidth, clientHeight } = this.el;
-        this.__updateBar(this.__xy, [clientWidth, clientHeight], this.__minXY, this.__contentSize);
-        setTranslate(this.contentEl, ...this.__xy);
+        if (allow.includes(true)) {
+            // 钩子
+            this.emit('scroll', this.__xy);
+            const { clientWidth, clientHeight } = this.el;
+            this.__updateBar(this.__xy, [clientWidth, clientHeight], this.__minXY, this.__contentSize);
+            setTranslate(this.contentEl, ...this.__xy);
+        }
         return this.__xy;
+
     }
 
     /**
@@ -249,11 +247,37 @@ export default class extends AnyEvent {
         this.__contentSize = [offsetWidth - clientWidth + scrollWidth, offsetHeight - clientHeight + scrollHeight];
         this.__minXY = [el.clientWidth - this.__contentSize[0], el.clientHeight - this.__contentSize[1]];
     }
+
+    /**
+     * 销毁
+     */
+    destroy() {
+        super.destroy();
+    }
 }
 
 function __nextTick(from: number, to: number, callback: (value: number, rafId: number) => void) {
     nextTick(to - from, (n, rafId) => {
         callback(from + n, rafId);
-        // }, this.__options.damping);
     }, 0.1);
+}
+
+/**
+ * 构造DOM结构
+ * @param el 外壳元素
+ * @returns 内部容器元素
+ */
+function __initDOM(el: HTMLElement): HTMLElement {
+    // 设置外容器样式
+    setStyle(el, STYLE);
+    el.classList.add(CLASS_NAME_ANY_SCROLL);
+    // 生成内容器, 并把外容器内的dom移动到内容器
+    const contentEl = createDOMDiv();
+    while (el.firstChild) {
+        contentEl.appendChild(el.firstChild);
+    }
+    // 设置内容器样式
+    setStyle(contentEl, CONTENT_STYLE);
+    el.appendChild(contentEl);
+    return contentEl;
 }
