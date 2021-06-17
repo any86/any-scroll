@@ -1,4 +1,4 @@
-import Core from 'packages/core/src/index'
+import Core from '@any-scroll/core'
 
 export default class {
     constructor(el: HTMLElement) {
