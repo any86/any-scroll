@@ -1,6 +1,6 @@
 {
     "name": "any-scroll",
-    "version": "0.1.4-alpha.1",
+    "version": "0.1.4-alpha.2",
     "description": "虚拟滚动",
     "unpkg": "dist/any-scroll.js",
     "jsdelivr": "dist/any-scroll.js",
@@ -23,6 +23,7 @@
     "dependencies": {
         "any-event": "^1.0.6",
         "any-touch": "^1.0.11",
+        "@any-scroll/core":"^0.1.4-alpha.2",
         "tslib": "^2.3.0"
     },
     "keywords": [
