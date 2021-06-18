@@ -23,7 +23,7 @@ interface Options {
     allow: [boolean, boolean];
 };
 
-const DEFAULT_OPTIONS = { tolerance: 100, damping: 0.1, allow: [true, false] as [boolean, boolean] };
+const DEFAULT_OPTIONS = { tolerance: 100, damping: 0.1, allow: [true, true] as [boolean, boolean] };
 
 export default class extends AnyTouch {
     private __xy: [number, number] = [0, 0];
