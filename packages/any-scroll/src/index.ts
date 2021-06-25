@@ -1,7 +1,7 @@
-import Core from '@any-scroll/core'
-interface Options { tolerance: number, damping: number, allow: [boolean, boolean] };
+import Core from '@any-scroll/core';
+import {Options} from '@any-scroll/core';
 export default class {
-    constructor(el: HTMLElement,options:Options) {
-        return new Core(el,options);
+    constructor(el: HTMLElement, options: Options) {
+        return new Core(el, options);
     }
 }

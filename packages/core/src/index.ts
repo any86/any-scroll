@@ -14,16 +14,16 @@ declare const WebKitMutationObserver: MutationObserver;
 declare const MozMutationObserver: MutationObserver;
 
 
-interface Options {
+export interface Options {
     // 允许超过边界的最大距离
-    tolerance: number;
+    tolerance?: number;
     // 减速系数
-    damping: number;
+    damping?: number;
     // 允许X&Y轴线滑动
-    allow: [boolean, boolean];
+    allow?: [boolean, boolean];
 };
 
-const DEFAULT_OPTIONS = { tolerance: 100, damping: 0.1, allow: [true, true] as [boolean, boolean] };
+export const DEFAULT_OPTIONS = { tolerance: 100, damping: 0.1, allow: [true, true] as [boolean, boolean] };
 
 export default class extends AnyTouch {
     private __xy: [number, number] = [0, 0];
@@ -44,7 +44,7 @@ export default class extends AnyTouch {
         super(el);
         this.el = el;
         this.contentEl = __initDOM(el);
-        this.__options = { ...options, ...DEFAULT_OPTIONS };
+        this.__options = { ...DEFAULT_OPTIONS, ...options, };
         this.__updateBar = createBar(el);
         // const [watch,sync,thumbEl, barEl] = createBar();
 

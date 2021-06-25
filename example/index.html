@@ -1,71 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <!-- <script src="https://unpkg.com/any-scroll/dist/any-scroll.umd.min.js"></script> -->
+        <script src="../packages/any-scroll/dist/any-scroll.umd.js"></script>
+        <title>Document</title>
+        <!-- <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js"></script> -->
+        <style>
+            * {
+                padding: 0;
+                margin: 0;
+            }
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- <script src="https://unpkg.com/any-scroll/dist/any-scroll.umd.min.js"></script> -->
-    <script src="../packages/any-scroll/dist/any-scroll.umd.js"></script>
-    <title>Document</title>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js"></script> -->
-    <style>
-        * {
-            padding: 0;
-            margin: 0;
-        }
+            img {
+                display: block;
+            }
+        </style>
+    </head>
 
-        img {
-            display: block;
-        }
-    </style>
-</head>
+    <body style="padding: 30px">
+        <div
+            id="scroll"
+            style="
+                border: 2px solid #444;
+                width: 36vw;
+                height: 80vh;
+                margin: auto;
+                box-shadow: 1px 2px 15px 5px rgba(0, 0, 0, 0.1), 1px 2px 150px 5px #4100966b;
+            "
+        >
+            <div>
+                <h1 style="background-image: linear-gradient(90deg, #c553a3, #5227b8); color: #fff; padding: 30px">
+                    <input type="text" style="padding: 15px" />
+                </h1>
+                <p
+                    style="
+                        font-size: 30px;
+                        background-image: linear-gradient(50deg, #fff3af, #ee89cc, #a38adf);
+                        color: #000;
+                        padding: 30px;
+                        letter-spacing: 1px;
+                        line-height: 3;
+                        width: 220%;
+                    "
+                >
+                    《呐喊》是现代文学家鲁迅的短篇小说集，收录鲁迅于1918年至1922年所作的14篇短篇小说，1923年由北京新潮社出版，现编入《鲁迅全集》第1卷。小说集真实地描绘了从辛亥革命到五四运动时期的社会生活，从革命民主主义出发，抱着启蒙主义目的和人道主义精神，揭示了种种深层次的社会矛盾，对旧时中国的制度及部分陈腐的传统观念进行了深刻的剖析和比较彻底的否定，表现出对民族生存浓重的忧患意识和对社会变革的强烈希望。
 
-<body style="padding:30px;">
+                    <img
+                        src="https://cdn.cnbj1.fds.api.mi-img.com/mi-mall/adee9d02d03493be1b1bfb79bf6b600f.jpg"
+                        width="300"
+                    />
 
-    <div id="scroll"
-        style="border:2px solid #444;width:36vw;height: 80vh; margin:auto;box-shadow: 1px 2px 15px 5px rgba(0,0,0,.1),1px 2px 150px 5px #4100966b;">
-        <div>
-            <h1 style=" background-image: linear-gradient(90deg, #c553a3, #5227b8);color:#fff;padding:30px;">
-                <input type="text" style="padding:15px;">
-            </h1>
-            <p
-                style="font-size:30px;background-image: linear-gradient(50deg, #fff3af, #ee89cc, #a38adf);color:#000;padding:30px;letter-spacing: 1px;line-height:3;width: 220%;">
-                《呐喊》是现代文学家鲁迅的短篇小说集，收录鲁迅于1918年至1922年所作的14篇短篇小说，1923年由北京新潮社出版，现编入《鲁迅全集》第1卷。小说集真实地描绘了从辛亥革命到五四运动时期的社会生活，从革命民主主义出发，抱着启蒙主义目的和人道主义精神，揭示了种种深层次的社会矛盾，对旧时中国的制度及部分陈腐的传统观念进行了深刻的剖析和比较彻底的否定，表现出对民族生存浓重的忧患意识和对社会变革的强烈希望。
-
-                <img src="https://cdn.cnbj1.fds.api.mi-img.com/mi-mall/adee9d02d03493be1b1bfb79bf6b600f.jpg"
-                    width="300" />
-
-                [1]
-                《呐喊》是中国现代小说的开端与成熟的标志，开创了现代现实主义文学的先河。作品通过写实主义、象征主义、浪漫主义等多种手法，以传神的笔触和“画眼睛”、“写灵魂”的艺术技巧，形象生动地塑造了狂人、孔乙己、阿Q等一批不朽的艺术形象，深刻反映了19世纪末到20世纪20年代间中国社会生活的现状，有力揭露和鞭挞了封建旧恶势力，表达了作者渴望变革，为时代呐喊，希望唤醒国民的思想。奠定了鲁迅在中国现代文学史和现代文化史上的地位。
-                [2] 1985年，日本出版的50卷本《世界最高杰作》，中国仅有《呐喊》与《论语》被收入 [3] ；1999年6月，《呐喊》被《亚洲周刊》评选为20世纪中文小说100强之首。 [4]
-                作品名称呐喊外文名称Call To Arms作品出处《鲁迅全集》文学体裁短篇小说集作 者鲁迅字 数7.3万首版时间1923年
-
-
-            </p>
+                    [1]
+                    《呐喊》是中国现代小说的开端与成熟的标志，开创了现代现实主义文学的先河。作品通过写实主义、象征主义、浪漫主义等多种手法，以传神的笔触和“画眼睛”、“写灵魂”的艺术技巧，形象生动地塑造了狂人、孔乙己、阿Q等一批不朽的艺术形象，深刻反映了19世纪末到20世纪20年代间中国社会生活的现状，有力揭露和鞭挞了封建旧恶势力，表达了作者渴望变革，为时代呐喊，希望唤醒国民的思想。奠定了鲁迅在中国现代文学史和现代文化史上的地位。
+                    [2] 1985年，日本出版的50卷本《世界最高杰作》，中国仅有《呐喊》与《论语》被收入 [3]
+                    ；1999年6月，《呐喊》被《亚洲周刊》评选为20世纪中文小说100强之首。 [4] 作品名称呐喊外文名称Call To
+                    Arms作品出处《鲁迅全集》文学体裁短篇小说集作 者鲁迅字 数7.3万首版时间1923年
+                </p>
+            </div>
         </div>
-    </div>
 
-    <script>
-        // const parentEl = document.getElementById('scroll-parent');
-        // if (parentEl) {
-        //     anyScroll(parentEl)
-        // }
+        <script>
+            // const parentEl = document.getElementById('scroll-parent');
+            // if (parentEl) {
+            //     anyScroll(parentEl)
+            // }
 
-        const el = document.getElementById('scroll');
-        el.addEventListener('click',()=>{
-            const h1 = document.createElement('h1');
-            h1.textContent = ('回家汉广街规划局关乎价格金龟换酒规划局规划局干活')
-            h1.style.fontSize="199px";
-            el.firstChild.appendChild(h1)
-        })
-        const as = new AnyScroll(el);
-        // as.__scrollTo([-100,-100])
-        as.on('scroll-end', e=>{
-            console.log('scroll-end');
-        })
-        // scrollTo(1000, 1100, 1000);
-    </script>
-</body>
-
+            const el = document.getElementById('scroll');
+            el.addEventListener('click', () => {
+                const h1 = document.createElement('h1');
+                h1.textContent = '回家汉广街规划局关乎价格金龟换酒规划局规划局干活';
+                h1.style.fontSize = '199px';
+                el.firstChild.appendChild(h1);
+            });
+            const as = new AnyScroll(el, { allow: [true, false] });
+            // as.__scrollTo([-100,-100])
+            as.on('scroll-end', (e) => {
+                console.log('scroll-end');
+            });
+            // scrollTo(1000, 1100, 1000);
+        </script>
+    </body>
 </html>
