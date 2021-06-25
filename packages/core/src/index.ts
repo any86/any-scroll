@@ -119,7 +119,7 @@ export default class extends AnyTouch {
         const Observer = MutationObserver || WebKitMutationObserver || MozMutationObserver;
         // observe
         if (typeof Observer === 'function') {
-            const ob = new Observer(this.update);
+            const ob = new Observer(this.update.bind(this));
             ob.observe(this.contentEl, {
                 subtree: true,
                 childList: true,

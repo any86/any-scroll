@@ -53,6 +53,12 @@
         // }
 
         const el = document.getElementById('scroll');
+        el.addEventListener('click',()=>{
+            const h1 = document.createElement('h1');
+            h1.textContent = ('回家汉广街规划局关乎价格金龟换酒规划局规划局干活')
+            h1.style.fontSize="199px";
+            el.firstChild.appendChild(h1)
+        })
         const as = new AnyScroll(el);
         // as.__scrollTo([-100,-100])
         as.on('scroll-end', e=>{
