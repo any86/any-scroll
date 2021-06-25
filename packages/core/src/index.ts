@@ -21,9 +21,16 @@ export interface Options {
     damping?: number;
     // 允许X&Y轴线滑动
     allow?: [boolean, boolean];
+
+    hideBar?: [boolean, boolean];
 };
 
-export const DEFAULT_OPTIONS = { tolerance: 100, damping: 0.1, allow: [true, true] as [boolean, boolean] };
+export const DEFAULT_OPTIONS = {
+    tolerance: 100,
+    damping: 0.1,
+    allow: [true, true] as [boolean, boolean],
+    hideBar: [false, false] as [boolean, boolean]
+};
 
 export default class extends AnyTouch {
     private __xy: [number, number] = [0, 0];
@@ -31,10 +38,10 @@ export default class extends AnyTouch {
     // 给按时间和距离滚动的函数使用
     private __rafId = -1;
     private __minXY: [number, number] = [0, 0];
-    private __contentSize: [number, number] = [0, 0];
+    private contentSize: [number, number] = [0, 0];
     private __warpSize: [number, number] = [0, 0];
     private __isAnimateScrollStop: [boolean, boolean] = [true, true];
-    private __options: Options;
+    private __options: Required<Options>;
     __updateBar: any;
     el: HTMLElement;
     contentEl: HTMLElement;
@@ -49,7 +56,7 @@ export default class extends AnyTouch {
         // const [watch,sync,thumbEl, barEl] = createBar();
 
         this.__updateSize();
-        this.__updateBar(this.__xy, this.__warpSize, this.__minXY, this.__contentSize);
+        this.__updateBar(this.__xy, this.__warpSize, this.__minXY, this.contentSize);
         this.__registerObserver();
 
         this.on('panmove', e => {
@@ -76,7 +83,7 @@ export default class extends AnyTouch {
             clearTimeout(this.scrollEndTimeId)
             let deltaX = e.speedX * 100;
             let deltaY = e.speedY * 100;
-            this.__scrollTo([this.__xy[0] + deltaX, this.__xy[1] + deltaY]);
+            this.scrollTo([this.__xy[0] + deltaX, this.__xy[1] + deltaY]);
         });
 
 
@@ -95,9 +102,9 @@ export default class extends AnyTouch {
             } else if ('end' === type) {
                 if (5 < Math.abs(v)) {
                     if (wheelX) {
-                        this.__scrollTo([this.__xy[0] + v * 200, this.__xy[1]])
+                        this.scrollTo([this.__xy[0] + v * 200, this.__xy[1]])
                     } else {
-                        this.__scrollTo([this.__xy[0], this.__xy[1] + v * 200])
+                        this.scrollTo([this.__xy[0], this.__xy[1] + v * 200])
                     }
                 } else {
                     this.snap()
@@ -109,7 +116,7 @@ export default class extends AnyTouch {
 
     update() {
         this.__updateSize();
-        this.__updateBar(this.__xy, this.__warpSize, this.__minXY, this.__contentSize);
+        this.__updateBar(this.__xy, this.__warpSize, this.__minXY, this.contentSize);
     }
     /**
      * 注册监听
@@ -139,7 +146,7 @@ export default class extends AnyTouch {
      * 吸附到最近的边缘
      */
     snap() {
-        this.__scrollTo([clamp(this.__xy[0], this.__minXY[0], 0), clamp(this.__xy[1], this.__minXY[1], 0)]);
+        this.scrollTo([clamp(this.__xy[0], this.__minXY[0], 0), clamp(this.__xy[1], this.__minXY[1], 0)]);
     }
 
     /**
@@ -164,7 +171,7 @@ export default class extends AnyTouch {
             // 钩子
             this.emit('scroll', this.__xy);
             const { clientWidth, clientHeight } = this.el;
-            this.__updateBar(this.__xy, [clientWidth, clientHeight], this.__minXY, this.__contentSize);
+            this.__updateBar(this.__xy, [clientWidth, clientHeight], this.__minXY, this.contentSize);
             setTranslate(this.contentEl, ...this.__xy);
         }
         return this.__xy;
@@ -178,7 +185,7 @@ export default class extends AnyTouch {
      * @param onScroll 滚动回调
      * @param isShrink 是否收缩滚动, 用来防止回滚中再次执行回滚
      */
-    private __scrollTo(
+    scrollTo(
         dist: [number, number],
         onScroll = (([x, y]: [number, number]) => void 0),
         isShrink = [false, false],
@@ -219,13 +226,13 @@ export default class extends AnyTouch {
                             delay(() => {
                                 const toXY: [number, number] = [...this.__xy];
                                 toXY[i] = 0;
-                                this.__scrollTo(toXY, onScroll, isShrinks);
+                                this.scrollTo(toXY, onScroll, isShrinks);
                             });
                         } else if (__minXY[i] > newValue) {
                             delay(() => {
                                 const toXY: [number, number] = [...this.__xy];
                                 toXY[i] = __minXY[i];
-                                this.__scrollTo(toXY, onScroll, isShrinks);
+                                this.scrollTo(toXY, onScroll, isShrinks);
                             });
                         }
                     }
@@ -244,8 +251,8 @@ export default class extends AnyTouch {
         const { el, contentEl } = this;
         const { offsetWidth, offsetHeight, clientWidth, clientHeight, scrollWidth, scrollHeight } = contentEl;
         this.__warpSize = [el.clientWidth, el.clientHeight];
-        this.__contentSize = [offsetWidth - clientWidth + scrollWidth, offsetHeight - clientHeight + scrollHeight];
-        this.__minXY = [el.clientWidth - this.__contentSize[0], el.clientHeight - this.__contentSize[1]];
+        this.contentSize = [offsetWidth - clientWidth + scrollWidth, offsetHeight - clientHeight + scrollHeight];
+        this.__minXY = [el.clientWidth - this.contentSize[0], el.clientHeight - this.contentSize[1]];
     }
 
     /**
