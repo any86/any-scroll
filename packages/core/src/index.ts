@@ -38,11 +38,11 @@ export default class extends AnyTouch {
     // 给按时间和距离滚动的函数使用
     private __rafId = -1;
     private __minXY: [number, number] = [0, 0];
-    private contentSize: [number, number] = [0, 0];
     private __warpSize: [number, number] = [0, 0];
     private __isAnimateScrollStop: [boolean, boolean] = [true, true];
     private __options: Required<Options>;
-    __updateBar: any;
+    private __updateBar: any;
+    contentSize: [number, number] = [0, 0];
     el: HTMLElement;
     contentEl: HTMLElement;
     scrollEndTimeId = -1;
