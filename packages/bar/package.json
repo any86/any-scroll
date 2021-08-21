@@ -1,6 +1,6 @@
 {
     "name": "@any-scroll/bar",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "虚拟滚动",
     "unpkg": "dist/any-scroll.js",
     "jsdelivr": "dist/any-scroll.js",
@@ -21,7 +21,7 @@
     },
     "homepage": "https://github.com/any86/any-scroll#readme",
     "dependencies": {
-        "@any-scroll/shared": "^0.2.0",
+        "@any-scroll/shared": "^0.2.1",
         "insert-css": "^2.0.0",
         "lodash": "^4.17.15",
         "tslib": "^2.3.0"
