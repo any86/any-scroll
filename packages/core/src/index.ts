@@ -5,14 +5,13 @@ import debounce from 'lodash/debounce';
 
 import clamp from 'lodash/clamp';
 import createBar from '@any-scroll/bar';
-import { setStyle, easeOutCubic, setTranslate, delay, nextTick, createDOMDiv } from '@any-scroll/shared';
+import { setStyle, easeOutCubic, setTranslate, delay, nextTick, createDOMDiv, runTwice } from '@any-scroll/shared';
 import watchWheel from './wheel';
 import { STYLE, CONTENT_STYLE, SHRINK_DELAY_TIME, CLASS_NAME_ANY_SCROLL } from './const';
 const { setTimeout } = window;
 
 declare const WebKitMutationObserver: MutationObserver;
 declare const MozMutationObserver: MutationObserver;
-
 
 export interface Options {
     // 允许超过边界的最大距离
@@ -26,14 +25,13 @@ export interface Options {
 };
 
 export const DEFAULT_OPTIONS = {
-    tolerance: 100,
+    tolerance: 300,
     damping: 0.1,
     allow: [true, true] as [boolean, boolean],
     hideBar: [false, false] as [boolean, boolean]
 };
 
 export default class extends AnyTouch {
-    private __xy: [number, number] = [0, 0];
     private __rafIdXY: [number, number] = [-1, -1];
     // 给按时间和距离滚动的函数使用
     private __rafId = -1;
@@ -42,9 +40,11 @@ export default class extends AnyTouch {
     private __isAnimateScrollStop: [boolean, boolean] = [true, true];
     private __options: Required<Options>;
     private __updateBar: any;
+    readonly xy: [number, number] = [0, 0];
     contentSize: [number, number] = [0, 0];
     el: HTMLElement;
     contentEl: HTMLElement;
+    // 控制scroll-end不被频繁触发
     scrollEndTimeId = -1;
 
     constructor(el: HTMLElement, options?: Options) {
@@ -54,26 +54,33 @@ export default class extends AnyTouch {
         this.__options = { ...DEFAULT_OPTIONS, ...options, };
         this.__updateBar = createBar(el);
         // const [watch,sync,thumbEl, barEl] = createBar();
-
+        // const pan = this.get('pan')
+        // if (pan) {
+        //     pan.set({ threshold: 30 });
+        // }
         this.__updateSize();
-        this.__updateBar(this.__xy, this.__warpSize, this.__minXY, this.contentSize);
+        this.__updateBar(this.xy, this.__warpSize, this.__minXY, this.contentSize);
         this.__registerObserver();
+
+        this.on('panstart', e => {
+            console.log(e);
+        })
 
         this.on('panmove', e => {
             const { deltaX, deltaY } = e;
-            this.setXY(this.__xy[0] + deltaX, this.__xy[1] + deltaY);
+            this.__setXY([this.xy[0] + deltaX, this.xy[1] + deltaY]);
         });
 
         this.on('panend', e => {
             this.snap();
-
             this.scrollEndTimeId = setTimeout(() => {
-                this.emit('scroll-end', this.__xy);
+                this.emit('scroll-end', this.xy);
             }, SHRINK_DELAY_TIME)
         })
 
 
-        this.on('at:start', e => {
+        this.on('at:start', () => {
+            console.log('stop');
             this.stop();
         });
 
@@ -83,7 +90,7 @@ export default class extends AnyTouch {
             clearTimeout(this.scrollEndTimeId)
             let deltaX = e.speedX * 100;
             let deltaY = e.speedY * 100;
-            this.scrollTo([this.__xy[0] + deltaX, this.__xy[1] + deltaY]);
+            this.scrollTo([this.xy[0] + deltaX, this.xy[1] + deltaY]);
         });
 
 
@@ -95,16 +102,16 @@ export default class extends AnyTouch {
                 this.stop();
             } else if ('move' === type) {
                 if (wheelX) {
-                    this.setXY(this.__xy[0] + deltaY, this.__xy[1]);
+                    this.__setXY([this.xy[0] + deltaY, this.xy[1]]);
                 } else {
-                    this.setXY(this.__xy[0], this.__xy[1] + deltaY);
+                    this.__setXY([this.xy[0], this.xy[1] + deltaY]);
                 }
             } else if ('end' === type) {
                 if (5 < Math.abs(v)) {
                     if (wheelX) {
-                        this.scrollTo([this.__xy[0] + v * 200, this.__xy[1]])
+                        this.scrollTo([this.xy[0] + v * 200, this.xy[1]])
                     } else {
-                        this.scrollTo([this.__xy[0], this.__xy[1] + v * 200])
+                        this.scrollTo([this.xy[0], this.xy[1] + v * 200])
                     }
                 } else {
                     this.snap()
@@ -116,7 +123,7 @@ export default class extends AnyTouch {
 
     update() {
         this.__updateSize();
-        this.__updateBar(this.__xy, this.__warpSize, this.__minXY, this.contentSize);
+        this.__updateBar(this.xy, this.__warpSize, this.__minXY, this.contentSize);
     }
     /**
      * 注册监听
@@ -146,7 +153,7 @@ export default class extends AnyTouch {
      * 吸附到最近的边缘
      */
     snap() {
-        this.scrollTo([clamp(this.__xy[0], this.__minXY[0], 0), clamp(this.__xy[1], this.__minXY[1], 0)]);
+        this.scrollTo([clamp(this.xy[0], this.__minXY[0], 0), clamp(this.xy[1], this.__minXY[1], 0)]);
     }
 
     /**
@@ -155,27 +162,36 @@ export default class extends AnyTouch {
      * @param y 
      * @returns 
      */
-    private setXY(x: number, y: number): [number, number] {
+    private __setXY(distXY: [number, number]): [number, number] {
+        clearTimeout(this.scrollEndTimeId)
+
         const { allow } = this.__options;
 
-        if (allow[0]) {
-            // 同步
-            this.__xy[0] = clamp(x, this.__minXY[0] - this.__options.tolerance, this.__options.tolerance);
-        }
-
-        if (allow[1]) {
-            this.__xy[1] = clamp(y, this.__minXY[1] - this.__options.tolerance, this.__options.tolerance);
-        }
+        runTwice(i => {
+            if (allow[i]) {
+                this.xy[i] = clamp(distXY[i], this.__minXY[i] - this.__options.tolerance, this.__options.tolerance);
+            }
+        });
 
         if (allow.includes(true)) {
             // 钩子
-            this.emit('scroll', this.__xy);
+            this.emit('scroll', this.xy);
             const { clientWidth, clientHeight } = this.el;
-            this.__updateBar(this.__xy, [clientWidth, clientHeight], this.__minXY, this.contentSize);
-            setTranslate(this.contentEl, ...this.__xy);
+            this.__updateBar(this.xy, [clientWidth, clientHeight], this.__minXY, this.contentSize);
+            setTranslate(this.contentEl, ...this.xy);
         }
-        return this.__xy;
+        return this.xy;
 
+    }
+
+    scrollUseTime(distXY: [number, number], duration: number) {
+        const startTime = Date.now();
+        function scroll() {
+            console.log(Date.now());
+        }
+        console.log(startTime);
+        // raf(scroll)
+        // this.__setXY(...distXY);
     }
 
     /**
@@ -186,36 +202,33 @@ export default class extends AnyTouch {
      * @param isShrink 是否收缩滚动, 用来防止回滚中再次执行回滚
      */
     scrollTo(
-        dist: [number, number],
+        distXY: [number, number],
         onScroll = (([x, y]: [number, number]) => void 0),
         isShrink = [false, false],
     ) {
+        console.log('scrollTo');
         // y轴变化,也会触发scrollTo, 
         // 如果x==distX, 
         // 说明x轴不动
-        clearTimeout(this.scrollEndTimeId)
-        let _realDist = [...dist];
+
+        let _realDist = [...distXY];
         let _isOutXY = [false, false];
-        const { __minXY, __xy } = this;
+        const { __minXY, xy: __xy } = this;
         const { tolerance } = this.__options;
         for (let i = 0; i < 2; i++) {
-            if (__xy[i] !== dist[i]) {
+            if (__xy[i] !== distXY[i]) {
                 raf.cancel(this.__rafIdXY[i]);
                 // 容差范围内的dist[i]
-                _realDist[i] = clamp(dist[i], __minXY[i] - tolerance, tolerance);
+                _realDist[i] = clamp(distXY[i], __minXY[i] - tolerance, tolerance);
                 _isOutXY[i] = __xy[i] >= 0 && __xy[i] <= __minXY[i];
                 __nextTick(__xy[i], _realDist[i], (newValue, rafId) => {
                     this.__isAnimateScrollStop[i] = newValue === _realDist[i];
-                    // if (this.__isAnimateScrollStop.every(is => is) && _isOutXY.every(is => !is)) {
-                    if (this.__isAnimateScrollStop.every(is => is)) {
-                        this.emit('scroll-end', this.__xy);
-                    }
 
                     this.__rafIdXY[i] = rafId;
-                    const newXY: [number, number] = [...this.__xy];
+                    const newXY: [number, number] = [...this.xy];
                     newXY[i] = newValue;
-                    this.setXY(...newXY);
-                    onScroll(this.__xy);
+                    this.__setXY(newXY);
+                    onScroll(this.xy);
 
                     if (!isShrink[i]) {
                         // 准备收缩
@@ -224,22 +237,26 @@ export default class extends AnyTouch {
 
                         if (0 < newValue) {
                             delay(() => {
-                                const toXY: [number, number] = [...this.__xy];
+                                const toXY: [number, number] = [...this.xy];
                                 toXY[i] = 0;
                                 this.scrollTo(toXY, onScroll, isShrinks);
                             });
                         } else if (__minXY[i] > newValue) {
                             delay(() => {
-                                const toXY: [number, number] = [...this.__xy];
+                                const toXY: [number, number] = [...this.xy];
                                 toXY[i] = __minXY[i];
                                 this.scrollTo(toXY, onScroll, isShrinks);
                             });
                         }
                     }
+
+
+                    if (this.__isAnimateScrollStop.every(is => is)) {
+                        this.emit('scroll-end', this.xy);
+                    }
                 });
             }
         }
-
     }
 
     /**
@@ -264,7 +281,7 @@ export default class extends AnyTouch {
 }
 
 function __nextTick(from: number, to: number, callback: (value: number, rafId: number) => void) {
-    nextTick(to - from, (n, rafId) => {
+    return nextTick(to - from, (n, rafId) => {
         callback(from + n, rafId);
     }, 0.1);
 }

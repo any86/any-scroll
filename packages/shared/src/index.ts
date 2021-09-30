@@ -22,8 +22,8 @@ export function createDOMDiv() {
     return document.createElement(`div`);
 }
 
-export function hideDOM(el:HTMLElement){
-    setStyle(el,{display:'none'});
+export function hideDOM(el: HTMLElement) {
+    setStyle(el, { display: 'none' });
 }
 
 /**
@@ -61,4 +61,13 @@ export function nextTick(total: number, each: (n: number, rafId: number) => void
 
 export function easeOutCubic(t: number) {
     return 1 - Math.pow(1 - t, 3);
+}
+
+/**
+* 运行2次
+* @param callback 每次运行传入索引
+*/
+export function runTwice(callback: (n: number) => void) {
+    callback(0);
+    callback(1);
 }
