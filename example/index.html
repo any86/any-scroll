@@ -79,13 +79,15 @@
         as.on('scroll', (e) => {
             // console.log(as.contentSize);
         });
+
         as.on('scroll-end', (e) => {
             console.log('scroll-end', as.xy);
         });
 
-        as.scrollUseTime();
+        as.scrollTo([100, 100], 1000);
+        
         function scrollTo2() {
-            as.scrollTo([-2010, -1100], () => {
+            as._scrollTo([-0, -1100], () => {
                 console.log(as.xy);
             });
         }

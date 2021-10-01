@@ -5,7 +5,7 @@ import debounce from 'lodash/debounce';
 
 import clamp from 'lodash/clamp';
 import createBar from '@any-scroll/bar';
-import { setStyle, easeOutCubic, setTranslate, delay, nextTick, createDOMDiv, runTwice } from '@any-scroll/shared';
+import { setStyle, tween, setTranslate, delay, nextTick, createDOMDiv, runTwice } from '@any-scroll/shared';
 import watchWheel from './wheel';
 import { STYLE, CONTENT_STYLE, SHRINK_DELAY_TIME, CLASS_NAME_ANY_SCROLL } from './const';
 const { setTimeout } = window;
@@ -90,7 +90,7 @@ export default class extends AnyTouch {
             clearTimeout(this.scrollEndTimeId)
             let deltaX = e.speedX * 100;
             let deltaY = e.speedY * 100;
-            this.scrollTo([this.xy[0] + deltaX, this.xy[1] + deltaY]);
+            this._scrollTo([this.xy[0] + deltaX, this.xy[1] + deltaY]);
         });
 
 
@@ -109,9 +109,9 @@ export default class extends AnyTouch {
             } else if ('end' === type) {
                 if (5 < Math.abs(v)) {
                     if (wheelX) {
-                        this.scrollTo([this.xy[0] + v * 200, this.xy[1]])
+                        this._scrollTo([this.xy[0] + v * 200, this.xy[1]])
                     } else {
-                        this.scrollTo([this.xy[0], this.xy[1] + v * 200])
+                        this._scrollTo([this.xy[0], this.xy[1] + v * 200])
                     }
                 } else {
                     this.snap()
@@ -153,7 +153,7 @@ export default class extends AnyTouch {
      * 吸附到最近的边缘
      */
     snap() {
-        this.scrollTo([clamp(this.xy[0], this.__minXY[0], 0), clamp(this.xy[1], this.__minXY[1], 0)]);
+        this._scrollTo([clamp(this.xy[0], this.__minXY[0], 0), clamp(this.xy[1], this.__minXY[1], 0)]);
     }
 
     /**
@@ -184,14 +184,9 @@ export default class extends AnyTouch {
 
     }
 
-    scrollUseTime(distXY: [number, number], duration: number) {
-        const startTime = Date.now();
-        function scroll() {
-            console.log(Date.now());
-        }
-        console.log(startTime);
-        // raf(scroll)
-        // this.__setXY(...distXY);
+    scrollTo(distXY: [number, number], duration=1000) {
+        const [run] = tween(this.xy, distXY,duration);
+        run(this.__setXY.bind(this))
     }
 
     /**
@@ -201,7 +196,7 @@ export default class extends AnyTouch {
      * @param onScroll 滚动回调
      * @param isShrink 是否收缩滚动, 用来防止回滚中再次执行回滚
      */
-    scrollTo(
+    _scrollTo(
         distXY: [number, number],
         onScroll = (([x, y]: [number, number]) => void 0),
         isShrink = [false, false],
@@ -239,13 +234,13 @@ export default class extends AnyTouch {
                             delay(() => {
                                 const toXY: [number, number] = [...this.xy];
                                 toXY[i] = 0;
-                                this.scrollTo(toXY, onScroll, isShrinks);
+                                this._scrollTo(toXY, onScroll, isShrinks);
                             });
                         } else if (__minXY[i] > newValue) {
                             delay(() => {
                                 const toXY: [number, number] = [...this.xy];
                                 toXY[i] = __minXY[i];
-                                this.scrollTo(toXY, onScroll, isShrinks);
+                                this._scrollTo(toXY, onScroll, isShrinks);
                             });
                         }
                     }

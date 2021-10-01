@@ -59,7 +59,7 @@ export function nextTick(total: number, each: (n: number, rafId: number) => void
     return () => { raf.cancel(rafId) };
 }
 
-export function easeOutCubic(t: number) {
+export function easing(t: number) {
     return 1 - Math.pow(1 - t, 3);
 }
 
@@ -71,3 +71,50 @@ export function runTwice(callback: (n: number) => void) {
     callback(0);
     callback(1);
 }
+/**
+ * 缓动变化
+ * 
+ * @param to 目标值, 起始值为[0] 
+ * @param duration 时间间隔
+ * @returns [run, stop] 开始和停止函数
+ * @example
+ * const [run,stop] = tween([10, 30],[100,300], 1000); 
+ * run(console.log)
+ */
+export function tween<T extends number[]>(from: T, to: T, duration: number) {
+    // 防止from和to被外部改变
+    const _from = [...from] as T;
+    const _to = [...to] as T;
+
+    const startTime = Date.now();
+    let rafId = -1;
+    const valueDiff = _to.map((n, i) => n - _from[i]);
+    /**
+     * 开始动画
+     * @param onChange 每次变化执行函数, 参数是当前值
+     */
+    function run(onChange: (currentValue: T) => void) {
+        rafId = raf(() => {
+            const timeDiff = Date.now() - startTime;
+            const timeProgress = timeDiff / duration;
+            // 完成目标值比例
+            const valueProgress = easing(timeProgress);
+            if (1 > timeProgress) {
+                const currentValue = _from.map((n, i) => n + valueDiff[i] * valueProgress);
+                onChange(currentValue as T)
+                run(onChange);
+            } else {
+                onChange(_to);
+            }
+        });
+    }
+
+    function stop() {
+        raf.cancel(rafId);
+    }
+
+    return [run, stop] as const;
+}
+
+// const [run,stop] = tween([0, 0],[-100,-100], 10000); 
+//  run(console.log)
