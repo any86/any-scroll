@@ -84,12 +84,11 @@
             console.log('scroll-end', as.xy);
         });
 
-        as.scrollTo([100, 100], 1000);
-        
+        as._dampScroll([270, -222])
+        // as.scrollTo([100, 200], 1000);
+        // 
         function scrollTo2() {
-            as._scrollTo([-0, -1100], () => {
-                console.log(as.xy);
-            });
+            as.scrollTo([100, -1100], 500);
         }
     </script>
 </body>

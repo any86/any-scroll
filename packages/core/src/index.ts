@@ -4,8 +4,10 @@ import raf from 'raf';
 import debounce from 'lodash/debounce';
 
 import clamp from 'lodash/clamp';
+import inRange from 'lodash/inRange';
+
 import createBar from '@any-scroll/bar';
-import { setStyle, tween, setTranslate, delay, nextTick, createDOMDiv, runTwice } from '@any-scroll/shared';
+import { setStyle, damp, tween, setTranslate, delay, nextTick, createDOMDiv, runTwice } from '@any-scroll/shared';
 import watchWheel from './wheel';
 import { STYLE, CONTENT_STYLE, SHRINK_DELAY_TIME, CLASS_NAME_ANY_SCROLL } from './const';
 const { setTimeout } = window;
@@ -32,12 +34,8 @@ export const DEFAULT_OPTIONS = {
 };
 
 export default class extends AnyTouch {
-    private __rafIdXY: [number, number] = [-1, -1];
-    // 给按时间和距离滚动的函数使用
-    private __rafId = -1;
     private __minXY: [number, number] = [0, 0];
     private __warpSize: [number, number] = [0, 0];
-    private __isAnimateScrollStop: [boolean, boolean] = [true, true];
     private __options: Required<Options>;
     private __updateBar: any;
     readonly xy: [number, number] = [0, 0];
@@ -46,6 +44,8 @@ export default class extends AnyTouch {
     contentEl: HTMLElement;
     // 控制scroll-end不被频繁触发
     scrollEndTimeId = -1;
+    private _dampScrollRafId = -1;
+    private _stopScroll = () => { };
 
     constructor(el: HTMLElement, options?: Options) {
         super(el);
@@ -63,16 +63,15 @@ export default class extends AnyTouch {
         this.__registerObserver();
 
         this.on('panstart', e => {
-            console.log(e);
         })
 
         this.on('panmove', e => {
             const { deltaX, deltaY } = e;
-            this.__setXY([this.xy[0] + deltaX, this.xy[1] + deltaY]);
+            this.moveTo([this.xy[0] + deltaX, this.xy[1] + deltaY]);
         });
 
         this.on('panend', e => {
-            this.snap();
+
             this.scrollEndTimeId = setTimeout(() => {
                 this.emit('scroll-end', this.xy);
             }, SHRINK_DELAY_TIME)
@@ -84,13 +83,18 @@ export default class extends AnyTouch {
             this.stop();
         });
 
+        this.on('at:end', () => {
+            this.snap();
+        })
+
         const swipe = this.get('swipe');
         swipe && swipe.set({ velocity: 1 });
         this.on('swipe', e => {
+            console.log('swipe');
             clearTimeout(this.scrollEndTimeId)
-            let deltaX = e.speedX * 100;
-            let deltaY = e.speedY * 100;
-            this._scrollTo([this.xy[0] + deltaX, this.xy[1] + deltaY]);
+            let deltaX = e.speedX * 220;
+            let deltaY = e.speedY * 220;
+            this._dampScroll([this.xy[0] + deltaX, this.xy[1] + deltaY]);
         });
 
 
@@ -102,16 +106,16 @@ export default class extends AnyTouch {
                 this.stop();
             } else if ('move' === type) {
                 if (wheelX) {
-                    this.__setXY([this.xy[0] + deltaY, this.xy[1]]);
+                    this.moveTo([this.xy[0] + deltaY, this.xy[1]]);
                 } else {
-                    this.__setXY([this.xy[0], this.xy[1] + deltaY]);
+                    this.moveTo([this.xy[0], this.xy[1] + deltaY]);
                 }
             } else if ('end' === type) {
                 if (5 < Math.abs(v)) {
                     if (wheelX) {
-                        this._scrollTo([this.xy[0] + v * 200, this.xy[1]])
+                        this._dampScroll([this.xy[0] + v * 200, this.xy[1]])
                     } else {
-                        this._scrollTo([this.xy[0], this.xy[1] + v * 200])
+                        this._dampScroll([this.xy[0], this.xy[1] + v * 200])
                     }
                 } else {
                     this.snap()
@@ -144,16 +148,16 @@ export default class extends AnyTouch {
      * 立即停止滑动
      */
     stop() {
-        raf.cancel(this.__rafId);
-        raf.cancel(this.__rafIdXY[0]);
-        raf.cancel(this.__rafIdXY[1]);
+        raf.cancel(this._dampScrollRafId);
+        this._stopScroll();
     }
 
     /**
      * 吸附到最近的边缘
      */
     snap() {
-        this._scrollTo([clamp(this.xy[0], this.__minXY[0], 0), clamp(this.xy[1], this.__minXY[1], 0)]);
+        // console.log('snap');
+        this._dampScroll([clamp(this.xy[0], this.__minXY[0], 0), clamp(this.xy[1], this.__minXY[1], 0)]);
     }
 
     /**
@@ -162,9 +166,8 @@ export default class extends AnyTouch {
      * @param y 
      * @returns 
      */
-    private __setXY(distXY: [number, number]): [number, number] {
+    private moveTo(distXY: [number, number]): [number, number] {
         clearTimeout(this.scrollEndTimeId)
-
         const { allow } = this.__options;
 
         runTwice(i => {
@@ -184,9 +187,14 @@ export default class extends AnyTouch {
 
     }
 
-    scrollTo(distXY: [number, number], duration=1000) {
-        const [run] = tween(this.xy, distXY,duration);
-        run(this.__setXY.bind(this))
+    scrollTo(distXY: [number, number], duration = 1000) {
+        const [run, stop, done] = tween(this.xy, distXY, duration);
+        run(this.moveTo.bind(this))
+        this._stopScroll = stop;
+        done(() => {
+            this.snap();
+            // console.log('done');
+        });
     }
 
     /**
@@ -194,64 +202,63 @@ export default class extends AnyTouch {
      * 和对外的scrollTo的区别是:与时间无关的迭代衰减
      * @param distXY 目标点
      * @param onScroll 滚动回调
-     * @param isShrink 是否收缩滚动, 用来防止回滚中再次执行回滚
      */
-    _scrollTo(
-        distXY: [number, number],
-        onScroll = (([x, y]: [number, number]) => void 0),
-        isShrink = [false, false],
+    _dampScroll(
+        distXY: [number, number]
     ) {
-        console.log('scrollTo');
-        // y轴变化,也会触发scrollTo, 
-        // 如果x==distX, 
-        // 说明x轴不动
-
-        let _realDist = [...distXY];
-        let _isOutXY = [false, false];
-        const { __minXY, xy: __xy } = this;
+        if (distXY[0] === this.xy[0] && distXY[1] === this.xy[1]) return;
+        raf.cancel(this._dampScrollRafId)
+        console.log('_dampScroll', ...distXY, this.xy);
+        // 参数
+        const { __minXY } = this;
         const { tolerance } = this.__options;
-        for (let i = 0; i < 2; i++) {
-            if (__xy[i] !== distXY[i]) {
-                raf.cancel(this.__rafIdXY[i]);
-                // 容差范围内的dist[i]
-                _realDist[i] = clamp(distXY[i], __minXY[i] - tolerance, tolerance);
-                _isOutXY[i] = __xy[i] >= 0 && __xy[i] <= __minXY[i];
-                __nextTick(__xy[i], _realDist[i], (newValue, rafId) => {
-                    this.__isAnimateScrollStop[i] = newValue === _realDist[i];
 
-                    this.__rafIdXY[i] = rafId;
-                    const newXY: [number, number] = [...this.xy];
-                    newXY[i] = newValue;
-                    this.__setXY(newXY);
-                    onScroll(this.xy);
+        // 内部状态
+        const _distXY = [...distXY] as [number, number];
+        // AnyScroll实例
+        const context = this;
+        type Context = typeof this;
+        function _scrollTo(context: Context) {
+            const { xy } = context
+            console.log(xy, ..._distXY);
 
-                    if (!isShrink[i]) {
-                        // 准备收缩
-                        const isShrinks = [...isShrink];
-                        isShrinks[i] = true;
+            // 获取当前值
+            const _nextXY = runTwice(i => {
+                // 根据当前位置和目标计算阶"段性的目标位置"
+                const _nextvalue = damp(context.xy[i], _distXY[i]);
 
-                        if (0 < newValue) {
-                            delay(() => {
-                                const toXY: [number, number] = [...this.xy];
-                                toXY[i] = 0;
-                                this._scrollTo(toXY, onScroll, isShrinks);
-                            });
-                        } else if (__minXY[i] > newValue) {
-                            delay(() => {
-                                const toXY: [number, number] = [...this.xy];
-                                toXY[i] = __minXY[i];
-                                this._scrollTo(toXY, onScroll, isShrinks);
-                            });
-                        }
-                    }
+                // 当前位置和目标都超过了界限
+                if (xy[i] >= tolerance && _distXY[i] >= tolerance) {
+                    // 复位
+                    _distXY[i] = 0;
+                }
+                // 当前已经到达目标, 且位置超出的边框
+                else if (_nextvalue == _distXY[i] && _nextvalue > 0) {
+                    _distXY[i] = 0;
+                }
 
-
-                    if (this.__isAnimateScrollStop.every(is => is)) {
-                        this.emit('scroll-end', this.xy);
-                    }
+                else if (xy[i] < __minXY[i] && _distXY[i] < __minXY[i]) {
+                    _distXY[i] = __minXY[i];
+                } else if (_nextvalue == _distXY[i] && _nextvalue < __minXY[i]) {
+                    _distXY[i] = __minXY[i];
+                } else {
+                    return _nextvalue;
+                }
+                return damp(context.xy[i], _distXY[i]);
+            }) as [number, number];
+            // console.log('_nextXY',_nextXY)
+            context.moveTo(_nextXY);
+            // 停止
+            if (_distXY[0] !== _nextXY[0] || _distXY[1] !== _nextXY[1]) {
+                context._dampScrollRafId = raf(() => {
+                    _scrollTo(context);
                 });
+            } else {
+                // _scrollTo(context);
+                context.emit('scroll-end')
             }
         }
+        _scrollTo(context);
     }
 
     /**
@@ -274,13 +281,6 @@ export default class extends AnyTouch {
         super.destroy();
     }
 }
-
-function __nextTick(from: number, to: number, callback: (value: number, rafId: number) => void) {
-    return nextTick(to - from, (n, rafId) => {
-        callback(from + n, rafId);
-    }, 0.1);
-}
-
 /**
  * 构造DOM结构
  * @param el 外壳元素

@@ -67,10 +67,10 @@ export function easing(t: number) {
 * 运行2次
 * @param callback 每次运行传入索引
 */
-export function runTwice(callback: (n: number) => void) {
-    callback(0);
-    callback(1);
+export function runTwice(callback: (n: number) => unknown) {
+    return [callback(0), callback(1)];
 }
+
 /**
  * 缓动变化
  * 
@@ -88,6 +88,7 @@ export function tween<T extends number[]>(from: T, to: T, duration: number) {
 
     const startTime = Date.now();
     let rafId = -1;
+    let _onDone = () => { };
     const valueDiff = _to.map((n, i) => n - _from[i]);
     /**
      * 开始动画
@@ -105,16 +106,39 @@ export function tween<T extends number[]>(from: T, to: T, duration: number) {
                 run(onChange);
             } else {
                 onChange(_to);
+                _onDone();
             }
         });
+    }
+
+
+    function onDone(cb: () => void) {
+        _onDone = cb;
     }
 
     function stop() {
         raf.cancel(rafId);
     }
 
-    return [run, stop] as const;
+    return [run, stop, onDone] as const;
 }
 
-// const [run,stop] = tween([0, 0],[-100,-100], 10000); 
+/**
+ * 按比例减速逼近目标值
+ * @param value 当前
+ * @param dist 目标
+ * @param damping 减速比例
+ * @returns 当前值
+ */
+export function damp(value: number, dist: number, damping = 0.1) {
+    const diff = dist - value;
+    if (0.1 < Math.abs(diff)) {
+        return dist - (((1 - damping) * diff) | 0);
+    }
+    return dist;
+}
+
+// console.log(damp(13, 17));
+
+// const [run,stop] = tween([0, 0],[-100,-100], 10000);
 //  run(console.log)
