@@ -27,7 +27,7 @@ export interface Options {
 };
 
 export const DEFAULT_OPTIONS = {
-    tolerance: 300,
+    tolerance: 100,
     damping: 0.1,
     allow: [true, true] as [boolean, boolean],
     hideBar: [false, false] as [boolean, boolean]

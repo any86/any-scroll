@@ -132,13 +132,14 @@ export function tween<T extends number[]>(from: T, to: T, duration: number) {
  */
 export function damp(value: number, dist: number, damping = 0.1) {
     const diff = dist - value;
+
     if (0.1 < Math.abs(diff)) {
         return dist - (((1 - damping) * diff) | 0);
     }
     return dist;
 }
 
-// console.log(damp(13, 17));
+console.log(damp(13, 17));
 
 // const [run,stop] = tween([0, 0],[-100,-100], 10000);
 //  run(console.log)
