@@ -7,7 +7,7 @@ import clamp from 'lodash/clamp';
 import inRange from 'lodash/inRange';
 
 import createBar from '@any-scroll/bar';
-import { setStyle, damp, tween, setTranslate, delay, nextTick, createDOMDiv, runTwice } from '@any-scroll/shared';
+import { setStyle, damp, tween, setTranslate, createDOMDiv, runTwice } from '@any-scroll/shared';
 import watchWheel from './wheel';
 import { STYLE, CONTENT_STYLE, SHRINK_DELAY_TIME, CLASS_NAME_ANY_SCROLL } from './const';
 const { setTimeout } = window;
@@ -43,8 +43,10 @@ export default class extends AnyTouch {
     el: HTMLElement;
     contentEl: HTMLElement;
     // 控制scroll-end不被频繁触发
-    scrollEndTimeId = -1;
+    private _scrollEndTimeId = -1;
     private _dampScrollRafId = -1;
+    private _stopTimeId = -1;
+
     private _stopScroll = () => { };
 
     constructor(el: HTMLElement, options?: Options) {
@@ -72,15 +74,19 @@ export default class extends AnyTouch {
 
         this.on('panend', e => {
 
-            this.scrollEndTimeId = setTimeout(() => {
+            this._scrollEndTimeId = setTimeout(() => {
                 this.emit('scroll-end', this.xy);
             }, SHRINK_DELAY_TIME)
         })
 
 
         this.on('at:start', () => {
-            console.log('stop');
-            this.stop();
+            clearTimeout(this._stopTimeId)
+            this._stopTimeId = setTimeout(() => {
+                console.log('stop');
+                this.stop();
+            }, 1000)
+
         });
 
         this.on('at:end', () => {
@@ -91,7 +97,7 @@ export default class extends AnyTouch {
         swipe && swipe.set({ velocity: 1 });
         this.on('swipe', e => {
             console.log('swipe');
-            clearTimeout(this.scrollEndTimeId)
+            clearTimeout(this._scrollEndTimeId)
             let deltaX = e.speedX * 220;
             let deltaY = e.speedY * 220;
             this._dampScroll([this.xy[0] + deltaX, this.xy[1] + deltaY]);
@@ -101,21 +107,26 @@ export default class extends AnyTouch {
         const { allow } = this.__options;
         // 滚动鼠标X轴滑动
         const wheelX = allow[0] && !allow[1];
-        watchWheel(el, ({ type, deltaY, v, target }) => {
+        watchWheel(el, ({ type, deltaY, vx, vy, target }) => {
             if ('start' === type) {
                 this.stop();
+                if (wheelX) {
+                    this.moveTo([this.xy[0] - deltaY, this.xy[1]]);
+                } else {
+                    this.moveTo([this.xy[0], this.xy[1] - deltaY]);
+                }
             } else if ('move' === type) {
                 if (wheelX) {
-                    this.moveTo([this.xy[0] + deltaY, this.xy[1]]);
+                    this.moveTo([this.xy[0] - deltaY, this.xy[1]]);
                 } else {
-                    this.moveTo([this.xy[0], this.xy[1] + deltaY]);
+                    this.moveTo([this.xy[0], this.xy[1] - deltaY]);
                 }
             } else if ('end' === type) {
-                if (5 < Math.abs(v)) {
+                if (3 < Math.abs(vy)) {
                     if (wheelX) {
-                        this._dampScroll([this.xy[0] + v * 200, this.xy[1]])
+                        this._dampScroll([this.xy[0] - vy * 100, this.xy[1]])
                     } else {
-                        this._dampScroll([this.xy[0], this.xy[1] + v * 200])
+                        this._dampScroll([this.xy[0], this.xy[1] - vy * 100])
                     }
                 } else {
                     this.snap()
@@ -167,7 +178,7 @@ export default class extends AnyTouch {
      * @returns 
      */
     private moveTo(distXY: [number, number]): [number, number] {
-        clearTimeout(this.scrollEndTimeId)
+        clearTimeout(this._scrollEndTimeId)
         const { allow } = this.__options;
 
         runTwice(i => {
@@ -208,7 +219,7 @@ export default class extends AnyTouch {
     ) {
         if (distXY[0] === this.xy[0] && distXY[1] === this.xy[1]) return;
         raf.cancel(this._dampScrollRafId)
-        console.log('_dampScroll', ...distXY, this.xy);
+        // console.log('_dampScroll', ...distXY, this.xy);
         // 参数
         const { __minXY } = this;
         const { tolerance } = this.__options;
@@ -218,9 +229,9 @@ export default class extends AnyTouch {
         // AnyScroll实例
         const context = this;
         type Context = typeof this;
-        function _scrollTo(context: Context) {
+        function _moveTo(context: Context) {
             const { xy } = context
-            console.log(xy, ..._distXY);
+            // console.log(xy, ..._distXY);
 
             // 获取当前值
             const _nextXY = runTwice(i => {
@@ -246,19 +257,21 @@ export default class extends AnyTouch {
                 }
                 return damp(context.xy[i], _distXY[i]);
             }) as [number, number];
-            // console.log('_nextXY',_nextXY)
-            context.moveTo(_nextXY);
+
+            // 消除小数部分
+            context.moveTo([_nextXY[0], _nextXY[1]]);
             // 停止
             if (_distXY[0] !== _nextXY[0] || _distXY[1] !== _nextXY[1]) {
+                // console.log(_distXY, _nextXY);
                 context._dampScrollRafId = raf(() => {
-                    _scrollTo(context);
+                    _moveTo(context);
                 });
             } else {
                 // _scrollTo(context);
                 context.emit('scroll-end')
             }
         }
-        _scrollTo(context);
+        _moveTo(context);
     }
 
     /**

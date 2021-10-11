@@ -18,6 +18,15 @@
         img {
             display: block;
         }
+
+        h1 {
+            background-image: linear-gradient(90deg, #c553a3, #5227b8);
+            color: #fff;
+            padding: 30px;
+            line-height: 1.5;
+            /* letter-spacing: 1px; */
+            word-spacing: 1px;
+        }
     </style>
 </head>
 
@@ -25,13 +34,14 @@
     <button onclick="scrollTo2()">scrollTo2</button>
     <div id="scroll" style="
                 border: 2px solid #444;
-                width: 36vw;
+                width: 100%;
+                max-width: 480px;
                 height: 80vh;
                 margin: auto;
                 box-shadow: 1px 2px 15px 5px rgba(0, 0, 0, 0.1), 1px 2px 150px 5px #4100966b;
             ">
         <div>
-            <h1 style="background-image: linear-gradient(90deg, #c553a3, #5227b8); color: #fff; padding: 30px">
+            <h1>
                 <!-- <input type="text" style="padding: 15px" /> -->
             </h1>
 
@@ -65,13 +75,18 @@
         //     anyScroll(parentEl)
         // }
 
+        const colors= ['#f10', '#730', '#165', '#1f9', '#5f1', '#810', '#908'];
         const el = document.getElementById('scroll');
-        // el.addEventListener('click', () => {
-        //     const h1 = document.createElement('h1');
-        //     h1.textContent = '回家汉广街规划局关乎价格金龟换酒规划局规划局干活';
-        //     h1.style.fontSize = '199px';
-        //     el.firstChild.appendChild(h1);
-        // });
+        el.addEventListener('click', () => {
+            for (let i = 0; i < 100; i++) {
+                const textEl = document.createElement('h1');
+                textEl.textContent = '回家汉广街规划局关乎价格金龟换酒规划局规划局干活';
+                const color = colors[Math.round(Math.random()*colors.length)]
+                textEl.style.color = color;
+                el.firstChild.appendChild(textEl);
+            }
+        });
+        
         const as = new AnyScroll(el, { allow: [true, true] });
         // as.__scrollTo([-100,-100])
 
@@ -84,7 +99,12 @@
             console.log('scroll-end', as.xy);
         });
 
-        as._dampScroll([270, -222])
+        as._dampScroll([0, -1002]);
+
+        as.on('scroll-end', ()=>{
+            // alert(123)
+            // as._dampScroll([0, 0]) 
+        })
         // as.scrollTo([100, 200], 1000);
         // 
         function scrollTo2() {
