@@ -42,19 +42,19 @@ export default function (el: HTMLElement, onChange: (e: any) => void) {
             deltaXCounter = 0;
             deltaYCounter = 0;
             el.dispatchEvent(new Event('wheelend', {}));
-            onChange({ target: e.target, type: 'end', vx,vy });
-        }, 100);
+            onChange({ target: e.target, type: 'end', deltaX, deltaY, vx, vy });
+        }, 16);
 
 
         // 开始
         if (void 0 === lastWheelTime) {
-            onChange({ target: e.target, type: 'start', deltaX,deltaY });
+            onChange({ target: e.target, type: 'start', deltaX, deltaY });
             el.dispatchEvent(new Event('wheelstart', {}));
         }
         // 移动
         else {
             el.dispatchEvent(new Event('wheelmove', {}));
-            onChange({ target: e.target, type: 'move', deltaX,deltaY });
+            onChange({ target: e.target, type: 'move', deltaX, deltaY });
         }
 
         lastWheelTime = Date.now();

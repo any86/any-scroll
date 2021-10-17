@@ -1,4 +1,4 @@
-import AnyTouch from 'any-touch'
+import AnyTouch from 'any-touch';
 
 import raf from 'raf';
 import debounce from 'lodash/debounce';
@@ -24,13 +24,13 @@ export interface Options {
     allow?: [boolean, boolean];
 
     hideBar?: [boolean, boolean];
-};
+}
 
 export const DEFAULT_OPTIONS = {
     tolerance: 100,
     damping: 0.1,
     allow: [true, true] as [boolean, boolean],
-    hideBar: [false, false] as [boolean, boolean]
+    hideBar: [false, false] as [boolean, boolean],
 };
 
 export default class extends AnyTouch {
@@ -53,7 +53,7 @@ export default class extends AnyTouch {
         super(el);
         this.el = el;
         this.contentEl = __initDOM(el);
-        this.__options = { ...DEFAULT_OPTIONS, ...options, };
+        this.__options = { ...DEFAULT_OPTIONS, ...options };
         this.__updateBar = createBar(el);
         // const [watch,sync,thumbEl, barEl] = createBar();
         // const pan = this.get('pan')
@@ -64,79 +64,79 @@ export default class extends AnyTouch {
         this.__updateBar(this.xy, this.__warpSize, this.__minXY, this.contentSize);
         this.__registerObserver();
 
-        this.on('panstart', e => {
-        })
+        this.on('panstart', (e) => { });
 
-        this.on('panmove', e => {
+        this.on('panmove', (e) => {
             const { deltaX, deltaY } = e;
             this.moveTo([this.xy[0] + deltaX, this.xy[1] + deltaY]);
         });
 
-        this.on('panend', e => {
-
+        this.on('panend', (e) => {
             this._scrollEndTimeId = setTimeout(() => {
                 this.emit('scroll-end', this.xy);
-            }, SHRINK_DELAY_TIME)
-        })
-
+            }, SHRINK_DELAY_TIME);
+        });
 
         this.on('at:start', () => {
-            clearTimeout(this._stopTimeId)
-            this._stopTimeId = setTimeout(() => {
-                console.log('stop');
-                this.stop();
-            }, 1000)
-
+            clearTimeout(this._stopTimeId);
+            // this._stopTimeId = setTimeout(() => {
+            //     console.log('stop');
+            this.stop();
+            // }, 1000)
         });
 
         this.on('at:end', () => {
             this.snap();
-        })
+        });
 
         const swipe = this.get('swipe');
         swipe && swipe.set({ velocity: 1 });
-        this.on('swipe', e => {
+        this.on('swipe', (e) => {
             console.log('swipe');
-            clearTimeout(this._scrollEndTimeId)
+            clearTimeout(this._scrollEndTimeId);
             let deltaX = e.speedX * 220;
             let deltaY = e.speedY * 220;
             this._dampScroll([this.xy[0] + deltaX, this.xy[1] + deltaY]);
         });
 
-
         const { allow } = this.__options;
         // 滚动鼠标X轴滑动
         const wheelX = allow[0] && !allow[1];
+
+        let wheelTimeoutId = -1;
+
         watchWheel(el, ({ type, deltaY, vx, vy, target }) => {
+
             if ('start' === type) {
+
+                console.log('wheel-start');
                 this.stop();
                 if (wheelX) {
-                    this.moveTo([this.xy[0] - deltaY, this.xy[1]]);
+                    this._dampScroll([this.xy[0] - deltaY, this.xy[1]]);
                 } else {
-                    this.moveTo([this.xy[0], this.xy[1] - deltaY]);
+                    this._dampScroll([this.xy[0], this.xy[1] - deltaY]);
                 }
             } else if ('move' === type) {
                 if (wheelX) {
-                    this.moveTo([this.xy[0] - deltaY, this.xy[1]]);
+                    this._dampScroll([this.xy[0] - deltaY, this.xy[1]]);
                 } else {
-                    this.moveTo([this.xy[0], this.xy[1] - deltaY]);
+                    this._dampScroll([this.xy[0], this.xy[1] - deltaY]);
                 }
             } else if ('end' === type) {
-                if (3 < Math.abs(vy)) {
+                console.warn('wheel-end')
                     if (wheelX) {
-                        this._dampScroll([this.xy[0] - vy * 100, this.xy[1]])
+                        this._dampScroll([this.xy[0] - vy * 5, this.xy[1]]);
                     } else {
-                        this._dampScroll([this.xy[0], this.xy[1] - vy * 100])
+                        this._dampScroll([this.xy[0], this.xy[1] - Math.ceil(vy) * 30]);
                     }
-                } else {
-                    this.snap()
-                }
+    
+               
             }
         });
-
     }
 
     update() {
+        console.warn('update');
         this.__updateSize();
         this.__updateBar(this.xy, this.__warpSize, this.__minXY, this.contentSize);
     }
@@ -173,15 +173,15 @@ export default class extends AnyTouch {
 
     /**
      * 设置位置
-     * @param x 
-     * @param y 
-     * @returns 
+     * @param x
+     * @param y
+     * @returns
      */
     private moveTo(distXY: [number, number]): [number, number] {
-        clearTimeout(this._scrollEndTimeId)
+        clearTimeout(this._scrollEndTimeId);
         const { allow } = this.__options;
 
-        runTwice(i => {
+        runTwice((i) => {
             if (allow[i]) {
                 this.xy[i] = clamp(distXY[i], this.__minXY[i] - this.__options.tolerance, this.__options.tolerance);
             }
@@ -195,12 +195,11 @@ export default class extends AnyTouch {
             setTranslate(this.contentEl, ...this.xy);
         }
         return this.xy;
-
     }
 
     scrollTo(distXY: [number, number], duration = 1000) {
         const [run, stop, done] = tween(this.xy, distXY, duration);
-        run(this.moveTo.bind(this))
+        run(this.moveTo.bind(this));
         this._stopScroll = stop;
         done(() => {
             this.snap();
@@ -214,64 +213,68 @@ export default class extends AnyTouch {
      * @param distXY 目标点
      * @param onScroll 滚动回调
      */
-    _dampScroll(
-        distXY: [number, number]
-    ) {
+    _dampScroll(distXY: [number, number]) {
         if (distXY[0] === this.xy[0] && distXY[1] === this.xy[1]) return;
-        raf.cancel(this._dampScrollRafId)
-        // console.log('_dampScroll', ...distXY, this.xy);
+
+        raf.cancel(this._dampScrollRafId);
+        // console.log('_dampScroll', distXY, this.xy);
         // 参数
-        const { __minXY } = this;
         const { tolerance } = this.__options;
 
         // 内部状态
         const _distXY = [...distXY] as [number, number];
         // AnyScroll实例
-        const context = this;
-        type Context = typeof this;
-        function _moveTo(context: Context) {
-            const { xy } = context
-            // console.log(xy, ..._distXY);
+        type AnyScrollInstance = typeof this;
+
+        //
+        function _moveTo(context: AnyScrollInstance) {
+            const { xy, __minXY } = context;
 
             // 获取当前值
-            const _nextXY = runTwice(i => {
+            const _nextXY = runTwice((i) => {
                 // 根据当前位置和目标计算阶"段性的目标位置"
                 const _nextvalue = damp(context.xy[i], _distXY[i]);
 
                 // 当前位置和目标都超过了界限
                 if (xy[i] >= tolerance && _distXY[i] >= tolerance) {
+                    // console.log(1);
                     // 复位
                     _distXY[i] = 0;
                 }
+
                 // 当前已经到达目标, 且位置超出的边框
                 else if (_nextvalue == _distXY[i] && _nextvalue > 0) {
+                    // console.log(2);
                     _distXY[i] = 0;
-                }
-
-                else if (xy[i] < __minXY[i] && _distXY[i] < __minXY[i]) {
+                } else if (xy[i] < __minXY[i] && _distXY[i] < __minXY[i]) {
+                    // console.log(3, __minXY[i]);
                     _distXY[i] = __minXY[i];
                 } else if (_nextvalue == _distXY[i] && _nextvalue < __minXY[i]) {
+                    // console.log(4);
                     _distXY[i] = __minXY[i];
                 } else {
+                    // console.log(5);
+
                     return _nextvalue;
                 }
                 return damp(context.xy[i], _distXY[i]);
             }) as [number, number];
 
-            // 消除小数部分
-            context.moveTo([_nextXY[0], _nextXY[1]]);
-            // 停止
+            context.moveTo(_nextXY);
+            // console.log(`_nextXY`, _nextXY, 'distXY', _distXY);
+            // 迭代 OR 跳出迭代
             if (_distXY[0] !== _nextXY[0] || _distXY[1] !== _nextXY[1]) {
                 // console.log(_distXY, _nextXY);
                 context._dampScrollRafId = raf(() => {
                     _moveTo(context);
                 });
             } else {
+                // console.log(_distXY, _nextXY);
                 // _scrollTo(context);
-                context.emit('scroll-end')
+                context.emit('scroll-end');
             }
         }
-        _moveTo(context);
+        _moveTo(this);
     }
 
     /**
@@ -281,7 +284,10 @@ export default class extends AnyTouch {
         // 保留边框
         // 参考smooth-scroll
         const { el, contentEl } = this;
+
         const { offsetWidth, offsetHeight, clientWidth, clientHeight, scrollWidth, scrollHeight } = contentEl;
+        // console.log({ offsetWidth, offsetHeight, clientWidth, clientHeight, scrollWidth, scrollHeight }, contentEl.offsetHeight);
+
         this.__warpSize = [el.clientWidth, el.clientHeight];
         this.contentSize = [offsetWidth - clientWidth + scrollWidth, offsetHeight - clientHeight + scrollHeight];
         this.__minXY = [el.clientWidth - this.contentSize[0], el.clientHeight - this.contentSize[1]];
