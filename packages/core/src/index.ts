@@ -109,7 +109,7 @@ export default class extends AnyTouch {
 
             if ('start' === type) {
 
-                console.log('wheel-start');
+                // console.log('wheel-start');
                 this.stop();
                 if (wheelX) {
                     this._dampScroll([this.xy[0] - deltaY, this.xy[1]]);
@@ -123,14 +123,14 @@ export default class extends AnyTouch {
                     this._dampScroll([this.xy[0], this.xy[1] - deltaY]);
                 }
             } else if ('end' === type) {
-                console.warn('wheel-end')
-                    if (wheelX) {
-                        this._dampScroll([this.xy[0] - vy * 5, this.xy[1]]);
-                    } else {
-                        this._dampScroll([this.xy[0], this.xy[1] - Math.ceil(vy) * 30]);
-                    }
-    
-               
+                // console.warn('wheel-end')
+                if (wheelX) {
+                    this._dampScroll([this.xy[0] - vy * 5, this.xy[1]]);
+                } else {
+                    this._dampScroll([this.xy[0], this.xy[1] - Math.ceil(vy) * 30]);
+                }
+
+
             }
         });
     }
@@ -219,7 +219,7 @@ export default class extends AnyTouch {
         raf.cancel(this._dampScrollRafId);
         // console.log('_dampScroll', distXY, this.xy);
         // 参数
-        const { tolerance } = this.__options;
+        const { tolerance, allow } = this.__options;
 
         // 内部状态
         const _distXY = [...distXY] as [number, number];
@@ -261,9 +261,13 @@ export default class extends AnyTouch {
             }) as [number, number];
 
             context.moveTo(_nextXY);
-            // console.log(`_nextXY`, _nextXY, 'distXY', _distXY);
+            // console.log(allow,`_nextXY`, _nextXY, 'distXY', _distXY,);
+
+            // 是否开启的轴已经滚动到终点
+            const _needScroll = runTwice(i => allow[i] && _distXY[i] !== _nextXY[i]).some(bool => bool)
+
             // 迭代 OR 跳出迭代
-            if (_distXY[0] !== _nextXY[0] || _distXY[1] !== _nextXY[1]) {
+            if (_needScroll) {
                 // console.log(_distXY, _nextXY);
                 context._dampScrollRafId = raf(() => {
                     _moveTo(context);
