@@ -2,68 +2,87 @@
 const { setTimeout } = window;
 const WHEEL = 'wheel';
 
-// 参考
-// https://github.com/pmndrs/use-gesture/blob/3290c1d5f6beea238afb82c55d48855f10780874/packages/core/src/utils/events.ts#L83
-const LINE_HEIGHT = 40
-const PAGE_HEIGHT = 800
-function normalizeWheel(e: WheelEvent) {
+/**
+ * 统一滚轮的表现
+ * 参考: https://github.com/pmndrs/use-gesture/blob/3290c1d5f6beea238afb82c55d48855f10780874/packages/core/src/utils/events.ts#L83
+ * @param e 鼠标滚轮事件对象
+ * @param LINE_HEIGHT 滚动一行的高度
+ * @param PAGE_HEIGHT 滚动一页的高度
+ * @returns 一次滚动的偏移
+ */
+function normalizeWheel(e: WheelEvent, LINE_HEIGHT = 40, PAGE_HEIGHT = 800) {
     let { deltaX, deltaY, deltaMode } = e;
     // console.log(deltaMode, e.DOM_DELTA_LINE);
     if (deltaMode == e.DOM_DELTA_LINE) {
-        deltaX *= LINE_HEIGHT
-        deltaY *= LINE_HEIGHT
+        deltaX *= LINE_HEIGHT;
+        deltaY *= LINE_HEIGHT;
     } else if (deltaMode == e.DOM_DELTA_PAGE) {
-        deltaX *= PAGE_HEIGHT
-        deltaY *= PAGE_HEIGHT
+        deltaX *= PAGE_HEIGHT;
+        deltaY *= PAGE_HEIGHT;
     }
     return [deltaX, deltaY];
 }
-
-export default function (el: HTMLElement, onChange: (e: any) => void) {
-    let lastWheelTime: number | undefined;
-    let endTimerId: number;
-    let deltaYCounter = 0;
-    let deltaXCounter = 0;
+interface WheelEvent2 extends WheelEvent {
+    type: 'start' | 'move' | 'end';
+    [k: string]: any;
+}
+export default function (el: HTMLElement, onChange: (e: WheelEvent2) => void) {
+    // 上一次滚动发生时间
+    let _lastWheelTime: number | undefined;
+    // wheelend延迟触发的id
+    let _endTimeoutId: number;
+    // 一轮滚动距离的和
+    let _deltaYCounter = 0;
+    let _deltaXCounter = 0;
 
     function __onWheel(e: WheelEvent) {
-        let [deltaX, deltaY] = normalizeWheel(e);
-        deltaXCounter += deltaX;
-        deltaYCounter += deltaY;
-
+        const [deltaX, deltaY] = normalizeWheel(e);
+        _deltaXCounter += deltaX;
+        _deltaYCounter += deltaY;
+        /**
+         * 触发回调和自定义DOM事件
+         * @param e 滚轮事件
+         * @param type 类型: 'start' | 'move' | 'end'
+         * @param payload 自定义事件数据
+         */
+        function _dispatchEvent(type: 'start' | 'move' | 'end', payload?: Record<string, any>) {
+            const wheelEvent2 = {
+                ...e,
+                deltaX,
+                deltaY,
+                type,
+                ...payload,
+            };
+            onChange(wheelEvent2);
+            el.dispatchEvent(new Event('wheel' + type, wheelEvent2));
+        }
 
         // 最后一下滚动
-        clearTimeout(endTimerId);
-        endTimerId = setTimeout(() => {
-            const timeDiff = Date.now() - <number>lastWheelTime;
-            const vx = deltaXCounter / timeDiff;
-            const vy = deltaYCounter / timeDiff;
+        clearTimeout(_endTimeoutId);
+        _endTimeoutId = setTimeout(() => {
+            const timeDiff = Date.now() - <number>_lastWheelTime;
+            const vx = _deltaXCounter / timeDiff;
+            const vy = _deltaYCounter / timeDiff;
 
-            lastWheelTime = void 0;
-            deltaXCounter = 0;
-            deltaYCounter = 0;
-            el.dispatchEvent(new Event('wheelend', {}));
-            onChange({ target: e.target, type: 'end', deltaX, deltaY, vx, vy });
+            _lastWheelTime = void 0;
+            _deltaXCounter = 0;
+            _deltaYCounter = 0;
+            _dispatchEvent('end', { vx, vy });
         }, 16);
 
-
         // 开始
-        if (void 0 === lastWheelTime) {
-            onChange({ target: e.target, type: 'start', deltaX, deltaY });
-            el.dispatchEvent(new Event('wheelstart', {}));
+        if (void 0 === _lastWheelTime) {
+            _dispatchEvent('start');
         }
         // 移动
         else {
-            el.dispatchEvent(new Event('wheelmove', {}));
-            onChange({ target: e.target, type: 'move', deltaX, deltaY });
+            _dispatchEvent('move');
         }
-
-        lastWheelTime = Date.now();
-        // e.preventDefault();
+        _lastWheelTime = Date.now();
     }
+
     el.addEventListener(WHEEL, __onWheel);
-
-
     return () => {
         el.removeEventListener(WHEEL, __onWheel);
-    }
+    };
 }
