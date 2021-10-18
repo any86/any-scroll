@@ -3,9 +3,11 @@ import AnyTouch from 'any-touch';
 import raf from 'raf';
 import debounce from 'lodash/debounce';
 
-import clamp from 'lodash/clamp';
+import _clamp from 'lodash/clamp';
+function clamp(a: number, b: number, c: number) {
+    return _clamp(a, Math.min(b, c), Math.max(b, c))
+}
 import inRange from 'lodash/inRange';
-
 import createBar from '@any-scroll/bar';
 import { setStyle, damp, tween, setTranslate, createDOMDiv, runTwice } from '@any-scroll/shared';
 import watchWheel from './wheel';
@@ -24,6 +26,10 @@ export interface Options {
     allow?: [boolean, boolean];
 
     hideBar?: [boolean, boolean];
+    // 超出界限后自动吸附边框
+    snap?: boolean;
+    // 是否允许滑动出界限, 超过tolerance
+    limit?: boolean;
 }
 
 export const DEFAULT_OPTIONS = {
@@ -31,6 +37,8 @@ export const DEFAULT_OPTIONS = {
     damping: 0.1,
     allow: [true, true] as [boolean, boolean],
     hideBar: [false, false] as [boolean, boolean],
+    snap: true,
+    limit: true,
 };
 
 export default class extends AnyTouch {
@@ -101,6 +109,7 @@ export default class extends AnyTouch {
         const { allow } = this.__options;
         // 滚动鼠标X轴滑动
         const wheelX = allow[0] && !allow[1];
+        console.log(this);
 
         watchWheel(el, ({ type, deltaY, vx, vy, target }) => {
 
@@ -164,8 +173,10 @@ export default class extends AnyTouch {
      * 吸附到最近的边缘
      */
     snap() {
-        // console.log('snap');
-        this._dampScroll([clamp(this.xy[0], this.__minXY[0], 0), clamp(this.xy[1], this.__minXY[1], 0)]);
+        if (this.__options.snap) {
+            // console.log('snap');
+            this._dampScroll([clamp(this.xy[0], this.__minXY[0], 0), clamp(this.xy[1], this.__minXY[1], 0)]);
+        }
     }
 
     /**
@@ -176,14 +187,13 @@ export default class extends AnyTouch {
      */
     moveTo(distXY: [number, number]): [number, number] {
         clearTimeout(this._scrollEndTimeId);
-        const { allow } = this.__options;
-
+        const { allow, limit } = this.__options;
         runTwice((i) => {
             if (allow[i]) {
-                this.xy[i] = clamp(distXY[i], this.__minXY[i] - this.__options.tolerance, this.__options.tolerance);
+                console.log(i, distXY[i], this.__minXY[i] - this.__options.tolerance, this.__options.tolerance);
+                this.xy[i] = limit ? clamp(distXY[i], this.__minXY[i] - this.__options.tolerance, this.__options.tolerance) : distXY[i];
             }
         });
-
         if (allow.includes(true)) {
             // 钩子
             this.emit('scroll', this.xy);
@@ -234,23 +244,23 @@ export default class extends AnyTouch {
 
                 // 当前位置和目标都超过了界限
                 if (xy[i] >= tolerance && _distXY[i] >= tolerance) {
-                    // console.log(1);
+                    console.log(1);
                     // 复位
                     _distXY[i] = 0;
                 }
 
                 // 当前已经到达目标, 且位置超出的边框
                 else if (_nextvalue == _distXY[i] && _nextvalue > 0) {
-                    // console.log(2);
+                    console.log(2);
                     _distXY[i] = 0;
                 } else if (xy[i] < __minXY[i] && _distXY[i] < __minXY[i]) {
-                    // console.log(3, __minXY[i]);
+                    console.log(3, __minXY[i]);
                     _distXY[i] = __minXY[i];
                 } else if (_nextvalue == _distXY[i] && _nextvalue < __minXY[i]) {
-                    // console.log(4);
+                    console.log(4);
                     _distXY[i] = __minXY[i];
                 } else {
-                    // console.log(5);
+                    console.log(5);
 
                     return _nextvalue;
                 }
@@ -289,6 +299,10 @@ export default class extends AnyTouch {
         this.__warpSize = [el.clientWidth, el.clientHeight];
         this.contentSize = [offsetWidth - clientWidth + scrollWidth, offsetHeight - clientHeight + scrollHeight];
         this.__minXY = [el.clientWidth - this.contentSize[0], el.clientHeight - this.contentSize[1]];
+        console.log('__warpSize', this.__warpSize);
+        console.log('contentSize', this.contentSize);
+        console.log('__minXY', this.__minXY);
+
     }
 
     /**

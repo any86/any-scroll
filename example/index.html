@@ -54,12 +54,11 @@
                 box-shadow: 1px 2px 15px 5px rgba(0, 0, 0, 0.1), 1px 2px 150px 5px #4100966b;
             ">
         <div>
-            <h1>
-                <input type="text" style="padding: 15px" />
+            <h1 style="width:240px;">
+                <input type="text" style="padding: 15px;" />
             </h1>
 
-            <p style="
-            display: none;
+            <p id="p" style="
                         font-size: 30px;
                         background-image: linear-gradient(50deg, #fff3af, #ee89cc, #a38adf);
                         color: #000;
@@ -102,7 +101,11 @@
         //     }
         // });
 
-        const as = new AnyScroll(el, { allow: [true, true] });
+        // const as = new AnyScroll(el, { allow: [true, true]});
+
+        document.getElementById('p').style.display = 'none';
+        const as = new AnyScroll(el, { allow: [false, true], snap: false, limit: true, });
+        // as.beforeMove()
         // as.__scrollTo([-100,-100])
         for (let i = 0; i < 100; i++) {
             const textEl = document.createElement('h1');
