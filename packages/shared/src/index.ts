@@ -108,10 +108,10 @@ export function damp(value: number, dist: number, damping = 0.1) {
     return dist;
 }
 
-console.warn(damp(-0, -1002));
-console.warn(damp(-101, -1002));
+// console.warn(damp(-0, -1002));
+// console.warn(damp(-101, -1002));
 
-console.warn(damp(-192, -2000));
+// console.warn(damp(-192, -2000));
 
 
 // const [run,stop] = tween([0, 0],[-100,-100], 10000);

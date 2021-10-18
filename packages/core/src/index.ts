@@ -64,9 +64,8 @@ export default class extends AnyTouch {
         this.__updateBar(this.xy, this.__warpSize, this.__minXY, this.contentSize);
         this.__registerObserver();
 
-        this.on('panstart', (e) => { });
 
-        this.on('panmove', (e) => {
+        this.on(['panstart', 'panmove'], (e) => {
             const { deltaX, deltaY } = e;
             this.moveTo([this.xy[0] + deltaX, this.xy[1] + deltaY]);
         });
@@ -102,8 +101,6 @@ export default class extends AnyTouch {
         const { allow } = this.__options;
         // 滚动鼠标X轴滑动
         const wheelX = allow[0] && !allow[1];
-
-        let wheelTimeoutId = -1;
 
         watchWheel(el, ({ type, deltaY, vx, vy, target }) => {
 
@@ -177,7 +174,7 @@ export default class extends AnyTouch {
      * @param y
      * @returns
      */
-    private moveTo(distXY: [number, number]): [number, number] {
+    moveTo(distXY: [number, number]): [number, number] {
         clearTimeout(this._scrollEndTimeId);
         const { allow } = this.__options;
 
@@ -288,10 +285,7 @@ export default class extends AnyTouch {
         // 保留边框
         // 参考smooth-scroll
         const { el, contentEl } = this;
-
         const { offsetWidth, offsetHeight, clientWidth, clientHeight, scrollWidth, scrollHeight } = contentEl;
-        // console.log({ offsetWidth, offsetHeight, clientWidth, clientHeight, scrollWidth, scrollHeight }, contentEl.offsetHeight);
-
         this.__warpSize = [el.clientWidth, el.clientHeight];
         this.contentSize = [offsetWidth - clientWidth + scrollWidth, offsetHeight - clientHeight + scrollHeight];
         this.__minXY = [el.clientWidth - this.contentSize[0], el.clientHeight - this.contentSize[1]];
