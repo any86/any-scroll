@@ -34,8 +34,8 @@ export function easing(t: number) {
 * 运行2次
 * @param callback 每次运行传入索引
 */
-export function runTwice(callback: (n: number) => unknown) {
-    return [callback(0), callback(1)];
+export function runTwice<T>(callback: (n: number) => T) {
+    return [callback(0), callback(1)] as const;
 }
 
 /**

@@ -14,6 +14,8 @@ import watchWheel from './wheel';
 import { STYLE, CONTENT_STYLE, SHRINK_DELAY_TIME, CLASS_NAME_ANY_SCROLL } from './const';
 const { setTimeout } = window;
 
+type XY = [number, number];
+
 declare const WebKitMutationObserver: MutationObserver;
 declare const MozMutationObserver: MutationObserver;
 
@@ -172,7 +174,11 @@ export default class extends AnyTouch {
     snap() {
         if (this.__options.snap) {
             // console.log('snap');
-            this._dampScroll([clamp(this.xy[0], this.__minXY[0], 0), clamp(this.xy[1], this.__minXY[1], 0)]);
+            const xy = runTwice(i => {
+                return clamp(this.xy[i], this.__minXY[i], this.__maxXY[i]);
+            });
+            console.warn(xy);
+            this._dampScroll(xy);
         }
     }
 
@@ -182,14 +188,19 @@ export default class extends AnyTouch {
      * @param y
      * @returns
      */
-    moveTo(distXY: [number, number]): [number, number] {
+    moveTo(distXY: readonly [number, number]): [number, number] {
         clearTimeout(this._scrollEndTimeId);
-        const { allow } = this.__options;
+        const { allow, overflowDistance } = this.__options;
         runTwice((i) => {
             if (allow[i]) {
-                this.xy[i] = clamp(distXY[i], this.__minXY[i] - this.__options.overflowDistance, this.__options.overflowDistance);
+                this.xy[i] = clamp(
+                    distXY[i],
+                    this.__minXY[i] - overflowDistance,
+                    this.__maxXY[i] + overflowDistance
+                );
             }
         });
+
         if (allow.includes(true)) {
             // 钩子
             this.emit('scroll', this.xy);
@@ -216,7 +227,7 @@ export default class extends AnyTouch {
      * @param distXY 目标点
      * @param onScroll 滚动回调
      */
-    _dampScroll(distXY: [number, number]) {
+    _dampScroll(distXY: readonly [number, number]) {
         if (distXY[0] === this.xy[0] && distXY[1] === this.xy[1]) return;
 
         raf.cancel(this._dampScrollRafId);
@@ -224,30 +235,33 @@ export default class extends AnyTouch {
         // 参数
         const { overflowDistance, allow } = this.__options;
 
-        // 内部状态
+        // 内部状态, 根据不同位置会发生变化
         const _distXY = [...distXY] as [number, number];
 
         // AnyScroll实例
         type AnyScrollInstance = typeof this;
         function _moveTo(context: AnyScrollInstance) {
-            const { xy, __minXY } = context;
+            const { xy, __minXY, __maxXY } = context;
 
             // 获取当前值
             const _nextXY = runTwice((i) => {
                 // 根据当前位置和目标计算阶"段性的目标位置"
                 const _nextvalue = damp(context.xy[i], _distXY[i]);
-
+                console.log(i, { _nextvalue }, context.xy[i], _distXY[i]);
                 // 当前位置和目标都超过了界限
-                if (xy[i] >= overflowDistance && _distXY[i] >= overflowDistance) {
+                if (xy[i] >= __maxXY[i] + overflowDistance && _distXY[i] >= __maxXY[i] + overflowDistance) {
                     console.log(1);
                     // 复位
-                    _distXY[i] = 0;
+                    // _distXY[i] = 0;
+                    _distXY[i] = __maxXY[i];
                 }
-
                 // 当前已经到达目标, 且位置超出的边框
-                else if (_nextvalue == _distXY[i] && _nextvalue > 0) {
+                // else if (_nextvalue == _distXY[i] && _nextvalue > 0) {
+                else if (_nextvalue == _distXY[i] && _nextvalue > __maxXY[i]) {
                     console.log(2);
-                    _distXY[i] = 0;
+                    // _distXY[i] = 0;
+                    _distXY[i] = __maxXY[i];
+
                 } else if (xy[i] < __minXY[i] && _distXY[i] < __minXY[i]) {
                     console.log(3, __minXY[i]);
                     _distXY[i] = __minXY[i];
@@ -260,7 +274,7 @@ export default class extends AnyTouch {
                     return _nextvalue;
                 }
                 return damp(context.xy[i], _distXY[i]);
-            }) as [number, number];
+            });
 
             context.moveTo(_nextXY);
             // console.log(allow,`_nextXY`, _nextXY, 'distXY', _distXY,);
@@ -287,7 +301,6 @@ export default class extends AnyTouch {
      * 更新尺寸
      */
     private __updateSize() {
-
         const { el, contentEl } = this;
         const { offsetWidth, offsetHeight, clientWidth, clientHeight, scrollWidth, scrollHeight } = contentEl;
         // scrollView尺寸
@@ -296,22 +309,20 @@ export default class extends AnyTouch {
         // 内容尺寸
         // 保留边框
         // 参考smooth-scroll
-        this.contentSize = [
-            offsetWidth - clientWidth + scrollWidth,
-            offsetHeight - clientHeight + scrollHeight
-        ];
+        this.contentSize = [offsetWidth - clientWidth + scrollWidth, offsetHeight - clientHeight + scrollHeight];
 
         this.__minXY = [
             Math.min(0, this.size[0] - this.contentSize[0]),
             Math.min(0, this.size[1] - this.contentSize[1]),
         ];
 
-        this.__maxXY = [0, 0];
-
+        this.__maxXY = [0, 300];
 
         console.log('__warpSize', this.size);
         console.log('contentSize', this.contentSize);
         console.log('__minXY', this.__minXY);
+        console.log('__maxXY', this.__maxXY);
+
     }
 
     /**
