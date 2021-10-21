@@ -2,16 +2,16 @@ import AnyTouch from 'any-touch';
 
 import raf from 'raf';
 import debounce from 'lodash/debounce';
-
-import _clamp from 'lodash/clamp';
-function clamp(a: number, b: number, c: number) {
-    return _clamp(a, Math.min(b, c), Math.max(b, c));
-}
 import inRange from 'lodash/inRange';
+
+import clamp from 'lodash/clamp';
+// function clamp(a: number, b: number, c: number) {
+//     return _clamp(a, Math.min(b, c), Math.max(b, c));
+// }
 import createBar from '@any-scroll/bar';
-import { setStyle, damp, tween, setTranslate, createDOMDiv, runTwice } from '@any-scroll/shared';
+import { setStyle, damp, tween, setTranslate, runTwice } from '@any-scroll/shared';
 import watchWheel from './wheel';
-import { STYLE, CONTENT_STYLE, SHRINK_DELAY_TIME, CLASS_NAME_ANY_SCROLL } from './const';
+import { STYLE, CONTENT_STYLE, SCROLL_END_DELAY, CLASS_NAME_ANY_SCROLL } from './const';
 const { setTimeout } = window;
 
 type XY = [number, number];
@@ -31,7 +31,7 @@ export interface Options {
     // 超出界限后自动吸附边框
     snap?: boolean;
     // 是否允许滑动出界限, 超过tolerance
-    limit?: boolean;
+    // limit?: [XY,XY];
 }
 
 export const DEFAULT_OPTIONS = {
@@ -40,7 +40,6 @@ export const DEFAULT_OPTIONS = {
     allow: [true, true] as [boolean, boolean],
     hideBar: [false, false] as [boolean, boolean],
     snap: true,
-    limit: true,
 };
 
 export default class extends AnyTouch {
@@ -52,19 +51,20 @@ export default class extends AnyTouch {
     private __updateBar: any;
     readonly xy: [number, number] = [0, 0];
     contentSize: [number, number] = [0, 0];
-    el: HTMLElement;
+    wrapEl: HTMLElement;
     contentEl: HTMLElement;
     // 控制scroll-end不被频繁触发
     private _scrollEndTimeId = -1;
     private _dampScrollRafId = -1;
     private _stopTimeId = -1;
-
     private _stopScroll = () => { };
 
     constructor(el: HTMLElement, options?: Options) {
-        super(el);
-        this.el = el;
-        this.contentEl = __initDOM(el);
+        super(options.contentEl || getContentDOM(el));
+        this.wrapEl = el;
+        this.contentEl = this.el as HTMLElement;
+        setStyle(this.contentEl, { position: 'absolute' });
+
         this.__options = { ...DEFAULT_OPTIONS, ...options };
         this.__updateBar = createBar(el);
         // const [watch,sync,thumbEl, barEl] = createBar();
@@ -84,7 +84,7 @@ export default class extends AnyTouch {
         this.on('panend', (e) => {
             this._scrollEndTimeId = setTimeout(() => {
                 this.emit('scroll-end', this.xy);
-            }, SHRINK_DELAY_TIME);
+            }, SCROLL_END_DELAY);
         });
 
         this.on('at:start', () => {
@@ -145,6 +145,35 @@ export default class extends AnyTouch {
         this.__updateSize();
         this.__updateBar(this.xy, this.size, this.__minXY, this.contentSize);
     }
+
+    /**
+     * 更新尺寸
+     */
+    private __updateSize() {
+        const { wrapEl, contentEl } = this;
+        const { offsetWidth, offsetHeight, clientWidth, clientHeight, scrollWidth, scrollHeight } = contentEl;
+        // scrollView尺寸
+        this.size = [wrapEl.clientWidth, wrapEl.clientHeight];
+
+        // 内容尺寸
+        // 保留边框
+        // 参考smooth-scroll
+        this.contentSize = [offsetWidth - clientWidth + scrollWidth, offsetHeight - clientHeight + scrollHeight];
+
+        this.__minXY = [
+            Math.min(0, this.size[0] - this.contentSize[0]),
+            Math.min(0, this.size[1] - this.contentSize[1]),
+        ];
+
+        this.__maxXY = [0, 0];
+
+        console.log('__warpSize', this.size);
+        console.log('contentSize', this.contentSize);
+        console.log('__minXY', this.__minXY);
+        console.log('__maxXY', this.__maxXY);
+
+    }
+
     /**
      * 注册监听
      */
@@ -177,7 +206,6 @@ export default class extends AnyTouch {
             const xy = runTwice(i => {
                 return clamp(this.xy[i], this.__minXY[i], this.__maxXY[i]);
             });
-            console.warn(xy);
             this._dampScroll(xy);
         }
     }
@@ -204,7 +232,7 @@ export default class extends AnyTouch {
         if (allow.includes(true)) {
             // 钩子
             this.emit('scroll', this.xy);
-            const { clientWidth, clientHeight } = this.el;
+            const { clientWidth, clientHeight } = this.wrapEl;
             this.__updateBar(this.xy, [clientWidth, clientHeight], this.__minXY, this.contentSize);
             setTranslate(this.contentEl, ...this.xy);
         }
@@ -298,34 +326,6 @@ export default class extends AnyTouch {
     }
 
     /**
-     * 更新尺寸
-     */
-    private __updateSize() {
-        const { el, contentEl } = this;
-        const { offsetWidth, offsetHeight, clientWidth, clientHeight, scrollWidth, scrollHeight } = contentEl;
-        // scrollView尺寸
-        this.size = [el.clientWidth, el.clientHeight];
-
-        // 内容尺寸
-        // 保留边框
-        // 参考smooth-scroll
-        this.contentSize = [offsetWidth - clientWidth + scrollWidth, offsetHeight - clientHeight + scrollHeight];
-
-        this.__minXY = [
-            Math.min(0, this.size[0] - this.contentSize[0]),
-            Math.min(0, this.size[1] - this.contentSize[1]),
-        ];
-
-        this.__maxXY = [0, 300];
-
-        console.log('__warpSize', this.size);
-        console.log('contentSize', this.contentSize);
-        console.log('__minXY', this.__minXY);
-        console.log('__maxXY', this.__maxXY);
-
-    }
-
-    /**
      * 销毁
      */
     destroy() {
@@ -337,17 +337,17 @@ export default class extends AnyTouch {
  * @param el 外壳元素
  * @returns 内部容器元素
  */
-function __initDOM(el: HTMLElement): HTMLElement {
+function getContentDOM(el: HTMLElement) {
     // 设置外容器样式
     setStyle(el, STYLE);
     el.classList.add(CLASS_NAME_ANY_SCROLL);
     // 生成内容器, 并把外容器内的dom移动到内容器
-    const contentEl = createDOMDiv();
-    while (el.firstChild) {
-        contentEl.appendChild(el.firstChild);
-    }
+    const contentEl = el.firstElementChild as HTMLElement;
     // 设置内容器样式
-    setStyle(contentEl, CONTENT_STYLE);
-    el.appendChild(contentEl);
-    return contentEl;
+    if (null !== contentEl) {
+        setStyle(contentEl, CONTENT_STYLE);
+        return contentEl;
+    } else {
+        throw '请增加body元素!';
+    }
 }
