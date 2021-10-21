@@ -104,7 +104,9 @@
         // const as = new AnyScroll(el, { allow: [true, true]});
 
         document.getElementById('p').style.display = 'none';
-        const as = new AnyScroll(el, { allow: [false, true], snap: false, limit: true, });
+        const as = new AnyScroll(el, { allow: [true, true], });
+
+
         // as.beforeMove()
         // as.__scrollTo([-100,-100])
         for (let i = 0; i < 100; i++) {
