@@ -45,7 +45,6 @@
 <body style="padding: 30px">
     <button onclick="scrollTo2()">scrollTo2</button>
     <div id="scroll" style="
-
                 border: 2px solid #444;
                 width: 100%;
                 max-width: 480px;
@@ -55,7 +54,7 @@
             ">
         <div class="content" id="content"></div>
 
-        <div class="content"  id="content2" style="width:300px"></div>
+        <div class="content" id="content2" style="width:300px"></div>
     </div>
 
     <script>
@@ -80,15 +79,17 @@
 
 
         as.on('scroll', (e) => {
-            console.log(`scroll`,e);
+            console.log(`scroll`, e);
         });
 
         as.on('scroll-end', (e) => {
-            console.warn('scroll-end',e);
+            console.warn('scroll-end', e);
             // as._dampScroll([0, -4002]);
         });
 
-        as.scrollTo([100, 200], 1000);
+        as.scrollTo([100, 200], 300);
+
+        as.getContentRef(1).scrollTo([100, 200], 1000);
 
         function scrollTo2() {
             as.scrollTo([100, -1100], 500);

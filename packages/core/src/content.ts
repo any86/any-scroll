@@ -35,7 +35,7 @@ export default class extends AnyEvent {
     private __options: Required<Options>;
     readonly xy: [number, number] = [0, 0];
     contentSize: [number, number] = [0, 0];
-    contentEl: HTMLElement;
+    el: HTMLElement;
     wrapEl: HTMLElement;
     targets: (EventTarget | null)[] = [];
     // 控制scroll-end不被频繁触发
@@ -45,7 +45,7 @@ export default class extends AnyEvent {
 
     constructor(contentEl: HTMLElement, wrapEl: HTMLElement, options: Options) {
         super();
-        this.contentEl = contentEl;
+        this.el = contentEl;
         this.wrapEl = wrapEl;
         this.__options = { ...DEFAULT_OPTIONS, ...options };
         setStyle(contentEl, { position: 'absolute' });
@@ -62,7 +62,7 @@ export default class extends AnyEvent {
      * 更新尺寸
      */
     private __updateSize() {
-        const { wrapEl, contentEl } = this;
+        const { wrapEl, el: contentEl } = this;
         const { offsetWidth, offsetHeight, clientWidth, clientHeight, scrollWidth, scrollHeight } = contentEl;
         // scrollView尺寸
         this.size = [wrapEl.clientWidth, wrapEl.clientHeight];
@@ -95,7 +95,7 @@ export default class extends AnyEvent {
         // observe
         if (typeof Observer === 'function') {
             const ob = new Observer(this.update.bind(this));
-            ob.observe(this.contentEl, {
+            ob.observe(this.el, {
                 subtree: true,
                 childList: true,
             });
@@ -149,7 +149,7 @@ export default class extends AnyEvent {
             this.emit('scroll', { targets, target, x, y });
             // const { clientWidth, clientHeight } = this.wrapEl;
             // this.__updateBar(this.xy, [clientWidth, clientHeight], this.__minXY, this.contentSize);
-            setTranslate(this.contentEl, ...this.xy);
+            setTranslate(this.el, ...this.xy);
         }
         return this.xy;
     }
@@ -195,14 +195,14 @@ export default class extends AnyEvent {
                 if (xy[i] >= __maxXY[i] + overflowDistance) {
                     // 复位
                     _distXY[i] = __maxXY[i];
-                } else if(xy[i] <= __minXY[i] - overflowDistance){
+                } else if (xy[i] <= __minXY[i] - overflowDistance) {
                     _distXY[i] = __minXY[i];
                 } else {
                     // 当前已经到达目标, 且位置超出的边框
                     if (xy[i] === _distXY[i] && _nextvalue === _distXY[i]) {
                         if (xy[i] > __maxXY[i]) {
                             _distXY[i] = __maxXY[i];
-                        } else if(xy[i] < __minXY[i]) {
+                        } else if (xy[i] < __minXY[i]) {
                             _distXY[i] = __minXY[i];
                         }
                     } else {

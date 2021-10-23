@@ -22,7 +22,8 @@ function normalizeWheel(e: WheelEvent, LINE_HEIGHT = 40, PAGE_HEIGHT = 800) {
     }
     return [deltaX, deltaY];
 }
-interface WheelEvent2 extends WheelEvent {
+interface WheelEvent2 {
+    target:EventTarget|null;
     type: 'start' | 'move' | 'end';
     [k: string]: any;
 }
@@ -47,14 +48,16 @@ export default function (el: HTMLElement, onChange: (e: WheelEvent2) => void) {
          */
         function _dispatchEvent(type: 'start' | 'move' | 'end', payload?: Record<string, any>) {
             const wheelEvent2 = {
-                ...e,
+                target:e.target,
                 deltaX,
                 deltaY,
                 type,
                 ...payload,
             };
+
+            const event = new Event('wheel' + type);
             onChange(wheelEvent2);
-            el.dispatchEvent(new Event('wheel' + type, wheelEvent2));
+            el.dispatchEvent(event);
         }
 
         // 最后一下滚动
