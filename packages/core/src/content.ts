@@ -188,39 +188,31 @@ export default class extends AnyEvent {
 
             // 获取当前值
             const _nextXY = runTwice((i) => {
-                // 根据当前位置和目标计算阶"段性的目标位置"
+                // 根据当前位置和目标计算阶"段性的目标位置"(修正distXY)
                 const _nextvalue = damp(context.xy[i], _distXY[i]);
                 // console.log(i, { _nextvalue }, context.xy[i], _distXY[i]);
                 // 当前位置和目标都超过了界限
-                if (xy[i] >= __maxXY[i] + overflowDistance && _distXY[i] >= __maxXY[i] + overflowDistance) {
-                    // console.log(1);
+                if (xy[i] >= __maxXY[i] + overflowDistance) {
                     // 复位
-                    // _distXY[i] = 0;
                     _distXY[i] = __maxXY[i];
-                }
-                // 当前已经到达目标, 且位置超出的边框
-                // else if (_nextvalue == _distXY[i] && _nextvalue > 0) {
-                else if (_nextvalue == _distXY[i] && _nextvalue > __maxXY[i]) {
-                    // console.log(2);
-                    // _distXY[i] = 0;
-                    _distXY[i] = __maxXY[i];
-
-                } else if (xy[i] < __minXY[i] && _distXY[i] < __minXY[i]) {
-                    // console.log(3, __minXY[i]);
-                    _distXY[i] = __minXY[i];
-                } else if (_nextvalue == _distXY[i] && _nextvalue < __minXY[i]) {
-                    // console.log(4);
+                } else if(xy[i] <= __minXY[i] - overflowDistance){
                     _distXY[i] = __minXY[i];
                 } else {
-                    // console.log(5);
-
-                    return _nextvalue;
+                    // 当前已经到达目标, 且位置超出的边框
+                    if (xy[i] === _distXY[i] && _nextvalue === _distXY[i]) {
+                        if (xy[i] > __maxXY[i]) {
+                            _distXY[i] = __maxXY[i];
+                        } else if(xy[i] < __minXY[i]) {
+                            _distXY[i] = __minXY[i];
+                        }
+                    } else {
+                        return _nextvalue;
+                    }
                 }
                 return damp(context.xy[i], _distXY[i]);
             });
 
             context.moveTo(_nextXY);
-            // console.log(allow,`_nextXY`, _nextXY, 'distXY', _distXY,);
 
             // 是否开启的轴已经滚动到终点
             const _needScroll = runTwice((i) => allow[i] && _distXY[i] !== _nextXY[i]).some((bool) => bool);
