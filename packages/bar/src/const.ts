@@ -10,6 +10,7 @@ export const BAR_CSS = `
 ${__ANY_SCROLL} {
     display: block;
     position: relative;
+    overflow:hidden;
 }
 
 ${__ANY_SCROLL} > .${TRACK_CLASS_NAME}{

@@ -28,15 +28,15 @@
             font-size: 24px;
         }
 
-        .box:nth-child(4n+1) {
+        .box:nth-child(4n + 1) {
             background-color: #2196f3;
         }
 
-        .box:nth-child(4n+2) {
+        .box:nth-child(4n + 2) {
             background-color: #ffc107;
         }
 
-        .box:nth-child(4n+3) {
+        .box:nth-child(4n + 3) {
             background-color: #ccc;
         }
     </style>
@@ -45,41 +45,41 @@
 <body style="padding: 30px">
     <button onclick="scrollTo2()">scrollTo2</button>
     <div id="scroll" style="
-                border: 2px solid #444;
                 width: 100%;
                 max-width: 480px;
                 height: 80vh;
                 margin: auto;
                 box-shadow: 1px 2px 15px 5px rgba(0, 0, 0, 0.1), 1px 2px 150px 5px #4100966b;
             ">
-        <div class="content" id="content"></div>
+        <!-- <div class="content" id="content"></div> -->
 
-        <div class="content" id="content2" style="width:300px"></div>
+        <div class="content" id="content2" style="width: 300px"></div>
     </div>
 
     <script>
         const content = document.getElementById('content');
-        const html = [];
-        for (let i = 1; i <= 12; i++) {
-            html.push(`<span class="box">${i}</span>`);
+        if (content) {
+            const html = [];
+            for (let i = 1; i <= 3; i++) {
+                html.push(`<span class="box">${i}</span>`);
+            }
+            content.innerHTML = html.join('');
         }
-        content.innerHTML = html.join('');
 
 
         const content2 = document.getElementById('content2');
-        const html2 = [];
-        for (let i = 1; i <= 61; i++) {
-            html2.push(`<span class="box">${i}</span>`);
+        if (content2) {
+            const html2 = [];
+            for (let i = 1; i <= 61; i++) {
+                html2.push(`<span class="box">${i}</span>`);
+            }
+            content2.innerHTML = html2.join('');
         }
-        content2.innerHTML = html2.join('');
-
-
         const el = document.getElementById('scroll');
-        const as = new AnyScroll(el, { allow: [true, true], });
-
+        const as = new AnyScroll(el, { overflowDistance: 100 });
 
         as.on('scroll', (e) => {
-            console.log(`scroll`, e);
+            // console.log(`scroll`, e);
         });
 
         as.on('scroll-end', (e) => {
@@ -87,9 +87,14 @@
             // as._dampScroll([0, -4002]);
         });
 
-        as.scrollTo([100, 200], 300);
+        // as.scrollTo([100, 200], 300);
 
-        as.getContentRef(1).scrollTo([100, 200], 1000);
+        const as2 = as.getContentRef(0);
+        // as2.maxXY[0] = as2.wrapSize[0] - as2.contentSize[0];
+        // as2.maxXY[1] = as2.wrapSize[1] - as2.contentSize[1];
+
+
+        // as.getContentRef(1).scrollTo([100, 200], 1000);
 
         function scrollTo2() {
             as.scrollTo([100, -1100], 500);

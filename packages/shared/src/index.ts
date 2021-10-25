@@ -17,8 +17,12 @@ export function appendStyleToHTML(style: string) {
     }
 }
 
-export function createDOMDiv() {
-    return document.createElement(`div`);
+export function createDOMDiv(className?: string[]) {
+    const div = document.createElement(`div`);
+    if (className) {
+        div.classList.add(...className);
+    }
+    return div;
 }
 
 export function hideDOM(el: HTMLElement) {
@@ -34,8 +38,8 @@ export function easing(t: number) {
 * 运行2次
 * @param callback 每次运行传入索引
 */
-export function runTwice<T>(callback: (n: number) => T) {
-    return [callback(0), callback(1)] as const;
+export function runTwice<T>(callback: (n: number) => T): [T, T] {
+    return [callback(0), callback(1)];
 }
 
 /**
