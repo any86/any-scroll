@@ -1,4 +1,5 @@
 import _wrap from './wrap';
+import _content from './content';
 export interface Options {
     // 允许超过边界的最大距离
     overflowDistance?: number;
@@ -15,6 +16,8 @@ export interface Options {
     hasBar?: boolean;
 }
 export const Wrap = _wrap;
+export const Content = _content;
+
 
 const plugins: any[] = [];
 export default class extends Wrap {

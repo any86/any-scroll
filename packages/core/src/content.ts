@@ -50,6 +50,7 @@ export default class extends AnyEvent {
         this.__options = { ...DEFAULT_OPTIONS, ...options };
         setStyle(contentEl, { position: 'absolute' });
         this.update();
+        this.__registerObserver();
     }
 
     set(options: Options) {

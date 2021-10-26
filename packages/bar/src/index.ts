@@ -2,43 +2,54 @@ import { setStyle, setTranslate, createDOMDiv, hideDOM, runTwice } from '@any-sc
 import { insertCss } from 'insert-css';
 import { TRACK_CLASS_NAME, THUMB_CLASS_NAME, BAR_CSS, DIRECTION } from './const';
 import clamp from 'lodash/clamp';
-import { Wrap } from '@any-scroll/core';
+import { Wrap, Content } from '@any-scroll/core';
 const widthAndHeight = ['width', 'height'];
-type WarpInstance = InstanceType<typeof Wrap>
+type WarpInstance = InstanceType<typeof Wrap>;
+type ContentInstance = InstanceType<typeof Content>;
 /**
  * 创建滚动条
  * @param el 容器元素
- * @returns 
+ * @returns
  */
 export default function (context: WarpInstance) {
+    let __isDraggingBar = false;
     insertCss(BAR_CSS);
     const bars: WarpInstance[] = [];
     // 构建x|y轴滚动条DOM
-    const xyBarElements = [DIRECTION.X, DIRECTION.Y].map(dir => {
+    const xyBarElements = [DIRECTION.X, DIRECTION.Y].map((dir, index) => {
         const [trackEl, thumbEl] = createDOM(context.el as HTMLElement, dir);
         // console.log(trackEl.clientHeight);
         // 基于scroll做bar
         const bar = new Wrap(trackEl, { allow: [DIRECTION.X === dir, DIRECTION.Y === dir], overflowDistance: 0 });
-        // console.log(trackEl.clientHeight);
         bars.push(bar);
         setStyle(bar.el as HTMLElement, { position: 'absolute' });
+        bar.on('pan', (e) => {
+            const thumb = bar.getContentRef();
+            if (thumb) {
+                const contentRef = context.getContentRef();
+                if (null !== contentRef) {
+                    // 缩放, bar => scrollView
+                    const { xy } = contentRef;
+                    const nextXY = [...xy] as [number, number];
+                    nextXY[index] = -thumb.xy[index] * contentRef.contentSize[index] / thumb.wrapSize[index];
+                    contentRef.moveTo(nextXY);
+                    __isDraggingBar = true;
+                }
+            }
+        });
 
-
-        bar.on('pan', e => {
-            console.log(bar.getContentRef()?.xy);
+        bar.on('at:end', () => {
+            __isDraggingBar = false;
         })
         return [trackEl, thumbEl];
     });
 
-
-
     updateBar(context, bars, xyBarElements);
     context.on(['at:start', 'scroll'], () => {
+        if (__isDraggingBar) return;
         updateBar(context, bars, xyBarElements);
     });
 }
-
-
 
 /**
  * 根据view的数据调整bar
@@ -50,29 +61,38 @@ export default function (context: WarpInstance) {
 function updateBar(context: WarpInstance, bars: WarpInstance[], xyBarElements: HTMLElement[][]) {
     const contentRef = context.getContentRef();
     if (null !== contentRef) {
-        const { contentSize, wrapSize, minXY } = contentRef;
-
-        runTwice(i => {
+        const { contentSize, wrapSize, minXY, maxXY } = contentRef;
+        runTwice((i) => {
             if (contentSize[i] > wrapSize[i]) {
-                const [thumbLength, newPosition] = calcBar(contentRef.xy[i], wrapSize[i], minXY[i]);
-                const thumbElement = xyBarElements[i][1];
-                setStyle(thumbElement, { [widthAndHeight[i]]: `${thumbLength}px` });
                 const thumbRef = bars[i].getContentRef();
                 if (null !== thumbRef) {
+                    const [thumbSize, thumbXorY] = calcBarXorY(
+                        contentRef.xy[i],
+                        wrapSize[i],
+                        contentSize[i],
+                        maxXY[i],
+                        minXY[i],
+                        thumbRef.minXY[i],
+                        thumbRef.maxXY[i]
+                    );
+                    const thumbElement = xyBarElements[i][1];
+                    setStyle(thumbElement, { [widthAndHeight[i]]: `${thumbSize}px` });
+
                     // 设置thumb的滑动范围
-                    // console.log(i,thumbRef,thumbRef.wrapSize[i], thumbRef.contentSize[i]);
-                    thumbRef.maxXY[i] = thumbRef.wrapSize[i] - thumbRef.contentSize[i];
+                    thumbRef.maxXY[i] = thumbRef.wrapSize[i] - thumbSize;
+                    thumbRef.minXY[i] = 0;
+
+                    // 移动thumb
                     const { xy } = thumbRef;
-                    xy[i] = newPosition;
+                    xy[i] = thumbXorY;
                     thumbRef.moveTo(xy);
                 }
             } else {
                 hideDOM(xyBarElements[i][0]);
             }
-        })
+        });
     }
 }
-
 
 /**
  * 创建指定轴的滚动条DOM
@@ -90,20 +110,41 @@ function createDOM(el: HTMLElement, axis: 'x' | 'y' = DIRECTION.X) {
 
 /**
  * 计算滚动条把手的尺寸和位置
- * @param position view的位置
- * @param trackLength view的外框尺寸
- * @param minValue view的最小位置
+ * @param scrollViewXOrY scrollView当前的X|Y值
+ * @param trackLength scrollView的外框尺寸做滚动轨道尺寸
+ * @param maxXorY scrollView的xy的最大值
+ * @param maxXorY scrollView的xy的最小值
  * @returns 把手的尺寸和位置
  */
-function calcBar(position: number, trackLength: number, minValue: number): [number, number] {
+function calcBarXorY(
+    scrollViewXOrY: number,
+    wrapSize: number,
+    contentSize: number,
+    maxXorY: number,
+    minXorY: number,
+    thumbMinXOrY: number,
+    thumbMaxXOrY: number
+): [number, number] {
+    const trackSize = wrapSize;
+    const scrollViewMaxDistance = maxXorY - minXorY;
     let scale = 1;
-    let thumbLength = Math.abs(trackLength / (minValue - trackLength) * trackLength);
-    if (0 < position) {
-        scale = 1 - (position / trackLength);
-    } else if (minValue > position) {
-        scale = 1 - (minValue - position) / trackLength
+    let thumbLength = (wrapSize / contentSize) * trackSize;
+
+    // 如果超出边界要thumb要缩短
+    if (minXorY >= scrollViewXOrY) {
+        scale = 1 - (minXorY - scrollViewXOrY) / wrapSize;
+    } else if (maxXorY < scrollViewXOrY) {
+        scale = 1 - (scrollViewXOrY - maxXorY) / wrapSize;
     }
-    thumbLength *= scale
-    const newPosition = clamp(position / (minValue) * (trackLength - thumbLength), 0, trackLength - thumbLength);
-    return [thumbLength, newPosition];
+    thumbLength *= scale;
+
+    // 缩放, scrollView => bar
+    // const thumbXorY = clamp(
+    //     -((scrollViewXOrY / scrollViewMaxDistance) * (trackSize - thumbLength)),
+    //     thumbMinXOrY,
+    //     thumbMaxXOrY
+    // );
+
+    const thumbXorY = -((scrollViewXOrY / scrollViewMaxDistance) * (trackSize - thumbLength));
+    return [thumbLength, thumbXorY];
 }
