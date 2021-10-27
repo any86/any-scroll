@@ -22,10 +22,12 @@
         .box {
             display: inline-block;
             width: 128px;
+            text-align: center;
             height: 128px;
+            line-height: 128px;
             background: #5227b8;
-            color: #fff;
-            font-size: 24px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 48px;
         }
 
         .box:nth-child(4n + 1) {
@@ -97,7 +99,7 @@
         // as.getContentRef(1).scrollTo([100, 200], 1000);
 
         function scrollTo2() {
-            as.scrollTo([100, -1100], 500);
+            as.scrollTo([-100, -100], 5000);
         }
     </script>
 </body>

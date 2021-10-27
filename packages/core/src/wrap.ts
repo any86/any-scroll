@@ -72,13 +72,15 @@ export default class extends AnyTouch {
         // 默认
         this.__currentContentRef = this.getContentRef();
 
+
+
         if (this.__currentContentRef) {
             this.__currentContentRef.on('scroll', arg => {
+                clearTimeout(this._scrollEndTimeId);
                 this.emit('scroll', arg);
             });
 
             this.__currentContentRef.on('scroll-end', arg => {
-                console.log(11123);
                 this.emit('scroll-end', arg);
             });
         }
@@ -126,9 +128,9 @@ export default class extends AnyTouch {
         this.on('swipe', (e) => {
             this.targets = e.targets;
             console.log('swipe');
-            clearTimeout(this._scrollEndTimeId);
-            let deltaX = e.speedX * 220;
-            let deltaY = e.speedY * 220;
+            // clearTimeout(this._scrollEndTimeId);
+            const deltaX = e.speedX * 200;
+            const deltaY = e.speedY * 200;
             this.__currentContentRef?._dampScroll([this.__currentContentRef.xy[0] + deltaX, this.__currentContentRef.xy[1] + deltaY]);
         });
 

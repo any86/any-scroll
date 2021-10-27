@@ -1,6 +1,7 @@
 import AnyEvent from 'any-event';
 import raf from 'raf';
 import clamp from 'lodash/clamp';
+import inRange from 'lodash/inRange';
 import { setStyle, damp, tween, setTranslate, runTwice } from '@any-scroll/shared';
 
 declare const WebKitMutationObserver: MutationObserver;
@@ -36,12 +37,13 @@ export default class extends AnyEvent {
     el: HTMLElement;
     wrapEl: HTMLElement;
     targets: (EventTarget | null)[] = [];
+    isScrolling = false;
 
     private __options: Required<Options>;
     // 控制scroll-end不被频繁触发
     private _scrollEndTimeId = -1;
     private _dampScrollRafId = -1;
-    private _stopScroll = () => { };
+    private __stopScroll = () => { };
 
     constructor(contentEl: HTMLElement, wrapEl: HTMLElement, options: Options) {
         super();
@@ -60,7 +62,6 @@ export default class extends AnyEvent {
 
     update() {
         console.warn('update');
-
         this.__updateSize();
     }
 
@@ -85,10 +86,7 @@ export default class extends AnyEvent {
 
         this.maxXY = [0, 0];
 
-        console.log('__warpSize', this.wrapSize);
-        console.log('contentSize', this.contentSize);
-        console.log('__minXY', this.minXY);
-        console.log('__maxXY', this.maxXY);
+        console.log('__warpSize', this.wrapSize, 'contentSize', this.contentSize, '__minXY', this.minXY, '__maxXY', this.maxXY);
 
     }
 
@@ -111,8 +109,12 @@ export default class extends AnyEvent {
      * 立即停止滑动
      */
     stop() {
+        if (this.isScrolling && this.xy.every((v, i) => inRange(v, this.minXY[i], this.maxXY[i]))) {
+            this.emit('scroll-end');
+        }
+        this.isScrolling = false;
         raf.cancel(this._dampScrollRafId);
-        this._stopScroll();
+        this.__stopScroll();
     }
 
     /**
@@ -153,25 +155,24 @@ export default class extends AnyEvent {
             const target = targets[0];
             // 钩子
             this.emit('scroll', { targets, target, x, y });
-            // const { clientWidth, clientHeight } = this.wrapEl;
-            // this.__updateBar(this.xy, [clientWidth, clientHeight], this.__minXY, this.contentSize);
             setTranslate(this.el, ...this.xy);
         }
         return this.xy;
     }
 
     scrollTo(distXY: [number, number], duration = 1000) {
+        this.isScrolling = true;
         const [run, stop, done] = tween(this.xy, distXY, duration);
         run(this.moveTo.bind(this));
-        this._stopScroll = stop;
+        this.__stopScroll = stop;
         done(() => {
             this.snap();
-            // console.log('done');
+            this.isScrolling = false;
         });
     }
 
     /**
-     * 手势对应的滚动逻辑
+     * swipe手势对应的滚动逻辑
      * 和对外的scrollTo的区别是:与时间无关的迭代衰减
      * @param distXY 目标点
      * @param onScroll 滚动回调
@@ -190,6 +191,7 @@ export default class extends AnyEvent {
         // AnyScroll实例
         type AnyScrollInstance = typeof this;
         function _moveTo(context: AnyScrollInstance) {
+            context.isScrolling = true;
             const { xy, minXY: __minXY, maxXY: __maxXY } = context;
 
             // 获取当前值
@@ -232,6 +234,7 @@ export default class extends AnyEvent {
             } else {
                 // console.log(_distXY, _nextXY);
                 // _scrollTo(context);
+                context.isScrolling = false;
                 context.emit('scroll-end');
             }
         }
