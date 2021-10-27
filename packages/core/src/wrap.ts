@@ -1,19 +1,10 @@
 import AnyTouch from 'any-touch';
-
-import raf from 'raf';
-import debounce from 'lodash/debounce';
-import inRange from 'lodash/inRange';
-
 import isElement from 'lodash/isElement';
-
-import { setStyle, damp, tween, setTranslate, runTwice } from '@any-scroll/shared';
 import Content from './content';
 import watchWheel from './wheel';
+import { SCROLL_END_DELAY, } from './const';
 
-import { STYLE, CONTENT_STYLE, SCROLL_END_DELAY, CLASS_NAME_ANY_SCROLL } from './const';
 const { setTimeout } = window;
-
-export type XY = [number, number];
 
 export interface Options {
     // 允许超过边界的最大距离
@@ -87,6 +78,7 @@ export default class extends AnyTouch {
             });
 
             this.__currentContentRef.on('scroll-end', arg => {
+                console.log(11123);
                 this.emit('scroll-end', arg);
             });
         }
@@ -105,7 +97,8 @@ export default class extends AnyTouch {
             if (null !== __currentContentRef) {
                 this.targets = e.targets;
                 const { deltaX, deltaY } = e;
-                __currentContentRef.moveTo([__currentContentRef.xy[0] + deltaX, __currentContentRef.xy[1] + deltaY]);
+                const { xy } = __currentContentRef;
+                __currentContentRef.moveTo([xy[0] + deltaX, xy[1] + deltaY]);
             }
         });
 
@@ -116,7 +109,6 @@ export default class extends AnyTouch {
                     this.emit('scroll-end', this.__currentContentRef.xy);
                 }
             }, SCROLL_END_DELAY);
-
         });
 
         this.on('at:start', e => {

@@ -15,11 +15,12 @@ export interface Options {
     // limit?: [XY,XY];
     hasBar?: boolean;
 }
+
 export const Wrap = _wrap;
 export const Content = _content;
 
 
-const plugins: any[] = [];
+const plugins: ((content: InstanceType<typeof Wrap>) => void)[] = [];
 export default class extends Wrap {
     /**
      * 加载插件

@@ -2,7 +2,7 @@ import AnyEvent from 'any-event';
 import raf from 'raf';
 import clamp from 'lodash/clamp';
 import { setStyle, damp, tween, setTranslate, runTwice } from '@any-scroll/shared';
-type XY = [number, number];
+
 declare const WebKitMutationObserver: MutationObserver;
 declare const MozMutationObserver: MutationObserver;
 export interface Options {
