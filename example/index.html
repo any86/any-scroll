@@ -41,11 +41,15 @@
         .box:nth-child(4n + 3) {
             background-color: rgba(216, 18, 18, 0.7);
         }
+
+        </style
     </style>
 </head>
 
 <body style="padding: 30px">
     <button onclick="scrollTo2()">scrollTo2</button>
+    <button onclick="add()">add</button>
+
     <div id="scroll" style="
                 width: 100%;
                 max-width: 480px;
@@ -55,7 +59,7 @@
             ">
         <!-- <div class="content" id="content"></div> -->
 
-        <div class="content" id="content2" style="width:700px"></div>
+        <div class="content" id="content2" style="width:800px"></div>
     </div>
 
     <script>
@@ -100,6 +104,10 @@
 
         function scrollTo2() {
             as.scrollTo([-100, -100], 5000);
+        }
+
+        function add(){
+
         }
     </script>
 </body>

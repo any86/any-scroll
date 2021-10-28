@@ -1,11 +1,9 @@
 import { setStyle, setTranslate, createDOMDiv, hideDOM, runTwice } from '@any-scroll/shared';
 import { insertCss } from 'insert-css';
 import { TRACK_CLASS_NAME, THUMB_CLASS_NAME, BAR_CSS, DIRECTION } from './const';
-import clamp from 'lodash/clamp';
 import { Wrap, Content } from '@any-scroll/core';
 const widthAndHeight = ['width', 'height'];
 type WarpInstance = InstanceType<typeof Wrap>;
-type ContentInstance = InstanceType<typeof Content>;
 /**
  * 创建滚动条
  * @param el 容器元素
@@ -14,40 +12,40 @@ type ContentInstance = InstanceType<typeof Content>;
 export default function (context: WarpInstance) {
     let __isDraggingBar = false;
     insertCss(BAR_CSS);
-    const bars: WarpInstance[] = [];
+    const barRefs: WarpInstance[] = [];
     // 构建x|y轴滚动条DOM
     const xyBarElements = [DIRECTION.X, DIRECTION.Y].map((dir, index) => {
         const [trackEl, thumbEl] = createDOM(context.el as HTMLElement, dir);
-        // console.log(trackEl.clientHeight);
         // 基于scroll做bar
-        const bar = new Wrap(trackEl, { allow: [DIRECTION.X === dir, DIRECTION.Y === dir], overflowDistance: 0 });
-        bars.push(bar);
-        setStyle(bar.el as HTMLElement, { position: 'absolute' });
-        bar.on('pan', (e) => {
-            const thumb = bar.getContentRef();
-            if (thumb) {
+        const barRef = new Wrap(trackEl, { allow: [DIRECTION.X === dir, DIRECTION.Y === dir], overflowDistance: 0 });
+        barRefs.push(barRef);
+        setStyle(barRef.el as HTMLElement, { position: 'absolute' });
+
+        barRef.on('pan', (e) => {
+            const thumbRef = barRef.getContentRef();
+            if (thumbRef) {
                 const contentRef = context.getContentRef();
                 if (null !== contentRef) {
                     // 缩放, bar => scrollView
                     const { xy } = contentRef;
                     const nextXY = [...xy] as [number, number];
-                    nextXY[index] = -thumb.xy[index] * contentRef.contentSize[index] / thumb.wrapSize[index];
+                    nextXY[index] = -thumbRef.xy[index] * contentRef.contentSize[index] / thumbRef.wrapSize[index];
                     contentRef.moveTo(nextXY);
                     __isDraggingBar = true;
                 }
             }
         });
 
-        bar.on('at:end', () => {
+        barRef.on('at:end', () => {
             __isDraggingBar = false;
         })
         return [trackEl, thumbEl];
     });
 
-    updateBar(context, bars, xyBarElements);
+    updateBar(context, barRefs, xyBarElements);
     context.on(['at:start', 'scroll'], () => {
         if (__isDraggingBar) return;
-        updateBar(context, bars, xyBarElements);
+        updateBar(context, barRefs, xyBarElements);
     });
 }
 
@@ -61,12 +59,13 @@ export default function (context: WarpInstance) {
 function updateBar(context: WarpInstance, bars: WarpInstance[], xyBarElements: HTMLElement[][]) {
     const contentRef = context.getContentRef();
     if (null !== contentRef) {
-        const { contentSize, wrapSize, minXY, maxXY } = contentRef;
+        const { contentSize, wrapSize, minXY, maxXY,xy } = contentRef;
+        // console.log(JSON.stringify({ contentSize, wrapSize, minXY, maxXY }));
         runTwice((i) => {
             if (contentSize[i] > wrapSize[i]) {
                 const thumbRef = bars[i].getContentRef();
                 if (null !== thumbRef) {
-                    const [thumbSize, thumbXorY] = calcBarXorY(
+                    const [thumbSize, thumbXorY] = getBarSizeAndPosition(
                         contentRef.xy[i],
                         wrapSize[i],
                         contentSize[i],
@@ -79,7 +78,9 @@ function updateBar(context: WarpInstance, bars: WarpInstance[], xyBarElements: H
                     setStyle(thumbElement, { [widthAndHeight[i]]: `${thumbSize}px` });
 
                     // 设置thumb的滑动范围
-                    thumbRef.maxXY[i] = thumbRef.wrapSize[i] - thumbSize;
+                    // 此处不能直接取thumbRef的warpSize和contentSize
+                    // 值不对, 原因稍后调查
+                    thumbRef.maxXY[i] = contentRef.wrapSize[i] - thumbSize;
                     thumbRef.minXY[i] = 0;
 
                     // 移动thumb
@@ -116,7 +117,7 @@ function createDOM(el: HTMLElement, axis: 'x' | 'y' = DIRECTION.X) {
  * @param maxXorY scrollView的xy的最小值
  * @returns 把手的尺寸和位置
  */
-function calcBarXorY(
+function getBarSizeAndPosition(
     scrollViewXOrY: number,
     wrapSize: number,
     contentSize: number,

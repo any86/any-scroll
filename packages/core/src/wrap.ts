@@ -3,6 +3,7 @@ import isElement from 'lodash/isElement';
 import Content from './content';
 import watchWheel from './wheel';
 import { SCROLL_END_DELAY, } from './const';
+import { setStyle } from '@any-scroll/shared';
 
 const { setTimeout } = window;
 
@@ -47,9 +48,8 @@ export default class extends AnyTouch {
     // contentSize: [number, number] = [0, 0];
     targets: (EventTarget | null)[] = [];
 
-    private __options: Required<Options>;
     // 控制scroll-end不被频繁触发
-    private _scrollEndTimeId = -1;
+    private __scrollEndTimeId = -1;
     // 存储content实例和元素
     private __contentRefList: ContentRefList = [];
     // 当前content实例
@@ -58,13 +58,14 @@ export default class extends AnyTouch {
     constructor(el: HTMLElement, options?: Options) {
         super(el);
         el.classList.add('any-scroll');
-        // setStyle(el, { position: `relative`, overflow: 'hidden' });
-        this.__options = { ...DEFAULT_OPTIONS, ...options };
+        setStyle(el, { position: `relative`, overflow: 'hidden' });
+        const __options = { ...DEFAULT_OPTIONS, ...options };
+
 
         // 遍历content元素
         // 生成实例
         Array.from(el.children).forEach(contentEl => {
-            const ref = new Content(contentEl as HTMLElement, el, this.__options);
+            const ref = new Content(contentEl as HTMLElement, el, __options);
 
             this.__contentRefList.push(ref)
         });
@@ -72,11 +73,9 @@ export default class extends AnyTouch {
         // 默认
         this.__currentContentRef = this.getContentRef();
 
-
-
         if (this.__currentContentRef) {
             this.__currentContentRef.on('scroll', arg => {
-                clearTimeout(this._scrollEndTimeId);
+                clearTimeout(this.__scrollEndTimeId);
                 this.emit('scroll', arg);
             });
 
@@ -105,7 +104,7 @@ export default class extends AnyTouch {
         });
 
         this.on('panend', (e) => {
-            this._scrollEndTimeId = setTimeout(() => {
+            this.__scrollEndTimeId = setTimeout(() => {
                 if (null !== this.__currentContentRef) {
                     this.targets = e.targets;
                     this.emit('scroll-end', this.__currentContentRef.xy);
@@ -134,7 +133,7 @@ export default class extends AnyTouch {
             this.__currentContentRef?._dampScroll([this.__currentContentRef.xy[0] + deltaX, this.__currentContentRef.xy[1] + deltaY]);
         });
 
-        const { allow } = this.__options;
+        const { allow } = __options;
         // 滚动鼠标X轴滑动
         const wheelX = allow[0] && !allow[1];
 

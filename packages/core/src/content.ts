@@ -61,7 +61,7 @@ export default class extends AnyEvent {
     }
 
     update() {
-        console.warn('update');
+        // console.warn('update');
         this.__updateSize();
     }
 
@@ -77,6 +77,7 @@ export default class extends AnyEvent {
         // 内容尺寸
         // 保留边框
         // 参考smooth-scroll
+        // console.log(offsetHeight , clientHeight , scrollHeight);
         this.contentSize = [offsetWidth - clientWidth + scrollWidth, offsetHeight - clientHeight + scrollHeight];
 
         this.minXY = [
@@ -86,7 +87,7 @@ export default class extends AnyEvent {
 
         this.maxXY = [0, 0];
 
-        console.log('__warpSize', this.wrapSize, 'contentSize', this.contentSize, '__minXY', this.minXY, '__maxXY', this.maxXY);
+        console.warn('__warpSize', this.wrapSize, 'contentSize', this.contentSize, '__minXY', this.minXY, '__maxXY', this.maxXY);
 
     }
 
