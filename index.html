@@ -6,8 +6,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- <script src="https://unpkg.com/any-scroll/dist/any-scroll.umd.min.js"></script> -->
-    <script src="./any-scroll.umd.min.js"></script>
+    <script src="../packages/any-scroll/dist/any-scroll.umd.js"></script>
     <title>Document</title>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js"></script> -->
     <style>
         * {
             padding: 0;
@@ -21,10 +22,12 @@
         .box {
             display: inline-block;
             width: 128px;
+            text-align: center;
             height: 128px;
+            line-height: 128px;
             background: #5227b8;
-            color: #fff;
-            font-size: 24px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 48px;
         }
 
         .box:nth-child(4n + 1) {
@@ -38,11 +41,15 @@
         .box:nth-child(4n + 3) {
             background-color: rgba(216, 18, 18, 0.7);
         }
+
+        </style
     </style>
 </head>
 
 <body style="padding: 30px">
     <button onclick="scrollTo2()">scrollTo2</button>
+    <button onclick="add()">add</button>
+
     <div id="scroll" style="
                 width: 100%;
                 max-width: 480px;
@@ -50,9 +57,9 @@
                 margin: auto;
                 box-shadow: 1px 2px 15px 5px rgba(0, 0, 0, 0.1), 1px 2px 150px 5px #4100966b;
             ">
-        <!-- <div class="content" id="content"></div> -->
 
-        <div class="content" id="content2" style="width:700px"></div>
+        <div class="content" id="content2" style="width:800px"></div>
+        <!-- <div class="content" id="content"></div> -->
     </div>
 
     <script>
@@ -88,15 +95,24 @@
 
         // as.scrollTo([100, 200], 300);
 
-        const as2 = as.getContentRef(0);
-        // as2.maxXY[0] = as2.wrapSize[0] - as2.contentSize[0];
-        // as2.maxXY[1] = as2.wrapSize[1] - as2.contentSize[1];
-
-
+        const as2 = as.getContentRef(1);
+        if (as2) {
+            as2.maxXY[0] = as2.wrapSize[0] - as2.contentSize[0];
+            as2.maxXY[1] = as2.wrapSize[1] - as2.contentSize[1];
+        }
         // as.getContentRef(1).scrollTo([100, 200], 1000);
 
         function scrollTo2() {
-            as.scrollTo([100, -1100], 500);
+            as.scrollTo([-100, -100], 5000);
+        }
+
+        function add() {
+            const html2 = [];
+            for (let i = 61; i <= 161; i++) {
+                html2.push(`<span class="box">${i}</span>`);
+            }
+            content2.innerHTML+= html2.join('');
+
         }
     </script>
 </body>
