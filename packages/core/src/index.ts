@@ -1,25 +1,11 @@
-import _wrap from './wrap';
+import _wrap,{Options} from './wrap';
 import _content from './content';
-export interface Options {
-    // 允许超过边界的最大距离
-    overflowDistance?: number;
-    // 减速系数
-    damping?: number;
-    // 允许X&Y轴线滑动
-    allow?: [boolean, boolean];
-
-    hideBar?: [boolean, boolean];
-    // 超出界限后自动吸附边框
-    snap?: boolean;
-    // 是否允许滑动出界限, 超过tolerance
-    // limit?: [XY,XY];
-    hasBar?: boolean;
-}
 
 export const Wrap = _wrap;
 export const Content = _content;
 
 
+// 插件队列
 const plugins: ((content: InstanceType<typeof Wrap>) => void)[] = [];
 export default class extends Wrap {
     /**

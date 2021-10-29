@@ -1,11 +1,13 @@
 import AnyTouch from 'any-touch';
+import ResizeObserver from 'resize-observer-polyfill';
 import isElement from 'lodash/isElement';
 import Content from './content';
 import watchWheel from './wheel';
 import { SCROLL_END_DELAY, } from './const';
 import { setStyle } from '@any-scroll/shared';
-
 const { setTimeout } = window;
+declare const WebKitMutationObserver: MutationObserver;
+declare const MozMutationObserver: MutationObserver;
 
 export interface Options {
     // 允许超过边界的最大距离
@@ -21,6 +23,8 @@ export interface Options {
     // 是否允许滑动出界限, 超过tolerance
     // limit?: [XY,XY];
     hasBar?: boolean;
+
+    watchResize?: boolean;
 }
 
 export const DEFAULT_OPTIONS = {
@@ -30,6 +34,7 @@ export const DEFAULT_OPTIONS = {
     hideBar: [false, false] as [boolean, boolean],
     snap: true,
     hasBar: true,
+    watchResize: true,
 };
 
 type ContentRefList = InstanceType<typeof Content>[];
@@ -43,7 +48,7 @@ export default class extends AnyTouch {
     static use(plugin: any) {
         plugins.push(plugin);
     }
-
+    el: HTMLElement;
     // size: [number, number] = [0, 0];
     // contentSize: [number, number] = [0, 0];
     targets: (EventTarget | null)[] = [];
@@ -57,16 +62,28 @@ export default class extends AnyTouch {
 
     constructor(el: HTMLElement, options?: Options) {
         super(el);
+        this.el = el;
         el.classList.add('any-scroll');
         setStyle(el, { position: `relative`, overflow: 'hidden' });
         const __options = { ...DEFAULT_OPTIONS, ...options };
+
+
+        if (__options.watchResize) {
+            const ro = new ResizeObserver(() => {
+                this.update();
+            });
+            ro.observe(el);
+        }
 
 
         // 遍历content元素
         // 生成实例
         Array.from(el.children).forEach(contentEl => {
             const ref = new Content(contentEl as HTMLElement, el, __options);
-
+            ref.on('resize', () => {
+                this.update();
+                console.log('resize');
+            })
             this.__contentRefList.push(ref)
         });
 
@@ -91,7 +108,7 @@ export default class extends AnyTouch {
 
         // this.__updateSize();
         // this.__updateBar(this.contentRef.xy, this.size, this.__minXY, this.contentSize);
-        // this.__registerObserver();
+        this.__registerObserver();
 
         this.on(['panstart', 'panmove'], (e) => {
             const { __currentContentRef } = this;
@@ -167,9 +184,38 @@ export default class extends AnyTouch {
             }
         });
     }
+    /**
+     * 注册监听
+     */
+    __registerObserver() {
+        const update = this.update.bind(this);
+        this.el.addEventListener('resize', update);
+        // const Observer = MutationObserver || WebKitMutationObserver || MozMutationObserver;
+        // // observe
+        // if (typeof Observer === 'function') {
+        //     const ob = new Observer(update);
+        //     ob.observe(this.el, {
+        //         subtree: true,
+        //         childList: true,
+        //     });
+        // }
+    }
 
+    update() {
+        this.__contentRefList.forEach(contentRef => {
+            contentRef.update();
+        })
+        this.emit('resize');
+    }
+
+    /**
+     * 根据元素找contentRef
+     * @param targetEl 
+     * @returns 
+     */
     __findContentRef(targetEl: HTMLElement) {
         for (let ref of this.__contentRefList) {
+            // 目标元素是否content元素的子元素
             if (ref.el.contains(targetEl)) {
                 return ref;
             }

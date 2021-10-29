@@ -25,8 +25,12 @@ export function createDOMDiv(className?: string[]) {
     return div;
 }
 
-export function hideDOM(el: HTMLElement) {
-    setStyle(el, { display: 'none' });
+export function changeDOMVisible(el: HTMLElement, visible = true) {
+    if (visible) {
+        setStyle(el, { display: '' });
+    } else {
+        setStyle(el, { display: 'none' });
+    }
 }
 
 

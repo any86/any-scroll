@@ -3,29 +3,10 @@ import raf from 'raf';
 import clamp from 'lodash/clamp';
 import inRange from 'lodash/inRange';
 import { setStyle, damp, tween, setTranslate, runTwice } from '@any-scroll/shared';
+import ResizeObserver from 'resize-observer-polyfill';
 
-declare const WebKitMutationObserver: MutationObserver;
-declare const MozMutationObserver: MutationObserver;
-export interface Options {
-    // 允许超过边界的最大距离
-    overflowDistance?: number;
-    // 减速系数
-    damping?: number;
-    // 允许X&Y轴线滑动
-    allow?: [boolean, boolean];
-
-    hideBar?: [boolean, boolean];
-    // 超出界限后自动吸附边框
-    snap?: boolean;
-}
-
-export const DEFAULT_OPTIONS = {
-    overflowDistance: 100,
-    damping: 0.1,
-    allow: [true, true] as [boolean, boolean],
-    hideBar: [false, false] as [boolean, boolean],
-    snap: true,
-};
+// 类型
+import { Options } from './wrap';
 
 export default class extends AnyEvent {
     readonly xy: [number, number] = [0, 0];
@@ -45,14 +26,20 @@ export default class extends AnyEvent {
     private _dampScrollRafId = -1;
     private __stopScroll = () => { };
 
-    constructor(contentEl: HTMLElement, wrapEl: HTMLElement, options: Options) {
+    constructor(contentEl: HTMLElement, wrapEl: HTMLElement, options: Required<Options>) {
         super();
         this.el = contentEl;
         this.wrapEl = wrapEl;
-        this.__options = { ...DEFAULT_OPTIONS, ...options };
+        this.__options = options;
         setStyle(contentEl, { position: 'absolute' });
         this.update();
-        this.__registerObserver();
+        if (this.__options.watchResize) {
+            const ro = new ResizeObserver(() => {
+                this.update();
+                this.emit('resize');
+            });
+            ro.observe(contentEl);
+        }
     }
 
     set(options: Options) {
@@ -60,16 +47,11 @@ export default class extends AnyEvent {
         this.update();
     }
 
-    update() {
-        // console.warn('update');
-        this.__updateSize();
-    }
 
     /**
      * 更新尺寸
      */
-    private __updateSize() {
-
+    update() {
         const { wrapEl, el: contentEl } = this;
         const { offsetWidth, offsetHeight, clientWidth, clientHeight, scrollWidth, scrollHeight } = contentEl;
         // scrollView尺寸
@@ -86,26 +68,9 @@ export default class extends AnyEvent {
         ];
 
         this.maxXY = [0, 0];
-
         console.warn('__warpSize', this.wrapSize, 'contentSize', this.contentSize, '__minXY', this.minXY, '__maxXY', this.maxXY);
-
     }
 
-    /**
-     * 注册监听
-     */
-    __registerObserver() {
-        window.addEventListener('resize', this.update.bind(this));
-        const Observer = MutationObserver || WebKitMutationObserver || MozMutationObserver;
-        // observe
-        if (typeof Observer === 'function') {
-            const ob = new Observer(this.update.bind(this));
-            ob.observe(this.el, {
-                subtree: true,
-                childList: true,
-            });
-        }
-    }
     /**
      * 立即停止滑动
      */
@@ -162,6 +127,7 @@ export default class extends AnyEvent {
     }
 
     scrollTo(distXY: [number, number], duration = 1000) {
+        this.stop();
         this.isScrolling = true;
         const [run, stop, done] = tween(this.xy, distXY, duration);
         run(this.moveTo.bind(this));

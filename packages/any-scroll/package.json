@@ -26,6 +26,7 @@
         "@any-scroll/shared": "^0.2.1",
         "any-event": "^1.0.6",
         "any-touch": "^1.0.11",
+        "resize-observer-polyfill": "^1.5.1",
         "tslib": "^2.3.0"
     },
     "keywords": [
