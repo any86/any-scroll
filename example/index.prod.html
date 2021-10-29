@@ -7,15 +7,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- <script src="https://unpkg.com/any-scroll/dist/any-scroll.umd.min.js"></script> -->
     <script src="./any-scroll.umd.min.js"></script>
-    <title>Demo</title>
+    <title>Document</title>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js"></script> -->
     <style>
         * {
             padding: 0;
             margin: 0;
         }
 
-        img {
-            display: block;
+        .app {
+            padding: 32px;
+            display: flex;
+        }
+
+        .app .left {
+            width: 420px;
+        }
+
+
+
+        .app .left .any-scroll-1 {
+            width: 100%;
+            max-width: 360px;
+            height: 80vh;
+            border-radius: 4px;
+            box-shadow: 1px 2px 15px 5px rgba(0, 0, 0, 0.1), 1px 2px 32px 5px rgba(0, 0, 0, 0.4);
+        }
+
+        .app .right {
+            flex: 1;
         }
 
         .box {
@@ -45,22 +65,27 @@
     </style>
 </head>
 
-<body style="padding: 30px">
-    <h1>线上</h1>
-    <button onclick="scrollTo2()">scrollTo2</button>
-    <button onclick="add()">add</button>
+<body>
+    <h1 class="margin-bottom:16px;"> 🎨 AnyScroll</h1>
 
-    <div id="scroll" style="
-                width: 100%;
-                max-width: 480px;
-                height: 80vh;
-                margin: auto;
-                box-shadow: 1px 2px 15px 5px rgba(0, 0, 0, 0.1), 1px 2px 150px 5px #4100966b;
-            ">
+    <article class="app">
 
-        <div class="content" id="content2" style="width:800px"></div>
-        <!-- <div class="content" id="content"></div> -->
-    </div>
+        <div class="left">
+            <div id="scroll" class="any-scroll-1">
+                <div class="content" id="content2" style="width:800px"></div>
+                <!-- <div class="content" id="content"></div> -->
+            </div>
+        </div>
+
+        <div class="right">
+            <button onclick="scrollTo2()">scrollTo2</button>
+            <button onclick="add()">add</button>
+        </div>
+
+
+
+    </article>
+
 
     <script>
         const content = document.getElementById('content');
@@ -103,15 +128,15 @@
         // as.getContentRef(1).scrollTo([100, 200], 1000);
 
         function scrollTo2() {
-            as.scrollTo([-100, -500], 2000);
+            as.scrollTo([-100, -100], 5000);
         }
 
         function add() {
             const html2 = [];
-            for (let i = 61; i <= 161; i++) {
+            for (let i = 62; i <= 161; i++) {
                 html2.push(`<span class="box">${i}</span>`);
             }
-            content2.innerHTML+= html2.join('');
+            content2.innerHTML += html2.join('');
 
         }
     </script>

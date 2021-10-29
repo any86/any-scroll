@@ -1,9 +1,9 @@
-import _wrap,{Options} from './wrap';
+import _wrap,{Options as _Options} from './wrap';
 import _content from './content';
 
 export const Wrap = _wrap;
 export const Content = _content;
-
+export type Options = _Options;
 
 // 插件队列
 const plugins: ((content: InstanceType<typeof Wrap>) => void)[] = [];

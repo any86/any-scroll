@@ -6,8 +6,8 @@ import watchWheel from './wheel';
 import { SCROLL_END_DELAY, } from './const';
 import { setStyle } from '@any-scroll/shared';
 const { setTimeout } = window;
-declare const WebKitMutationObserver: MutationObserver;
-declare const MozMutationObserver: MutationObserver;
+// declare const WebKitMutationObserver: MutationObserver;
+// declare const MozMutationObserver: MutationObserver;
 
 export interface Options {
     // 允许超过边界的最大距离
@@ -63,7 +63,6 @@ export default class extends AnyTouch {
     constructor(el: HTMLElement, options?: Options) {
         super(el);
         this.el = el;
-        el.classList.add('any-scroll');
         setStyle(el, { position: `relative`, overflow: 'hidden' });
         const __options = { ...DEFAULT_OPTIONS, ...options };
 
