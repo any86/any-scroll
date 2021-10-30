@@ -85,7 +85,6 @@ export default class extends AnyTouch {
             const ref = new Content(contentEl as HTMLElement, el, __options);
             ref.on('resize', () => {
                 this.update();
-                console.log('resize');
             })
             this.__contentRefList.push(ref)
         });
@@ -146,7 +145,6 @@ export default class extends AnyTouch {
         swipe && swipe.set({ velocity: 1 });
         this.on('swipe', (e) => {
             this.targets = e.targets;
-            console.log('swipe');
             // clearTimeout(this._scrollEndTimeId);
             const deltaX = e.speedX * 200;
             const deltaY = e.speedY * 200;

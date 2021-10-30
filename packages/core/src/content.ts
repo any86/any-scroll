@@ -9,6 +9,9 @@ import ResizeObserver from 'resize-observer-polyfill';
 import { Options } from './wrap';
 
 export default class extends AnyEvent {
+    /**
+     * 请用moveTo修改xy;
+     */
     readonly xy: [number, number] = [0, 0];
 
     minXY: [number, number] = [0, 0];
