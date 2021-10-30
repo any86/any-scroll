@@ -68,7 +68,7 @@ export default class extends AnyEvent {
         ];
 
         this.maxXY = [0, 0];
-        console.warn('__warpSize', this.wrapSize, 'contentSize', this.contentSize, '__minXY', this.minXY, '__maxXY', this.maxXY);
+        // console.warn('__warpSize', this.wrapSize, 'contentSize', this.contentSize, '__minXY', this.minXY, '__maxXY', this.maxXY);
     }
 
     /**

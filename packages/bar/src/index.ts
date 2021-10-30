@@ -1,6 +1,6 @@
-import { setStyle, createDOMDiv, changeDOMVisible, runTwice } from '@any-scroll/shared';
+import { setStyle, createDOMDiv, changeDOMVisible, runTwice, DIRECTION } from '@any-scroll/shared';
 import { insertCss } from 'insert-css';
-import { TRACK_CLASS_NAME, THUMB_CLASS_NAME, BAR_CSS, DIRECTION } from './const';
+import { TRACK_CLASS_NAME, THUMB_CLASS_NAME, BAR_CSS, } from './const';
 import { Wrap } from '@any-scroll/core';
 type WarpInstance = InstanceType<typeof Wrap>;
 /**
@@ -26,13 +26,14 @@ export default function (wrapRef: WarpInstance) {
         barRefs.push(barRef);
         setStyle(barRef.el as HTMLElement, { position: 'absolute' });
 
-        barRef.on('pan', (e) => {
+        barRef.on('pan', () => {
             const thumbRef = barRef.getContentRef();
             if (thumbRef) {
                 const contentRef = wrapRef.getContentRef();
                 if (null !== contentRef) {
                     // 缩放, bar => scrollView
                     const { xy } = contentRef;
+                    console.log(xy);
                     const nextXY = [...xy] as [number, number];
                     nextXY[index] = (-thumbRef.xy[index] * contentRef.contentSize[index]) / thumbRef.wrapSize[index];
                     contentRef.moveTo(nextXY);

@@ -29,4 +29,3 @@ export const BAR_CSS = `
     width:${TRACK_WIDTH};
 }
 `;
-export const enum DIRECTION { X = 'x', Y = 'y' };

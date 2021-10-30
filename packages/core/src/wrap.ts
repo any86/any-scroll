@@ -63,9 +63,13 @@ export default class extends AnyTouch {
     constructor(el: HTMLElement, options?: Options) {
         super(el);
         this.el = el;
-        setStyle(el, { position: `relative`, overflow: 'hidden' });
         const __options = { ...DEFAULT_OPTIONS, ...options };
-
+        const { allow } = __options;
+        setStyle(el, {
+            position: `relative`,
+            overflowX: allow[0] ? 'hidden' : '',
+            overflowY: allow[1] ? 'hidden' : ''
+        });
 
         if (__options.watchResize) {
             const ro = new ResizeObserver(() => {
@@ -149,7 +153,7 @@ export default class extends AnyTouch {
             this.__currentContentRef?._dampScroll([this.__currentContentRef.xy[0] + deltaX, this.__currentContentRef.xy[1] + deltaY]);
         });
 
-        const { allow } = __options;
+
         // 滚动鼠标X轴滑动
         const wheelX = allow[0] && !allow[1];
 
@@ -186,7 +190,7 @@ export default class extends AnyTouch {
     /**
      * 注册监听
      */
-    __registerObserver() {
+    private __registerObserver() {
         const update = this.update.bind(this);
         this.el.addEventListener('resize', update);
         // const Observer = MutationObserver || WebKitMutationObserver || MozMutationObserver;
@@ -212,7 +216,7 @@ export default class extends AnyTouch {
      * @param targetEl 
      * @returns 
      */
-    __findContentRef(targetEl: HTMLElement) {
+    private __findContentRef(targetEl: HTMLElement) {
         for (let ref of this.__contentRefList) {
             // 目标元素是否content元素的子元素
             if (ref.el.contains(targetEl)) {
@@ -230,7 +234,7 @@ export default class extends AnyTouch {
         this.__currentContentRef?.scrollTo(distXY, duration);
     }
 
-    __dampScroll(distXY: readonly [number, number]) {
+    private __dampScroll(distXY: readonly [number, number]) {
         this.__currentContentRef?._dampScroll(distXY);
     }
 
