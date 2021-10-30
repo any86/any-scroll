@@ -50,7 +50,6 @@ export default class extends AnyEvent {
         this.update();
     }
 
-
     /**
      * 更新尺寸
      */

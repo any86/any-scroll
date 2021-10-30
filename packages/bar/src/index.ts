@@ -1,17 +1,18 @@
-import { setStyle, setTranslate, createDOMDiv, changeDOMVisible, runTwice ,DIRECTION} from '@any-scroll/shared';
+import { setStyle, createDOMDiv, changeOpacity, runTwice, DIRECTION } from '@any-scroll/shared';
 import { insertCss } from 'insert-css';
-import { TRACK_CLASS_NAME, THUMB_CLASS_NAME, BAR_CSS,  } from './const';
-import clamp from 'lodash/clamp';
+import { TRACK_CLASS_NAME, THUMB_CLASS_NAME, BAR_CSS, } from './const';
 import { Wrap, Content } from '@any-scroll/core';
-const widthAndHeight = ['width', 'height'];
+const { setTimeout } = window;
 type WarpInstance = InstanceType<typeof Wrap>;
-type ContentInstance = InstanceType<typeof Content>;
 /**
  * 创建滚动条
  * @param el 容器元素
  * @returns
  */
 export default function (context: WarpInstance) {
+    // 给updateBar函数用
+    let timeoutIds = [-1, -1];
+
     let __isDraggingBar = false;
     insertCss(BAR_CSS);
     const bars: WarpInstance[] = [];
@@ -19,7 +20,8 @@ export default function (context: WarpInstance) {
     const xyBarElements = [DIRECTION.X, DIRECTION.Y].map((dir, index) => {
         const [trackEl, thumbEl] = createDOM(context.el as HTMLElement, dir);
         // console.log(trackEl.clientHeight);
-        // 基于scroll做bar
+
+        // ⭐基于scroll做bar
         const bar = new Wrap(trackEl, { allow: [DIRECTION.X === dir, DIRECTION.Y === dir], overflowDistance: 0 });
         bars.push(bar);
         setStyle(bar.el as HTMLElement, { position: 'absolute' });
@@ -45,55 +47,68 @@ export default function (context: WarpInstance) {
     });
 
     updateBar(context, bars, xyBarElements);
-    context.on(['at:start', 'scroll'], () => {
+    context.on(['at:start', 'scroll','resize'], () => {
         if (__isDraggingBar) return;
         updateBar(context, bars, xyBarElements);
     });
-}
+    
+    /**
+     * 根据view的数据调整bar
+     * @param position view的xy
+     * @param warpSize view的外壳尺寸
+     * @param min view可以到达的最小xy
+     * @param contentSize 内容尺寸
+     */
+    function updateBar(context: WarpInstance, bars: WarpInstance[], xyBarElements: HTMLElement[][]) {
+        const contentRef = context.getContentRef();
+        if (null !== contentRef) {
+            const { contentSize, wrapSize, minXY, maxXY } = contentRef;
+            runTwice((i) => {
 
-/**
- * 根据view的数据调整bar
- * @param position view的xy
- * @param warpSize view的外壳尺寸
- * @param min view可以到达的最小xy
- * @param contentSize 内容尺寸
- */
-function updateBar(context: WarpInstance, bars: WarpInstance[], xyBarElements: HTMLElement[][]) {
-    const contentRef = context.getContentRef();
-    if (null !== contentRef) {
-        const { contentSize, wrapSize, minXY, maxXY } = contentRef;
-        runTwice((i) => {
-            if (contentSize[i] > wrapSize[i]) {
-                changeDOMVisible(xyBarElements[i][0]);
-                const thumbRef = bars[i].getContentRef();
-                if (null !== thumbRef) {
-                    const [thumbSize, thumbXorY] = calcBarXorY(
-                        contentRef.xy[i],
-                        wrapSize[i],
-                        contentSize[i],
-                        maxXY[i],
-                        minXY[i],
-                        thumbRef.minXY[i],
-                        thumbRef.maxXY[i]
-                    );
-                    const thumbElement = xyBarElements[i][1];
-                    setStyle(thumbElement, { [widthAndHeight[i]]: `${thumbSize}px` });
+                // console.log(i,contentSize[i] > wrapSize[i]);
+                if (contentSize[i] > wrapSize[i]) {
 
-                    // 设置thumb的滑动范围
-                    thumbRef.maxXY[i] = thumbRef.wrapSize[i] - thumbSize;
-                    thumbRef.minXY[i] = 0;
+                    changeOpacity(xyBarElements[i][0], 1);
 
-                    // 移动thumb
-                    const { xy } = thumbRef;
-                    xy[i] = thumbXorY;
-                    thumbRef.moveTo(xy);
+                    clearTimeout(timeoutIds[i])
+                    timeoutIds[i] = setTimeout(() => {
+                        changeOpacity(xyBarElements[i][0], 0);
+                    }, 2000);
+
+                    const thumbRef = bars[i].getContentRef();
+                    if (null !== thumbRef) {
+                        const [thumbSize, thumbXorY] = calcBarXorY(
+                            contentRef.xy[i],
+                            wrapSize[i],
+                            contentSize[i],
+                            maxXY[i],
+                            minXY[i],
+                            thumbRef.minXY[i],
+                            thumbRef.maxXY[i]
+                        );
+                        const thumbElement = xyBarElements[i][1];
+                        setStyle(thumbElement, { [['width', 'height'][i]]: `${thumbSize}px` });
+
+                        // 设置thumb的滑动范围
+                        thumbRef.maxXY[i] = thumbRef.wrapSize[i] - thumbSize;
+                        thumbRef.minXY[i] = 0;
+
+                        // 移动thumb
+                        const { xy } = thumbRef;
+                        xy[i] = thumbXorY;
+                        thumbRef.moveTo(xy);
+                    }
+                } else {
+                    changeOpacity(xyBarElements[i][0], 0);
                 }
-            } else {
-                changeDOMVisible(xyBarElements[i][0],false);
-            }
-        });
+            });
+        }
     }
+
+
 }
+
+
 
 /**
  * 创建指定轴的滚动条DOM

@@ -28,6 +28,10 @@ export function createDOMDiv(className?: string[]) {
     return div;
 }
 
+export function changeOpacity(el: HTMLElement, opacity = 1) {
+    setStyle(el, { opacity: String(opacity) });
+}
+
 export function changeDOMVisible(el: HTMLElement, visible = true) {
     if (visible) {
         setStyle(el, { display: '' });

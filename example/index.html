@@ -27,8 +27,7 @@
 
 
         .app .left .any-scroll-1 {
-            width: 100%;
-            max-width: 360px;
+            width: 384px;
             height: 80vh;
             border-radius: 4px;
             box-shadow: 1px 2px 15px 5px rgba(0, 0, 0, 0.1), 1px 2px 32px 5px rgba(0, 0, 0, 0.4);
@@ -64,13 +63,13 @@
 </head>
 
 <body>
-    <h1 class="margin-bottom:16px;"> 🎨 AnyScroll</h1>
+    <h1 style="margin:16px;"> 🎨 AnyScroll</h1>
 
     <article class="app">
 
         <div class="left">
             <div id="scroll" class="any-scroll-1">
-                <div class="content" id="content2" style="width:800px"></div>
+                <div class="content" id="content2" style="width:768px"></div>
                 <!-- <div class="content" id="content"></div> -->
             </div>
         </div>
@@ -126,7 +125,7 @@
         // as.getContentRef(1).scrollTo([100, 200], 1000);
 
         function scrollTo2() {
-            as.scrollTo([-100, -100], 5000);
+            as.scrollTo([-100, -100], 2000);
         }
 
         function add() {
