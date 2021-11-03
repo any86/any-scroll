@@ -4,7 +4,7 @@ import _content from './content';
 export const Wrap = _wrap;
 export const Content = _content;
 export type Options = _Options;
-
+// console.log(process.env)
 // 插件队列
 const plugins: ((content: InstanceType<typeof Wrap>) => void)[] = [];
 export default class extends Wrap {

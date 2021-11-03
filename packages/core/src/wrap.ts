@@ -3,7 +3,7 @@ import ResizeObserver from 'resize-observer-polyfill';
 import isElement from 'lodash/isElement';
 import Content from './content';
 import watchWheel from './wheel';
-import { SCROLL_END_DELAY, } from './const';
+import { SCROLL_END_DELAY } from './const';
 import { setStyle } from '@any-scroll/shared';
 const { setTimeout } = window;
 // declare const WebKitMutationObserver: MutationObserver;
@@ -68,7 +68,7 @@ export default class extends AnyTouch {
         setStyle(el, {
             position: `relative`,
             overflowX: allow[0] ? 'hidden' : '',
-            overflowY: allow[1] ? 'hidden' : ''
+            overflowY: allow[1] ? 'hidden' : '',
         });
 
         if (__options.watchResize) {
@@ -78,35 +78,34 @@ export default class extends AnyTouch {
             ro.observe(el);
         }
 
-
         // 遍历content元素
         // 生成实例
-        Array.from(el.children).forEach(contentEl => {
+        Array.from(el.children).forEach((contentEl) => {
             const ref = new Content(contentEl as HTMLElement, el, __options);
             ref.on('resize', () => {
                 this.update();
-            })
-            this.__contentRefList.push(ref)
+            });
+            this.__contentRefList.push(ref);
         });
 
         // 默认
         this.__currentContentRef = this.getContentRef();
 
         if (this.__currentContentRef) {
-            this.__currentContentRef.on('scroll', arg => {
+            this.__currentContentRef.on('scroll', (arg) => {
                 clearTimeout(this.__scrollEndTimeId);
                 this.emit('scroll', arg);
             });
 
-            this.__currentContentRef.on('scroll-end', arg => {
+            this.__currentContentRef.on('scroll-end', (arg) => {
                 this.emit('scroll-end', arg);
             });
         }
 
         // 加载插件
-        plugins.forEach(plugin => {
+        plugins.forEach((plugin) => {
             plugin(this);
-        })
+        });
 
         // this.__updateSize();
         // this.__updateBar(this.contentRef.xy, this.size, this.__minXY, this.contentSize);
@@ -131,7 +130,7 @@ export default class extends AnyTouch {
             }, SCROLL_END_DELAY);
         });
 
-        this.on('at:start', e => {
+        this.on('at:start', (e) => {
             const targetEl = e.target as HTMLElement;
             this.__currentContentRef = this.__findContentRef(targetEl);
             this.__currentContentRef?.stop();
@@ -148,9 +147,11 @@ export default class extends AnyTouch {
             // clearTimeout(this._scrollEndTimeId);
             const deltaX = e.speedX * 200;
             const deltaY = e.speedY * 200;
-            this.__currentContentRef?._dampScroll([this.__currentContentRef.xy[0] + deltaX, this.__currentContentRef.xy[1] + deltaY]);
+            this.__currentContentRef?._dampScroll([
+                this.__currentContentRef.xy[0] + deltaX,
+                this.__currentContentRef.xy[1] + deltaY,
+            ]);
         });
-
 
         // 滚动鼠标X轴滑动
         const wheelX = allow[0] && !allow[1];
@@ -203,16 +204,16 @@ export default class extends AnyTouch {
     }
 
     update() {
-        this.__contentRefList.forEach(contentRef => {
+        this.__contentRefList.forEach((contentRef) => {
             contentRef.update();
-        })
+        });
         this.emit('resize');
     }
 
     /**
      * 根据元素找contentRef
-     * @param targetEl 
-     * @returns 
+     * @param targetEl
+     * @returns
      */
     private __findContentRef(targetEl: HTMLElement) {
         for (let ref of this.__contentRefList) {
@@ -240,19 +241,21 @@ export default class extends AnyTouch {
      * 立即停止滑动
      */
     stop() {
-        this.__currentContentRef?.stop()
+        this.__currentContentRef?.stop();
     }
 
     /**
      * 获取content实例
-     * @param elOrIndex 元素或者索引 
-     * @returns 
+     * @param elOrIndex 元素或者索引
+     * @returns
      */
     getContentRef(elOrIndex: HTMLElement | number = 0) {
         if (0 !== elOrIndex && isElement(elOrIndex)) {
-            return this.__contentRefList.find(({ el }) => {
-                return el === elOrIndex;
-            }) || null;
+            return (
+                this.__contentRefList.find(({ el }) => {
+                    return el === elOrIndex;
+                }) || null
+            );
         } else {
             return this.__contentRefList[Number(elOrIndex)] || null;
         }

@@ -9,26 +9,26 @@ type WarpInstance = InstanceType<typeof Wrap>;
  * @param el 容器元素
  * @returns
  */
-export default function (context: WarpInstance) {
+export default function (wrapRef: WarpInstance) {
     // 给updateBar函数用
     let timeoutIds = [-1, -1];
 
     let __isDraggingBar = false;
     insertCss(BAR_CSS);
-    const bars: WarpInstance[] = [];
+    const barRefs: WarpInstance[] = [];
     // 构建x|y轴滚动条DOM
     const xyBarElements = [DIRECTION.X, DIRECTION.Y].map((dir, index) => {
-        const [trackEl, thumbEl] = createDOM(context.el as HTMLElement, dir);
+        const [trackEl, thumbEl] = createDOM(wrapRef.el as HTMLElement, dir);
         // console.log(trackEl.clientHeight);
 
         // ⭐基于scroll做bar
         const bar = new Wrap(trackEl, { allow: [DIRECTION.X === dir, DIRECTION.Y === dir], overflowDistance: 0 });
-        bars.push(bar);
+        barRefs.push(bar);
         setStyle(bar.el as HTMLElement, { position: 'absolute' });
         bar.on('pan', () => {
             const thumb = bar.getContentRef();
             if (thumb) {
-                const contentRef = context.getContentRef();
+                const contentRef = wrapRef.getContentRef();
                 if (null !== contentRef) {
                     // 缩放, bar => scrollView
                     const { xy } = contentRef;
@@ -46,12 +46,11 @@ export default function (context: WarpInstance) {
         return [trackEl, thumbEl];
     });
 
-    updateBar(context, bars, xyBarElements);
-    context.on(['at:start', 'scroll','resize'], () => {
+    wrapRef.on(['at:start', 'scroll', 'resize'], () => {
         if (__isDraggingBar) return;
-        updateBar(context, bars, xyBarElements);
+        updateBar(wrapRef, barRefs, xyBarElements);
     });
-    
+
     /**
      * 根据view的数据调整bar
      * @param position view的xy
@@ -59,8 +58,8 @@ export default function (context: WarpInstance) {
      * @param min view可以到达的最小xy
      * @param contentSize 内容尺寸
      */
-    function updateBar(context: WarpInstance, bars: WarpInstance[], xyBarElements: HTMLElement[][]) {
-        const contentRef = context.getContentRef();
+    function updateBar(wrapRef: WarpInstance, bars: WarpInstance[], xyBarElements: HTMLElement[][]) {
+        const contentRef = wrapRef.getContentRef();
         if (null !== contentRef) {
             const { contentSize, wrapSize, minXY, maxXY } = contentRef;
             runTwice((i) => {
@@ -69,7 +68,6 @@ export default function (context: WarpInstance) {
                 if (contentSize[i] > wrapSize[i]) {
 
                     changeOpacity(xyBarElements[i][0], 1);
-
                     clearTimeout(timeoutIds[i])
                     timeoutIds[i] = setTimeout(() => {
                         changeOpacity(xyBarElements[i][0], 0);
