@@ -1,5 +1,5 @@
 # any-scroll
-纯JS滚动插件, 手势识别使用了[any-touch](https://github.com/any86/any-touch).
+纯JS滚动插件, 手势识别基于[any-touch](https://github.com/any86/any-touch).
 
 ## 安装
 ```shell
