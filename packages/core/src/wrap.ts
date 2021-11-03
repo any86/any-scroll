@@ -1,4 +1,6 @@
 import AnyTouch from 'any-touch';
+import AnyEvent from 'any-event';
+
 import ResizeObserver from 'resize-observer-polyfill';
 import isElement from 'lodash/isElement';
 import Content from './content';
@@ -40,7 +42,7 @@ export const DEFAULT_OPTIONS = {
 type ContentRefList = InstanceType<typeof Content>[];
 
 const plugins: any[] = [];
-export default class extends AnyTouch {
+export default class extends AnyEvent {
     /**
      * 加载插件
      * @param plugin 插件
@@ -61,20 +63,19 @@ export default class extends AnyTouch {
     private __currentContentRef: InstanceType<typeof Content> | null;
 
     constructor(el: HTMLElement, options?: Options) {
-        super(el);
+        super();
+        const at = new AnyTouch(el);
         this.el = el;
         const __options = { ...DEFAULT_OPTIONS, ...options };
         const { allow } = __options;
+
         setStyle(el, {
             position: `relative`,
-            overflowX: allow[0] ? 'hidden' : '',
-            overflowY: allow[1] ? 'hidden' : '',
+            overflow: 'hidden',
         });
 
         if (__options.watchResize) {
-            const ro = new ResizeObserver(() => {
-                this.update();
-            });
+            const ro = new ResizeObserver(this.update.bind(this));
             ro.observe(el);
         }
 
@@ -107,11 +108,7 @@ export default class extends AnyTouch {
             plugin(this);
         });
 
-        // this.__updateSize();
-        // this.__updateBar(this.contentRef.xy, this.size, this.__minXY, this.contentSize);
-        this.__registerObserver();
-
-        this.on(['panstart', 'panmove'], (e) => {
+        at.on(['panstart', 'panmove'], (e) => {
             const { __currentContentRef } = this;
             if (null !== __currentContentRef) {
                 this.targets = e.targets;
@@ -121,7 +118,7 @@ export default class extends AnyTouch {
             }
         });
 
-        this.on('panend', (e) => {
+        at.on('panend', (e) => {
             this.__scrollEndTimeId = setTimeout(() => {
                 if (null !== this.__currentContentRef) {
                     this.targets = e.targets;
@@ -130,24 +127,24 @@ export default class extends AnyTouch {
             }, SCROLL_END_DELAY);
         });
 
-        this.on('at:start', (e) => {
+        at.on('at:start', (e) => {
             const targetEl = e.target as HTMLElement;
             this.__currentContentRef = this.__findContentRef(targetEl);
             this.__currentContentRef?.stop();
         });
 
-        this.on('at:end', () => {
+        at.on('at:end', () => {
             this.__currentContentRef?.snap();
         });
 
-        const swipe = this.get('swipe');
+        const swipe = at.get('swipe');
         swipe && swipe.set({ velocity: 1 });
-        this.on('swipe', (e) => {
+        at.on('swipe', (e) => {
             this.targets = e.targets;
             // clearTimeout(this._scrollEndTimeId);
             const deltaX = e.speedX * 200;
             const deltaY = e.speedY * 200;
-            this.__currentContentRef?._dampScroll([
+            this.__currentContentRef?.dampScroll([
                 this.__currentContentRef.xy[0] + deltaX,
                 this.__currentContentRef.xy[1] + deltaY,
             ]);
@@ -166,41 +163,25 @@ export default class extends AnyTouch {
                 // console.log('wheel-start');
                 this.__currentContentRef.stop();
                 if (wheelX) {
-                    this.__dampScroll([xy[0] - deltaY, xy[1]]);
+                    this.dampScroll([xy[0] - deltaY, xy[1]]);
                 } else {
-                    this.__dampScroll([xy[0], xy[1] - deltaY]);
+                    this.dampScroll([xy[0], xy[1] - deltaY]);
                 }
             } else if ('move' === type) {
                 if (wheelX) {
-                    this.__dampScroll([xy[0] - deltaY, xy[1]]);
+                    this.dampScroll([xy[0] - deltaY, xy[1]]);
                 } else {
-                    this.__dampScroll([xy[0], xy[1] - deltaY]);
+                    this.dampScroll([xy[0], xy[1] - deltaY]);
                 }
             } else if ('end' === type) {
                 // console.warn('wheel-end')
                 if (wheelX) {
-                    this.__dampScroll([xy[0] - vy * 5, xy[1]]);
+                    this.dampScroll([xy[0] - vy * 5, xy[1]]);
                 } else {
-                    this.__dampScroll([xy[0], xy[1] - Math.ceil(vy) * 30]);
+                    this.dampScroll([xy[0], xy[1] - Math.ceil(vy) * 30]);
                 }
             }
         });
-    }
-    /**
-     * 注册监听
-     */
-    private __registerObserver() {
-        const update = this.update.bind(this);
-        this.el.addEventListener('resize', update);
-        // const Observer = MutationObserver || WebKitMutationObserver || MozMutationObserver;
-        // // observe
-        // if (typeof Observer === 'function') {
-        //     const ob = new Observer(update);
-        //     ob.observe(this.el, {
-        //         subtree: true,
-        //         childList: true,
-        //     });
-        // }
     }
 
     update() {
@@ -225,6 +206,7 @@ export default class extends AnyTouch {
         return null;
     }
 
+
     moveTo(distXY: readonly [number, number]) {
         return this.__currentContentRef?.moveTo(distXY);
     }
@@ -233,8 +215,8 @@ export default class extends AnyTouch {
         this.__currentContentRef?.scrollTo(distXY, duration);
     }
 
-    private __dampScroll(distXY: readonly [number, number]) {
-        this.__currentContentRef?._dampScroll(distXY);
+    dampScroll(distXY: readonly [number, number]) {
+        this.__currentContentRef?.dampScroll(distXY);
     }
 
     /**

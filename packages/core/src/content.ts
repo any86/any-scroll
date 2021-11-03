@@ -94,7 +94,7 @@ export default class extends AnyEvent {
             const xy = runTwice(i => {
                 return clamp(this.xy[i], this.minXY[i], this.maxXY[i]);
             });
-            this._dampScroll(xy);
+            this.dampScroll(xy);
         }
     }
 
@@ -146,7 +146,7 @@ export default class extends AnyEvent {
      * @param distXY 目标点
      * @param onScroll 滚动回调
      */
-    _dampScroll(distXY: readonly [number, number]) {
+    dampScroll(distXY: readonly [number, number]) {
         if (distXY[0] === this.xy[0] && distXY[1] === this.xy[1]) return;
 
         raf.cancel(this._dampScrollRafId);
