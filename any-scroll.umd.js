@@ -3116,7 +3116,7 @@
             setStyle(el, {
                 position: "relative",
                 overflowX: allow[0] ? 'hidden' : '',
-                overflowY: allow[1] ? 'hidden' : ''
+                overflowY: allow[1] ? 'hidden' : '',
             });
             if (__options.watchResize) {
                 var ro = new index(function () {
@@ -3179,7 +3179,10 @@
                 _this.targets = e.targets;
                 var deltaX = e.speedX * 200;
                 var deltaY = e.speedY * 200;
-                (_a = _this.__currentContentRef) === null || _a === void 0 ? void 0 : _a._dampScroll([_this.__currentContentRef.xy[0] + deltaX, _this.__currentContentRef.xy[1] + deltaY]);
+                (_a = _this.__currentContentRef) === null || _a === void 0 ? void 0 : _a._dampScroll([
+                    _this.__currentContentRef.xy[0] + deltaX,
+                    _this.__currentContentRef.xy[1] + deltaY,
+                ]);
             });
             var wheelX = allow[0] && !allow[1];
             watchWheel(el, function (_a) {
@@ -3269,10 +3272,10 @@
         default_1.prototype.getContentRef = function (elOrIndex) {
             if (elOrIndex === void 0) { elOrIndex = 0; }
             if (0 !== elOrIndex && isElement_1(elOrIndex)) {
-                return this.__contentRefList.find(function (_a) {
+                return (this.__contentRefList.find(function (_a) {
                     var el = _a.el;
                     return el === elOrIndex;
-                }) || null;
+                }) || null);
             }
             else {
                 return this.__contentRefList[Number(elOrIndex)] || null;
@@ -3380,20 +3383,20 @@
     var BAR_CSS = "\n." + TRACK_CLASS_NAME + "{\n    right:0;\n    bottom:0;\n    background: " + TRACK_COLOR + ";\n    transition:opacity .5s ease-out;\n}\n\n." + TRACK_CLASS_NAME + " > ." + THUMB_CLASS_NAME + "{\n    width: " + TRACK_WIDTH + ";\n    height: " + TRACK_WIDTH + ";\n    background: " + THUMB_COLOR + ";\n    border-radius:4px;\n}\n\n." + TRACK_CLASS_NAME + "-x{\n    left:0;\n    height:" + TRACK_WIDTH + ";\n}\n\n." + TRACK_CLASS_NAME + "-y{\n    top:0;\n    width:" + TRACK_WIDTH + ";\n}\n";
 
     var setTimeout$1 = window.setTimeout;
-    function bar (context) {
+    function bar (wrapRef) {
         var timeoutIds = [-1, -1];
         var __isDraggingBar = false;
         insertCss_2(BAR_CSS);
-        var bars = [];
+        var barRefs = [];
         var xyBarElements = [DIRECTION.X, DIRECTION.Y].map(function (dir, index) {
-            var _a = __read(createDOM(context.el, dir), 2), trackEl = _a[0], thumbEl = _a[1];
+            var _a = __read(createDOM(wrapRef.el, dir), 2), trackEl = _a[0], thumbEl = _a[1];
             var bar = new Wrap(trackEl, { allow: [DIRECTION.X === dir, DIRECTION.Y === dir], overflowDistance: 0 });
-            bars.push(bar);
+            barRefs.push(bar);
             setStyle(bar.el, { position: 'absolute' });
             bar.on('pan', function () {
                 var thumb = bar.getContentRef();
                 if (thumb) {
-                    var contentRef = context.getContentRef();
+                    var contentRef = wrapRef.getContentRef();
                     if (null !== contentRef) {
                         var xy = contentRef.xy;
                         var nextXY = __spread(xy);
@@ -3408,14 +3411,13 @@
             });
             return [trackEl, thumbEl];
         });
-        updateBar(context, bars, xyBarElements);
-        context.on(['at:start', 'scroll', 'resize'], function () {
+        wrapRef.on(['at:start', 'scroll', 'resize'], function () {
             if (__isDraggingBar)
                 return;
-            updateBar(context, bars, xyBarElements);
+            updateBar(wrapRef, barRefs, xyBarElements);
         });
-        function updateBar(context, bars, xyBarElements) {
-            var contentRef = context.getContentRef();
+        function updateBar(wrapRef, bars, xyBarElements) {
+            var contentRef = wrapRef.getContentRef();
             if (null !== contentRef) {
                 var contentSize_1 = contentRef.contentSize, wrapSize_1 = contentRef.wrapSize, minXY_1 = contentRef.minXY, maxXY_1 = contentRef.maxXY;
                 runTwice(function (i) {
