@@ -55,6 +55,8 @@ export default class extends AnyEvent {
     // contentSize: [number, number] = [0, 0];
     targets: (EventTarget | null)[] = [];
 
+    options: Required<Options>;
+
     // 控制scroll-end不被频繁触发
     private __scrollEndTimeId = -1;
     // 存储content实例和元素
@@ -66,15 +68,15 @@ export default class extends AnyEvent {
         super();
         const at = new AnyTouch(el);
         this.el = el;
-        const __options = { ...DEFAULT_OPTIONS, ...options };
-        const { allow } = __options;
+        this.options = { ...DEFAULT_OPTIONS, ...options };
+        const { allow } = this.options;
 
         setStyle(el, {
             position: `relative`,
             overflow: 'hidden',
         });
 
-        if (__options.watchResize) {
+        if (this.options.watchResize) {
             const ro = new ResizeObserver(this.update.bind(this));
             ro.observe(el);
         }
@@ -82,7 +84,7 @@ export default class extends AnyEvent {
         // 遍历content元素
         // 生成实例
         Array.from(el.children).forEach((contentEl) => {
-            const ref = new Content(contentEl as HTMLElement, el, __options);
+            const ref = new Content(contentEl as HTMLElement, el, this.options);
             ref.on('resize', () => {
                 this.update();
             });

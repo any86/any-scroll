@@ -1,55 +1,62 @@
-import { setStyle, createDOMDiv, changeOpacity, runTwice, DIRECTION } from '@any-scroll/shared';
+import { setStyle, createDOMDiv, changeDOMVisible, changeOpacity, runTwice, DIRECTION } from '@any-scroll/shared';
 import { insertCss } from 'insert-css';
 import { TRACK_CLASS_NAME, THUMB_CLASS_NAME, BAR_CSS, } from './const';
 import { Wrap, Content } from '@any-scroll/core';
 const { setTimeout } = window;
 type WarpInstance = InstanceType<typeof Wrap>;
+type ContentInstance = InstanceType<typeof Content>;
+
 /**
  * 创建滚动条
  * @param el 容器元素
  * @returns
  */
 export default function (wrapRef: WarpInstance) {
+    const { allow } = wrapRef.options;
     // 给updateBar函数用
     let timeoutIds = [-1, -1];
-
     let __isDraggingBar = false;
+    let __isFirstUpdate = false;
     insertCss(BAR_CSS);
-    const barRefs: WarpInstance[] = [];
     // 构建x|y轴滚动条DOM
-    const xyBarElements = [DIRECTION.X, DIRECTION.Y].map((dir, index) => {
-        const [trackEl, thumbEl] = createDOM(wrapRef.el as HTMLElement, dir);
+    const barRefs = runTwice(createBar);
+
+    wrapRef.on(['at:start', 'scroll', 'resize'], () => {
+        if (__isDraggingBar) return;
+        updateBar(wrapRef, barRefs, allow);
+    });
+
+    /**
+     * 生成bar
+     * @param index 0:x轴, 1:y轴
+     * @returns bar的track和thumb元素
+     */
+    function createBar(index: number) {
+        const dir = [DIRECTION.X, DIRECTION.Y][index];
+        const trackEl = createDOM(wrapRef.el as HTMLElement, dir);
         // console.log(trackEl.clientHeight);
 
         // ⭐基于scroll做bar
         const bar = new Wrap(trackEl, { allow: [DIRECTION.X === dir, DIRECTION.Y === dir], overflowDistance: 0 });
-        barRefs.push(bar);
-        setStyle(bar.el as HTMLElement, { position: 'absolute' });
+        setStyle(bar.el as HTMLElement, { position: 'absolute', display: 'none' });
         bar.on('pan', () => {
-            const thumb = bar.getContentRef();
-            if (thumb) {
-                const contentRef = wrapRef.getContentRef();
-                if (null !== contentRef) {
-                    // 缩放, bar => scrollView
-                    const { xy } = contentRef;
-                    const nextXY = [...xy] as [number, number];
-                    nextXY[index] = -thumb.xy[index] * contentRef.contentSize[index] / thumb.wrapSize[index];
-                    contentRef.moveTo(nextXY);
-                    __isDraggingBar = true;
-                }
+            const thumb = bar.getContentRef() as ContentInstance;
+            const contentRef = wrapRef.getContentRef();
+            if (null !== contentRef) {
+                // 缩放, bar => scrollView
+                const { xy } = contentRef;
+                const nextXY = [...xy] as [number, number];
+                nextXY[index] = -thumb.xy[index] * contentRef.contentSize[index] / thumb.wrapSize[index];
+                contentRef.moveTo(nextXY);
+                __isDraggingBar = true;
             }
         });
 
         bar.on('at:end', () => {
             __isDraggingBar = false;
         })
-        return [trackEl, thumbEl];
-    });
-
-    wrapRef.on(['at:start', 'scroll', 'resize'], () => {
-        if (__isDraggingBar) return;
-        updateBar(wrapRef, barRefs, xyBarElements);
-    });
+        return bar;
+    }
 
     /**
      * 根据view的数据调整bar
@@ -58,52 +65,54 @@ export default function (wrapRef: WarpInstance) {
      * @param min view可以到达的最小xy
      * @param contentSize 内容尺寸
      */
-    function updateBar(wrapRef: WarpInstance, bars: WarpInstance[], xyBarElements: HTMLElement[][]) {
-        const contentRef = wrapRef.getContentRef();
-        if (null !== contentRef) {
-            const { contentSize, wrapSize, minXY, maxXY } = contentRef;
-            runTwice((i) => {
+    function updateBar(wrapRef: WarpInstance, barRefs: WarpInstance[], allow: [boolean, boolean]) {
+        const contentRef = wrapRef.getContentRef() as ContentInstance;
+        const { contentSize, wrapSize, minXY, maxXY } = contentRef;
+        runTwice((i) => {
+            const barRef = barRefs[i];
+            const trackElement = barRef.el;
 
-                // console.log(i,contentSize[i] > wrapSize[i]);
-                if (contentSize[i] > wrapSize[i]) {
+            if (!allow[i]) {
+                return;
+            } else {
+                changeDOMVisible(trackElement);
+            }
 
-                    changeOpacity(xyBarElements[i][0], 1);
-                    clearTimeout(timeoutIds[i])
-                    timeoutIds[i] = setTimeout(() => {
-                        changeOpacity(xyBarElements[i][0], 0);
-                    }, 2000);
+            if (contentSize[i] > wrapSize[i]) {
+                changeOpacity(trackElement, 1);
+                clearTimeout(timeoutIds[i]);
+                timeoutIds[i] = setTimeout(() => {
+                    changeOpacity(trackElement, 0);
+                }, 1000);
 
-                    const thumbRef = bars[i].getContentRef();
-                    if (null !== thumbRef) {
-                        const [thumbSize, thumbXorY] = calcBarXorY(
-                            contentRef.xy[i],
-                            wrapSize[i],
-                            contentSize[i],
-                            maxXY[i],
-                            minXY[i],
-                            thumbRef.minXY[i],
-                            thumbRef.maxXY[i]
-                        );
-                        const thumbElement = xyBarElements[i][1];
-                        setStyle(thumbElement, { [['width', 'height'][i]]: `${thumbSize}px` });
+                const thumbRef = barRefs[i].getContentRef();
+                if (null !== thumbRef) {
+                    const [thumbSize, thumbXorY] = calcBarXorY(
+                        contentRef.xy[i],
+                        wrapSize[i],
+                        contentSize[i],
+                        maxXY[i],
+                        minXY[i],
+                        thumbRef.minXY[i],
+                        thumbRef.maxXY[i]
+                    );
+                    const thumbElement = barRef.getContentRef()!.el;
+                    setStyle(thumbElement, { [['width', 'height'][i]]: `${thumbSize}px` });
 
-                        // 设置thumb的滑动范围
-                        thumbRef.maxXY[i] = thumbRef.wrapSize[i] - thumbSize;
-                        thumbRef.minXY[i] = 0;
+                    // 设置thumb的滑动范围
+                    thumbRef.maxXY[i] = thumbRef.wrapSize[i] - thumbSize;
+                    thumbRef.minXY[i] = 0;
 
-                        // 移动thumb
-                        const { xy } = thumbRef;
-                        xy[i] = thumbXorY;
-                        thumbRef.moveTo(xy);
-                    }
-                } else {
-                    changeOpacity(xyBarElements[i][0], 0);
+                    // 移动thumb
+                    const { xy } = thumbRef;
+                    xy[i] = thumbXorY;
+                    thumbRef.moveTo(xy);
                 }
-            });
-        }
+            } else {
+                changeOpacity(trackElement, 0);
+            }
+        });
     }
-
-
 }
 
 
@@ -119,7 +128,7 @@ function createDOM(el: HTMLElement, axis: 'x' | 'y' = DIRECTION.X) {
     const thumbEl = createDOMDiv([THUMB_CLASS_NAME, `${THUMB_CLASS_NAME}-${axis}`]);
     trackEl.appendChild(thumbEl);
     el.appendChild(trackEl);
-    return [trackEl, thumbEl];
+    return trackEl;
 }
 
 /**

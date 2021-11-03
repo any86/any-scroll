@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- <script src="https://unpkg.com/any-scroll/dist/any-scroll.umd.min.js"></script> -->
     <script src="../packages/any-scroll/dist/any-scroll.umd.js"></script>
+    <!-- <script src="./any-scroll.umd.js"></script> -->
     <title>Document</title>
     <!-- <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js"></script> -->
     <style>
@@ -33,7 +34,9 @@
             box-shadow: 1px 2px 15px 5px rgba(0, 0, 0, 0.1), 1px 2px 32px 5px rgba(0, 0, 0, 0.4);
         }
 
-        .app .right {flex:1;}
+        .app .right {
+            flex: 1;
+        }
 
         .box {
             display: inline-block;
@@ -98,13 +101,13 @@
         const content2 = document.getElementById('content2');
         if (content2) {
             const html2 = [];
-            for (let i = 1; i <= 61; i++) {
+            for (let i = 1; i <= 103; i++) {
                 html2.push(`<span class="box">${i}</span>`);
             }
             content2.innerHTML = html2.join('');
         }
         const el = document.getElementById('scroll');
-        const as = new AnyScroll(el, { overflowDistance: 100 });
+        const as = new AnyScroll(el, { overflowDistance: 100, allow: [true, true] });
 
         as.on('scroll', (e) => {
             // console.log(`scroll`, e);
