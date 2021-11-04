@@ -91,7 +91,7 @@
         return ar;
     }
 
-    var default_1$b = (function () {
+    var default_1$a = (function () {
         function default_1() {
             this.listenersMap = {};
         }
@@ -159,7 +159,7 @@
         return default_1;
     }());
 
-    var AnyEvent = default_1$b;
+    var AnyEvent = default_1$a;
 
     var ObjectToString = Object.prototype.toString;
     function isRegExp(input) {
@@ -662,7 +662,7 @@
         return isVaild;
     }
 
-    var default_1$a = (function () {
+    var default_1$9 = (function () {
         function default_1(options) {
             this.disabled = false;
             this._$isRecognized = false;
@@ -683,7 +683,7 @@
         return default_1;
     }());
 
-    var Recognizer = default_1$a;
+    var Recognizer = default_1$9;
 
     var getVLength = (function (v) {
         return Math.sqrt(v.x * v.x + v.y * v.y);
@@ -872,7 +872,7 @@
         maxDistanceFromPrevTap: 9,
         maxPressTime: 250,
     };
-    var default_1$9 = (function (_super) {
+    var default_1$8 = (function (_super) {
         __extends(default_1, _super);
         function default_1(options) {
             var _this = _super.call(this, __assign(__assign({}, DEFAULT_OPTIONS$6), options)) || this;
@@ -954,14 +954,14 @@
         return default_1;
     }(Recognizer));
 
-    var Tap = default_1$9;
+    var Tap = default_1$8;
 
     var DEFAULT_OPTIONS$5 = {
         name: 'pan',
         threshold: 10,
         pointLength: 1
     };
-    var default_1$8 = (function (_super) {
+    var default_1$7 = (function (_super) {
         __extends(default_1, _super);
         function default_1(options) {
             var _this = _super.call(this, __assign(__assign({}, DEFAULT_OPTIONS$5), options)) || this;
@@ -982,7 +982,7 @@
         return default_1;
     }(Recognizer));
 
-    var Pan = default_1$8;
+    var Pan = default_1$7;
 
     var DEFAULT_OPTIONS$4 = {
         name: 'swipe',
@@ -990,7 +990,7 @@
         velocity: 0.3,
         pointLength: 1,
     };
-    var default_1$7 = (function (_super) {
+    var default_1$6 = (function (_super) {
         __extends(default_1, _super);
         function default_1(options) {
             var _this = _super.call(this, __assign(__assign({}, DEFAULT_OPTIONS$4), options)) || this;
@@ -1014,7 +1014,7 @@
         return default_1;
     }(Recognizer));
 
-    var Swipe = default_1$7;
+    var Swipe = default_1$6;
 
     var DEFAULT_OPTIONS$3 = {
         name: 'press',
@@ -1022,7 +1022,7 @@
         maxDistance: 9,
         minPressTime: 251,
     };
-    var default_1$6 = (function (_super) {
+    var default_1$5 = (function (_super) {
         __extends(default_1, _super);
         function default_1(options) {
             var _this = _super.call(this, __assign(__assign({}, DEFAULT_OPTIONS$3), options)) || this;
@@ -1062,14 +1062,14 @@
         return default_1;
     }(Recognizer));
 
-    var Press = default_1$6;
+    var Press = default_1$5;
 
     var DEFAULT_OPTIONS$2 = {
         name: 'pinch',
         threshold: 0,
         pointLength: 2,
     };
-    var default_1$5 = (function (_super) {
+    var default_1$4 = (function (_super) {
         __extends(default_1, _super);
         function default_1(options) {
             var _this = _super.call(this, __assign(__assign({}, DEFAULT_OPTIONS$2), options)) || this;
@@ -1088,14 +1088,14 @@
         return default_1;
     }(Recognizer));
 
-    var Pinch = default_1$5;
+    var Pinch = default_1$4;
 
     var DEFAULT_OPTIONS$1 = {
         name: 'rotate',
         threshold: 0,
         pointLength: 2,
     };
-    var default_1$4 = (function (_super) {
+    var default_1$3 = (function (_super) {
         __extends(default_1, _super);
         function default_1(options) {
             var _this = _super.call(this, __assign(__assign({}, DEFAULT_OPTIONS$1), options)) || this;
@@ -1112,7 +1112,7 @@
         return default_1;
     }(Recognizer));
 
-    var Rotate = default_1$4;
+    var Rotate = default_1$3;
 
     AnyTouch$1.use(Tap);
     AnyTouch$1.use(Pan);
@@ -2843,13 +2843,23 @@
         if (opacity === void 0) { opacity = 1; }
         setStyle(el, { opacity: String(opacity) });
     }
+    function changeDOMVisible(el, visible) {
+        if (visible === void 0) { visible = true; }
+        if (visible) {
+            setStyle(el, { display: '' });
+        }
+        else {
+            setStyle(el, { display: 'none' });
+        }
+    }
     function easing(t) {
         return 1 - Math.pow(1 - t, 3);
     }
     function runTwice(callback) {
         return [callback(0), callback(1)];
     }
-    function tween(from, to, duration) {
+    function tween(from, to, duration, easingFunction) {
+        if (easingFunction === void 0) { easingFunction = easing; }
         var _from = __spread(from);
         var _to = __spread(to);
         var startTime = Date.now();
@@ -2860,7 +2870,7 @@
             rafId = raf$1(function () {
                 var timeDiff = Date.now() - startTime;
                 var timeProgress = timeDiff / duration;
-                var valueProgress = easing(timeProgress);
+                var valueProgress = easingFunction(timeProgress);
                 if (1 > timeProgress) {
                     var currentValue = _from.map(function (n, i) { return n + valueDiff[i] * valueProgress; });
                     onChange(currentValue);
@@ -2889,9 +2899,9 @@
         return dist;
     }
 
-    var default_1$3 = (function (_super) {
-        __extends(default_1, _super);
-        function default_1(contentEl, wrapEl, options) {
+    var Content = (function (_super) {
+        __extends(Content, _super);
+        function Content(contentEl, wrapEl, options) {
             var _this = _super.call(this) || this;
             _this.xy = [0, 0];
             _this.minXY = [0, 0];
@@ -2900,8 +2910,8 @@
             _this.contentSize = [0, 0];
             _this.targets = [];
             _this.isScrolling = false;
-            _this._scrollEndTimeId = -1;
-            _this._dampScrollRafId = -1;
+            _this.__scrollEndTimeId = -1;
+            _this.__dampScrollRafId = -1;
             _this.__stopScroll = function () { };
             _this.el = contentEl;
             _this.wrapEl = wrapEl;
@@ -2917,42 +2927,42 @@
             }
             return _this;
         }
-        default_1.prototype.set = function (options) {
+        Content.prototype.set = function (options) {
             this.__options = __assign(__assign({}, this.__options), options);
             this.update();
         };
-        default_1.prototype.update = function () {
+        Content.prototype.update = function () {
             var _a = this, wrapEl = _a.wrapEl, contentEl = _a.el;
             var offsetWidth = contentEl.offsetWidth, offsetHeight = contentEl.offsetHeight, clientWidth = contentEl.clientWidth, clientHeight = contentEl.clientHeight, scrollWidth = contentEl.scrollWidth, scrollHeight = contentEl.scrollHeight;
             this.wrapSize = [wrapEl.clientWidth, wrapEl.clientHeight];
             this.contentSize = [offsetWidth - clientWidth + scrollWidth, offsetHeight - clientHeight + scrollHeight];
-            this.minXY = [
+            this.minXY = this.__options.minXY ? this.__options.minXY(this) : [
                 Math.min(0, this.wrapSize[0] - this.contentSize[0]),
                 Math.min(0, this.wrapSize[1] - this.contentSize[1]),
             ];
-            this.maxXY = [0, 0];
+            this.maxXY = this.__options.maxXY ? this.__options.maxXY(this) : [0, 0];
         };
-        default_1.prototype.stop = function () {
+        Content.prototype.stop = function () {
             var _this = this;
             if (this.isScrolling && this.xy.every(function (v, i) { return inRange_1(v, _this.minXY[i], _this.maxXY[i]); })) {
                 this.emit('scroll-end');
             }
             this.isScrolling = false;
-            raf$1.cancel(this._dampScrollRafId);
+            raf$1.cancel(this.__dampScrollRafId);
             this.__stopScroll();
         };
-        default_1.prototype.snap = function () {
+        Content.prototype.snap = function () {
             var _this = this;
             if (this.__options.snap) {
                 var xy = runTwice(function (i) {
                     return clamp_1(_this.xy[i], _this.minXY[i], _this.maxXY[i]);
                 });
-                this._dampScroll(xy);
+                this.dampScroll(xy);
             }
         };
-        default_1.prototype.moveTo = function (distXY) {
+        Content.prototype.moveTo = function (distXY) {
             var _this = this;
-            clearTimeout(this._scrollEndTimeId);
+            clearTimeout(this.__scrollEndTimeId);
             var _a = this.__options, allow = _a.allow, overflowDistance = _a.overflowDistance;
             runTwice(function (i) {
                 if (allow[i]) {
@@ -2968,12 +2978,12 @@
             }
             return this.xy;
         };
-        default_1.prototype.scrollTo = function (distXY, duration) {
+        Content.prototype.scrollTo = function (distXY, duration, easing) {
             var _this = this;
             if (duration === void 0) { duration = 1000; }
             this.stop();
             this.isScrolling = true;
-            var _a = __read(tween(this.xy, distXY, duration), 3), run = _a[0], stop = _a[1], done = _a[2];
+            var _a = __read(tween(this.xy, distXY, duration, easing), 3), run = _a[0], stop = _a[1], done = _a[2];
             run(this.moveTo.bind(this));
             this.__stopScroll = stop;
             done(function () {
@@ -2981,10 +2991,10 @@
                 _this.isScrolling = false;
             });
         };
-        default_1.prototype._dampScroll = function (distXY) {
+        Content.prototype.dampScroll = function (distXY) {
             if (distXY[0] === this.xy[0] && distXY[1] === this.xy[1])
                 return;
-            raf$1.cancel(this._dampScrollRafId);
+            raf$1.cancel(this.__dampScrollRafId);
             var _a = this.__options, overflowDistance = _a.overflowDistance, allow = _a.allow;
             var _distXY = __spread(distXY);
             function _moveTo(context) {
@@ -3016,7 +3026,7 @@
                 context.moveTo(_nextXY);
                 var _needScroll = runTwice(function (i) { return allow[i] && _distXY[i] !== _nextXY[i]; }).some(function (bool) { return bool; });
                 if (_needScroll) {
-                    context._dampScrollRafId = raf$1(function () {
+                    context.__dampScrollRafId = raf$1(function () {
                         _moveTo(context);
                     });
                 }
@@ -3027,10 +3037,10 @@
             }
             _moveTo(this);
         };
-        default_1.prototype.destroy = function () {
+        Content.prototype.destroy = function () {
             _super.prototype.destroy.call(this);
         };
-        return default_1;
+        return Content;
     }(AnyEvent));
 
     var setTimeout$3 = window.setTimeout;
@@ -3106,46 +3116,40 @@
     var default_1$2 = (function (_super) {
         __extends(default_1, _super);
         function default_1(el, options) {
-            var _this = _super.call(this, el) || this;
+            var _this = _super.call(this) || this;
             _this.targets = [];
-            _this.__scrollEndTimeId = -1;
             _this.__contentRefList = [];
+            var at = new AnyTouch$1(el);
             _this.el = el;
-            var __options = __assign(__assign({}, DEFAULT_OPTIONS), options);
-            var allow = __options.allow;
+            _this.options = __assign(__assign({}, DEFAULT_OPTIONS), options);
+            var allow = _this.options.allow;
             setStyle(el, {
                 position: "relative",
-                overflowX: allow[0] ? 'hidden' : '',
-                overflowY: allow[1] ? 'hidden' : '',
+                overflow: 'hidden',
             });
-            if (__options.watchResize) {
-                var ro = new index(function () {
-                    _this.update();
-                });
+            if (_this.options.watchResize) {
+                var ro = new index(_this.update.bind(_this));
                 ro.observe(el);
             }
             Array.from(el.children).forEach(function (contentEl) {
-                var ref = new default_1$3(contentEl, el, __options);
+                var ref = new Content(contentEl, el, _this.options);
                 ref.on('resize', function () {
                     _this.update();
+                });
+                ref.on('scroll', function (arg) {
+                    clearTimeout(ref.__scrollEndTimeId);
+                    _this.emit('scroll', arg);
+                });
+                ref.on('scroll-end', function (arg) {
+                    _this.emit('scroll-end', arg);
                 });
                 _this.__contentRefList.push(ref);
             });
             _this.__currentContentRef = _this.getContentRef();
-            if (_this.__currentContentRef) {
-                _this.__currentContentRef.on('scroll', function (arg) {
-                    clearTimeout(_this.__scrollEndTimeId);
-                    _this.emit('scroll', arg);
-                });
-                _this.__currentContentRef.on('scroll-end', function (arg) {
-                    _this.emit('scroll-end', arg);
-                });
-            }
             plugins$1.forEach(function (plugin) {
                 plugin(_this);
             });
-            _this.__registerObserver();
-            _this.on(['panstart', 'panmove'], function (e) {
+            at.on(['panstart', 'panmove'], function (e) {
                 var __currentContentRef = _this.__currentContentRef;
                 if (null !== __currentContentRef) {
                     _this.targets = e.targets;
@@ -3154,32 +3158,34 @@
                     __currentContentRef.moveTo([xy[0] + deltaX, xy[1] + deltaY]);
                 }
             });
-            _this.on('panend', function (e) {
-                _this.__scrollEndTimeId = setTimeout$2(function () {
+            at.on('panend', function (e) {
+                if (null === _this.__currentContentRef)
+                    return;
+                _this.__currentContentRef.__scrollEndTimeId = setTimeout$2(function () {
                     if (null !== _this.__currentContentRef) {
                         _this.targets = e.targets;
                         _this.emit('scroll-end', _this.__currentContentRef.xy);
                     }
                 }, SCROLL_END_DELAY);
             });
-            _this.on('at:start', function (e) {
+            at.on('at:start', function (e) {
                 var _a;
                 var targetEl = e.target;
                 _this.__currentContentRef = _this.__findContentRef(targetEl);
                 (_a = _this.__currentContentRef) === null || _a === void 0 ? void 0 : _a.stop();
             });
-            _this.on('at:end', function () {
+            at.on('at:end', function () {
                 var _a;
                 (_a = _this.__currentContentRef) === null || _a === void 0 ? void 0 : _a.snap();
             });
-            var swipe = _this.get('swipe');
+            var swipe = at.get('swipe');
             swipe && swipe.set({ velocity: 1 });
-            _this.on('swipe', function (e) {
+            at.on('swipe', function (e) {
                 var _a;
                 _this.targets = e.targets;
                 var deltaX = e.speedX * 200;
                 var deltaY = e.speedY * 200;
-                (_a = _this.__currentContentRef) === null || _a === void 0 ? void 0 : _a._dampScroll([
+                (_a = _this.__currentContentRef) === null || _a === void 0 ? void 0 : _a.dampScroll([
                     _this.__currentContentRef.xy[0] + deltaX,
                     _this.__currentContentRef.xy[1] + deltaY,
                 ]);
@@ -3195,26 +3201,26 @@
                 if ('start' === type) {
                     _this.__currentContentRef.stop();
                     if (wheelX) {
-                        _this.__dampScroll([xy[0] - deltaY, xy[1]]);
+                        _this.dampScroll([xy[0] - deltaY, xy[1]]);
                     }
                     else {
-                        _this.__dampScroll([xy[0], xy[1] - deltaY]);
+                        _this.dampScroll([xy[0], xy[1] - deltaY]);
                     }
                 }
                 else if ('move' === type) {
                     if (wheelX) {
-                        _this.__dampScroll([xy[0] - deltaY, xy[1]]);
+                        _this.dampScroll([xy[0] - deltaY, xy[1]]);
                     }
                     else {
-                        _this.__dampScroll([xy[0], xy[1] - deltaY]);
+                        _this.dampScroll([xy[0], xy[1] - deltaY]);
                     }
                 }
                 else if ('end' === type) {
                     if (wheelX) {
-                        _this.__dampScroll([xy[0] - vy * 5, xy[1]]);
+                        _this.dampScroll([xy[0] - vy * 5, xy[1]]);
                     }
                     else {
-                        _this.__dampScroll([xy[0], xy[1] - Math.ceil(vy) * 30]);
+                        _this.dampScroll([xy[0], xy[1] - Math.ceil(vy) * 30]);
                     }
                 }
             });
@@ -3222,10 +3228,6 @@
         }
         default_1.use = function (plugin) {
             plugins$1.push(plugin);
-        };
-        default_1.prototype.__registerObserver = function () {
-            var update = this.update.bind(this);
-            this.el.addEventListener('resize', update);
         };
         default_1.prototype.update = function () {
             this.__contentRefList.forEach(function (contentRef) {
@@ -3239,6 +3241,7 @@
                 for (var _b = __values(this.__contentRefList), _c = _b.next(); !_c.done; _c = _b.next()) {
                     var ref = _c.value;
                     if (ref.el.contains(targetEl)) {
+                        this.emit('change-content', ref);
                         return ref;
                     }
                 }
@@ -3256,21 +3259,23 @@
             var _a;
             return (_a = this.__currentContentRef) === null || _a === void 0 ? void 0 : _a.moveTo(distXY);
         };
-        default_1.prototype.scrollTo = function (distXY, duration) {
+        default_1.prototype.scrollTo = function (distXY, duration, easing) {
             var _a;
             if (duration === void 0) { duration = 1000; }
-            (_a = this.__currentContentRef) === null || _a === void 0 ? void 0 : _a.scrollTo(distXY, duration);
+            (_a = this.__currentContentRef) === null || _a === void 0 ? void 0 : _a.scrollTo(distXY, duration, easing);
         };
-        default_1.prototype.__dampScroll = function (distXY) {
+        default_1.prototype.dampScroll = function (distXY) {
             var _a;
-            (_a = this.__currentContentRef) === null || _a === void 0 ? void 0 : _a._dampScroll(distXY);
+            (_a = this.__currentContentRef) === null || _a === void 0 ? void 0 : _a.dampScroll(distXY);
         };
         default_1.prototype.stop = function () {
             var _a;
             (_a = this.__currentContentRef) === null || _a === void 0 ? void 0 : _a.stop();
         };
         default_1.prototype.getContentRef = function (elOrIndex) {
-            if (elOrIndex === void 0) { elOrIndex = 0; }
+            if (void 0 === elOrIndex) {
+                return this.__currentContentRef || this.__contentRefList[0];
+            }
             if (0 !== elOrIndex && isElement_1(elOrIndex)) {
                 return (this.__contentRefList.find(function (_a) {
                     var el = _a.el;
@@ -3285,7 +3290,7 @@
             _super.prototype.destroy.call(this);
         };
         return default_1;
-    }(AnyTouch$1));
+    }(AnyEvent));
 
     var Wrap = default_1$2;
     var plugins = [];
@@ -3384,67 +3389,75 @@
 
     var setTimeout$1 = window.setTimeout;
     function bar (wrapRef) {
+        var allow = wrapRef.options.allow;
         var timeoutIds = [-1, -1];
         var __isDraggingBar = false;
         insertCss_2(BAR_CSS);
-        var barRefs = [];
-        var xyBarElements = [DIRECTION.X, DIRECTION.Y].map(function (dir, index) {
-            var _a = __read(createDOM(wrapRef.el, dir), 2), trackEl = _a[0], thumbEl = _a[1];
+        var barRefs = runTwice(createBar);
+        wrapRef.on(['at:start', 'scroll', 'resize'], function () {
+            if (__isDraggingBar)
+                return;
+            updateBar(wrapRef, barRefs, allow);
+        });
+        wrapRef.on('change-content', function (ref) {
+            updateBar(wrapRef, barRefs, allow);
+        });
+        function createBar(index) {
+            var dir = [DIRECTION.X, DIRECTION.Y][index];
+            var trackEl = createDOM(wrapRef.el, dir);
             var bar = new Wrap(trackEl, { allow: [DIRECTION.X === dir, DIRECTION.Y === dir], overflowDistance: 0 });
-            barRefs.push(bar);
-            setStyle(bar.el, { position: 'absolute' });
+            setStyle(bar.el, { position: 'absolute', display: 'none' });
             bar.on('pan', function () {
                 var thumb = bar.getContentRef();
-                if (thumb) {
-                    var contentRef = wrapRef.getContentRef();
-                    if (null !== contentRef) {
-                        var xy = contentRef.xy;
-                        var nextXY = __spread(xy);
-                        nextXY[index] = -thumb.xy[index] * contentRef.contentSize[index] / thumb.wrapSize[index];
-                        contentRef.moveTo(nextXY);
-                        __isDraggingBar = true;
-                    }
+                var contentRef = wrapRef.getContentRef();
+                if (null !== contentRef) {
+                    var xy = contentRef.xy;
+                    var nextXY = __spread(xy);
+                    nextXY[index] = -thumb.xy[index] * contentRef.contentSize[index] / thumb.wrapSize[index];
+                    contentRef.moveTo(nextXY);
+                    __isDraggingBar = true;
                 }
             });
             bar.on('at:end', function () {
                 __isDraggingBar = false;
             });
-            return [trackEl, thumbEl];
-        });
-        wrapRef.on(['at:start', 'scroll', 'resize'], function () {
-            if (__isDraggingBar)
-                return;
-            updateBar(wrapRef, barRefs, xyBarElements);
-        });
-        function updateBar(wrapRef, bars, xyBarElements) {
+            return bar;
+        }
+        function updateBar(wrapRef, barRefs, allow) {
             var contentRef = wrapRef.getContentRef();
-            if (null !== contentRef) {
-                var contentSize_1 = contentRef.contentSize, wrapSize_1 = contentRef.wrapSize, minXY_1 = contentRef.minXY, maxXY_1 = contentRef.maxXY;
-                runTwice(function (i) {
-                    var _a;
-                    if (contentSize_1[i] > wrapSize_1[i]) {
-                        changeOpacity(xyBarElements[i][0], 1);
-                        clearTimeout(timeoutIds[i]);
-                        timeoutIds[i] = setTimeout$1(function () {
-                            changeOpacity(xyBarElements[i][0], 0);
-                        }, 2000);
-                        var thumbRef = bars[i].getContentRef();
-                        if (null !== thumbRef) {
-                            var _b = __read(calcBarXorY(contentRef.xy[i], wrapSize_1[i], contentSize_1[i], maxXY_1[i], minXY_1[i], thumbRef.minXY[i], thumbRef.maxXY[i]), 2), thumbSize = _b[0], thumbXorY = _b[1];
-                            var thumbElement = xyBarElements[i][1];
-                            setStyle(thumbElement, (_a = {}, _a[['width', 'height'][i]] = thumbSize + "px", _a));
-                            thumbRef.maxXY[i] = thumbRef.wrapSize[i] - thumbSize;
-                            thumbRef.minXY[i] = 0;
-                            var xy = thumbRef.xy;
-                            xy[i] = thumbXorY;
-                            thumbRef.moveTo(xy);
-                        }
+            var contentSize = contentRef.contentSize, wrapSize = contentRef.wrapSize, minXY = contentRef.minXY, maxXY = contentRef.maxXY;
+            runTwice(function (i) {
+                var _a;
+                var barRef = barRefs[i];
+                var trackElement = barRef.el;
+                if (!allow[i]) {
+                    return;
+                }
+                else {
+                    changeDOMVisible(trackElement);
+                }
+                if (contentSize[i] > wrapSize[i]) {
+                    changeOpacity(trackElement, 1);
+                    clearTimeout(timeoutIds[i]);
+                    timeoutIds[i] = setTimeout$1(function () {
+                        changeOpacity(trackElement, 0);
+                    }, 1000);
+                    var thumbRef = barRefs[i].getContentRef();
+                    if (null !== thumbRef) {
+                        var _b = __read(calcBarXorY(contentRef.xy[i], wrapSize[i], contentSize[i], maxXY[i], minXY[i], thumbRef.minXY[i], thumbRef.maxXY[i]), 2), thumbSize = _b[0], thumbXorY = _b[1];
+                        var thumbElement = barRef.getContentRef().el;
+                        setStyle(thumbElement, (_a = {}, _a[['width', 'height'][i]] = thumbSize + "px", _a));
+                        thumbRef.maxXY[i] = thumbRef.wrapSize[i] - thumbSize;
+                        thumbRef.minXY[i] = 0;
+                        var xy = thumbRef.xy;
+                        xy[i] = thumbXorY;
+                        thumbRef.moveTo(xy);
                     }
-                    else {
-                        changeOpacity(xyBarElements[i][0], 0);
-                    }
-                });
-            }
+                }
+                else {
+                    changeOpacity(trackElement, 0);
+                }
+            });
         }
     }
     function createDOM(el, axis) {
@@ -3453,7 +3466,7 @@
         var thumbEl = createDOMDiv([THUMB_CLASS_NAME, THUMB_CLASS_NAME + "-" + axis]);
         trackEl.appendChild(thumbEl);
         el.appendChild(trackEl);
-        return [trackEl, thumbEl];
+        return trackEl;
     }
     function calcBarXorY(scrollViewXOrY, wrapSize, contentSize, maxXorY, minXorY, thumbMinXOrY, thumbMaxXOrY) {
         var trackSize = wrapSize;
