@@ -24,7 +24,7 @@ export default class Content extends AnyEvent {
 
     private __options: ContentOptions;
     // 控制scroll-end不被频繁触发
-    private __scrollEndTimeId = -1;
+    __scrollEndTimeId = -1;
     private __dampScrollRafId = -1;
     private __stopScroll = () => { };
 

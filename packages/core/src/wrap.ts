@@ -57,8 +57,6 @@ export default class extends AnyEvent {
 
     options: Required<Options>;
 
-    // 控制scroll-end不被频繁触发
-    private __scrollEndTimeId = -1;
     // 存储content实例和元素
     private __contentRefList: ContentRefList = [];
     // 当前content实例
@@ -90,7 +88,7 @@ export default class extends AnyEvent {
             });
 
             ref.on('scroll', (arg) => {
-                clearTimeout(this.__scrollEndTimeId);
+                clearTimeout(ref.__scrollEndTimeId);
                 this.emit('scroll', arg);
             });
 
@@ -120,7 +118,8 @@ export default class extends AnyEvent {
         });
 
         at.on('panend', (e) => {
-            this.__scrollEndTimeId = setTimeout(() => {
+            if (null === this.__currentContentRef) return;
+            this.__currentContentRef.__scrollEndTimeId = setTimeout(() => {
                 if (null !== this.__currentContentRef) {
                     this.targets = e.targets;
                     this.emit('scroll-end', this.__currentContentRef.xy);
