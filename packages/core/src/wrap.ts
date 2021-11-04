@@ -107,6 +107,12 @@ export default class extends AnyEvent {
             plugin(this);
         });
 
+        // 代理所有手势事件
+        at.on('at:after', e => {
+            this.emit(e.type, e);
+        });
+
+
         at.on(['panstart', 'panmove'], (e) => {
             const { __currentContentRef } = this;
             if (null !== __currentContentRef) {
@@ -116,6 +122,7 @@ export default class extends AnyEvent {
                 __currentContentRef.moveTo([xy[0] + deltaX, xy[1] + deltaY]);
             }
         });
+
 
         at.on('panend', (e) => {
             if (null === this.__currentContentRef) return;
@@ -128,12 +135,14 @@ export default class extends AnyEvent {
         });
 
         at.on('at:start', (e) => {
+            this.emit('at:start');
             const targetEl = e.target as HTMLElement;
             this.__currentContentRef = this.__findContentRef(targetEl);
             this.__currentContentRef?.stop();
         });
 
         at.on('at:end', () => {
+            this.emit('at:end');
             this.__currentContentRef?.snap();
         });
 
