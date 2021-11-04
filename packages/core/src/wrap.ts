@@ -88,22 +88,21 @@ export default class extends AnyEvent {
             ref.on('resize', () => {
                 this.update();
             });
-            this.__contentRefList.push(ref);
-        });
 
-        // 默认
-        this.__currentContentRef = this.getContentRef();
-
-        if (this.__currentContentRef) {
-            this.__currentContentRef.on('scroll', (arg) => {
+            ref.on('scroll', (arg) => {
                 clearTimeout(this.__scrollEndTimeId);
                 this.emit('scroll', arg);
             });
 
-            this.__currentContentRef.on('scroll-end', (arg) => {
+            ref.on('scroll-end', (arg) => {
                 this.emit('scroll-end', arg);
             });
-        }
+
+            this.__contentRefList.push(ref);
+        });
+
+        // 默认contentRef为第一个contentRef
+        this.__currentContentRef = this.getContentRef();
 
         // 加载插件
         plugins.forEach((plugin) => {
@@ -202,6 +201,7 @@ export default class extends AnyEvent {
         for (let ref of this.__contentRefList) {
             // 目标元素是否content元素的子元素
             if (ref.el.contains(targetEl)) {
+                this.emit('change-content', ref);
                 return ref;
             }
         }
@@ -233,14 +233,21 @@ export default class extends AnyEvent {
      * @param elOrIndex 元素或者索引
      * @returns
      */
-    getContentRef(elOrIndex: HTMLElement | number = 0) {
+    getContentRef(elOrIndex?: HTMLElement | number) {
+        // 返回默认ref
+        if (void 0 === elOrIndex) {
+            return this.__currentContentRef || this.__contentRefList[0];
+        }
+
+        // 传入元素
         if (0 !== elOrIndex && isElement(elOrIndex)) {
             return (
                 this.__contentRefList.find(({ el }) => {
                     return el === elOrIndex;
                 }) || null
             );
-        } else {
+        }
+        else {
             return this.__contentRefList[Number(elOrIndex)] || null;
         }
     }

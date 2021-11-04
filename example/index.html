@@ -73,7 +73,7 @@
         <div class="left">
             <div id="scroll" class="any-scroll-1">
                 <div class="content" id="content2" style="width:768px"></div>
-                <!-- <div class="content" id="content"></div> -->
+                <div class="content" id="content"></div>
             </div>
         </div>
 
@@ -121,11 +121,15 @@
         // as.scrollTo([100, 200], 300);
 
         const as2 = as.getContentRef(1);
-        if (as2) {
-            as2.maxXY[0] = as2.wrapSize[0] - as2.contentSize[0];
-            as2.maxXY[1] = as2.wrapSize[1] - as2.contentSize[1];
-        }
-        // as.getContentRef(1).scrollTo([100, 200], 1000);
+        as2.set({
+            maxXY: ({ wrapSize, contentSize }) => {
+                return [
+                    wrapSize[0] - contentSize[0],
+                    wrapSize[1] - contentSize[1],
+                ]
+            }
+        })
+
 
         function scrollTo2() {
             as.scrollTo([-100, -100], 2000);

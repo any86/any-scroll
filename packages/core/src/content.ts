@@ -4,11 +4,10 @@ import clamp from 'lodash/clamp';
 import inRange from 'lodash/inRange';
 import { setStyle, damp, tween, setTranslate, runTwice } from '@any-scroll/shared';
 import ResizeObserver from 'resize-observer-polyfill';
-
 // 类型
 import { Options } from './wrap';
 
-export default class extends AnyEvent {
+export default class Content extends AnyEvent {
     /**
      * 请用moveTo修改xy;
      */
@@ -23,13 +22,13 @@ export default class extends AnyEvent {
     targets: (EventTarget | null)[] = [];
     isScrolling = false;
 
-    private __options: Required<Options>;
+    private __options: ContentOptions;
     // 控制scroll-end不被频繁触发
-    private _scrollEndTimeId = -1;
-    private _dampScrollRafId = -1;
+    private __scrollEndTimeId = -1;
+    private __dampScrollRafId = -1;
     private __stopScroll = () => { };
 
-    constructor(contentEl: HTMLElement, wrapEl: HTMLElement, options: Required<Options>) {
+    constructor(contentEl: HTMLElement, wrapEl: HTMLElement, options: ContentOptions) {
         super();
         this.el = contentEl;
         this.wrapEl = wrapEl;
@@ -45,7 +44,7 @@ export default class extends AnyEvent {
         }
     }
 
-    set(options: Options) {
+    set(options: ContentOptions) {
         this.__options = { ...this.__options, ...options };
         this.update();
     }
@@ -64,12 +63,12 @@ export default class extends AnyEvent {
         // console.log(offsetHeight , clientHeight , scrollHeight);
         this.contentSize = [offsetWidth - clientWidth + scrollWidth, offsetHeight - clientHeight + scrollHeight];
 
-        this.minXY = [
+        this.minXY = this.__options.minXY ? this.__options.minXY(this) : [
             Math.min(0, this.wrapSize[0] - this.contentSize[0]),
             Math.min(0, this.wrapSize[1] - this.contentSize[1]),
         ];
 
-        this.maxXY = [0, 0];
+        this.maxXY = this.__options.maxXY ? this.__options.maxXY(this) : [0, 0];
         // console.warn('__warpSize', this.wrapSize, 'contentSize', this.contentSize, '__minXY', this.minXY, '__maxXY', this.maxXY);
     }
 
@@ -81,7 +80,7 @@ export default class extends AnyEvent {
             this.emit('scroll-end');
         }
         this.isScrolling = false;
-        raf.cancel(this._dampScrollRafId);
+        raf.cancel(this.__dampScrollRafId);
         this.__stopScroll();
     }
 
@@ -105,7 +104,7 @@ export default class extends AnyEvent {
      * @returns
      */
     moveTo(distXY: readonly [number, number]): [number, number] {
-        clearTimeout(this._scrollEndTimeId);
+        clearTimeout(this.__scrollEndTimeId);
         const { allow, overflowDistance } = this.__options;
         runTwice((i) => {
             if (allow[i]) {
@@ -149,7 +148,7 @@ export default class extends AnyEvent {
     dampScroll(distXY: readonly [number, number]) {
         if (distXY[0] === this.xy[0] && distXY[1] === this.xy[1]) return;
 
-        raf.cancel(this._dampScrollRafId);
+        raf.cancel(this.__dampScrollRafId);
         // console.log('_dampScroll', distXY, this.xy);
         // 参数
         const { overflowDistance, allow } = this.__options;
@@ -197,7 +196,7 @@ export default class extends AnyEvent {
             // 迭代 OR 跳出迭代
             if (_needScroll) {
                 // console.log(_distXY, _nextXY);
-                context._dampScrollRafId = raf(() => {
+                context.__dampScrollRafId = raf(() => {
                     _moveTo(context);
                 });
             } else {
@@ -216,4 +215,9 @@ export default class extends AnyEvent {
     destroy() {
         super.destroy();
     }
+}
+
+interface ContentOptions extends Required<Options> {
+    minXY?: (context: Content) => [number, number];
+    maxXY?: (context: Content) => [number, number];
 }

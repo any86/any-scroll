@@ -16,7 +16,6 @@ export default function (wrapRef: WarpInstance) {
     // 给updateBar函数用
     let timeoutIds = [-1, -1];
     let __isDraggingBar = false;
-    let __isFirstUpdate = false;
     insertCss(BAR_CSS);
     // 构建x|y轴滚动条DOM
     const barRefs = runTwice(createBar);
@@ -25,6 +24,11 @@ export default function (wrapRef: WarpInstance) {
         if (__isDraggingBar) return;
         updateBar(wrapRef, barRefs, allow);
     });
+
+    wrapRef.on('change-content', ref => {
+        // console.log(ref);
+        updateBar(wrapRef, barRefs, allow);
+    })
 
     /**
      * 生成bar
@@ -68,6 +72,7 @@ export default function (wrapRef: WarpInstance) {
     function updateBar(wrapRef: WarpInstance, barRefs: WarpInstance[], allow: [boolean, boolean]) {
         const contentRef = wrapRef.getContentRef() as ContentInstance;
         const { contentSize, wrapSize, minXY, maxXY } = contentRef;
+        console.log(contentRef);
         runTwice((i) => {
             const barRef = barRefs[i];
             const trackElement = barRef.el;
