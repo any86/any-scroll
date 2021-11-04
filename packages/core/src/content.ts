@@ -127,10 +127,10 @@ export default class Content extends AnyEvent {
         return this.xy;
     }
 
-    scrollTo(distXY: [number, number], duration = 1000) {
+    scrollTo(distXY: [number, number], duration = 1000,easing?:(t:number)=>number) {
         this.stop();
         this.isScrolling = true;
-        const [run, stop, done] = tween(this.xy, distXY, duration);
+        const [run, stop, done] = tween(this.xy, distXY, duration,easing);
         run(this.moveTo.bind(this));
         this.__stopScroll = stop;
         done(() => {

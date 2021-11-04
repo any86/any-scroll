@@ -72,7 +72,6 @@ export default function (wrapRef: WarpInstance) {
     function updateBar(wrapRef: WarpInstance, barRefs: WarpInstance[], allow: [boolean, boolean]) {
         const contentRef = wrapRef.getContentRef() as ContentInstance;
         const { contentSize, wrapSize, minXY, maxXY } = contentRef;
-        console.log(contentRef);
         runTwice((i) => {
             const barRef = barRefs[i];
             const trackElement = barRef.el;

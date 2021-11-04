@@ -55,7 +55,6 @@ export function runTwice<T>(callback: (n: number) => T): [T, T] {
 
 /**
  * 缓动变化
- * 
  * @param to 目标值, 起始值为[0] 
  * @param duration 时间间隔
  * @returns [run, stop] 开始和停止函数
@@ -63,7 +62,7 @@ export function runTwice<T>(callback: (n: number) => T): [T, T] {
  * const [run,stop] = tween([10, 30],[100,300], 1000); 
  * run(console.log)
  */
-export function tween<T extends number[]>(from: T, to: T, duration: number) {
+export function tween<T extends number[]>(from: T, to: T, duration: number, easingFunction = easing) {
     // 防止from和to被外部改变
     const _from = [...from] as T;
     const _to = [...to] as T;
@@ -81,7 +80,7 @@ export function tween<T extends number[]>(from: T, to: T, duration: number) {
             const timeDiff = Date.now() - startTime;
             const timeProgress = timeDiff / duration;
             // 完成目标值比例
-            const valueProgress = easing(timeProgress);
+            const valueProgress = easingFunction(timeProgress);
             if (1 > timeProgress) {
                 const currentValue = _from.map((n, i) => n + valueDiff[i] * valueProgress);
                 onChange(currentValue as T)

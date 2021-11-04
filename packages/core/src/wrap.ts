@@ -207,13 +207,12 @@ export default class extends AnyEvent {
         return null;
     }
 
-
     moveTo(distXY: readonly [number, number]) {
         return this.__currentContentRef?.moveTo(distXY);
     }
 
-    scrollTo(distXY: [number, number], duration = 1000) {
-        this.__currentContentRef?.scrollTo(distXY, duration);
+    scrollTo(distXY: [number, number], duration = 1000, easing?: (t: number) => number) {
+        this.__currentContentRef?.scrollTo(distXY, duration, easing);
     }
 
     dampScroll(distXY: readonly [number, number]) {
