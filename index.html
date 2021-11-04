@@ -121,7 +121,7 @@
         // as.scrollTo([100, 200], 300);
 
         const as2 = as.getContentRef(1);
-        as2.set({
+        as2?.set({
             maxXY: ({ wrapSize, contentSize }) => {
                 return [
                     wrapSize[0] - contentSize[0],

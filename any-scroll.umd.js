@@ -3149,6 +3149,9 @@
             plugins$1.forEach(function (plugin) {
                 plugin(_this);
             });
+            at.on('at:after', function (e) {
+                _this.emit(e.type, e);
+            });
             at.on(['panstart', 'panmove'], function (e) {
                 var __currentContentRef = _this.__currentContentRef;
                 if (null !== __currentContentRef) {
@@ -3170,12 +3173,14 @@
             });
             at.on('at:start', function (e) {
                 var _a;
+                _this.emit('at:start');
                 var targetEl = e.target;
                 _this.__currentContentRef = _this.__findContentRef(targetEl);
                 (_a = _this.__currentContentRef) === null || _a === void 0 ? void 0 : _a.stop();
             });
             at.on('at:end', function () {
                 var _a;
+                _this.emit('at:end');
                 (_a = _this.__currentContentRef) === null || _a === void 0 ? void 0 : _a.snap();
             });
             var swipe = at.get('swipe');
