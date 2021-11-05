@@ -1,0 +1,42 @@
+{
+    "name": "@any-scroll/bar",
+    "version": "0.2.3",
+    "description": "虚拟滚动",
+    "unpkg": "dist/any-scroll.js",
+    "jsdelivr": "dist/any-scroll.js",
+    "main": "dist/index.js",
+    "module": "dist/index.es.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist/*"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/any86/any-scroll.git"
+    },
+    "author": "any86",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/any86/any-scroll/issues"
+    },
+    "homepage": "https://github.com/any86/any-scroll#readme",
+    "dependencies": {
+        "@any-scroll/shared": "^0.2.3",
+        "insert-css": "^2.0.0",
+        "lodash": "^4.17.15",
+        "resize-observer-polyfill": "^1.5.1",
+        "tslib": "^2.3.0"
+    },
+    "devDependencies": {
+        "@types/insert-css": "^2.0.0",
+        "@types/lodash": "^4.14.149"
+    },
+    "keywords": [
+        "scroll"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "sideEffects": false,
+    "gitHead": "6250d6cb886e979c65bc55ae6fab934501df2844"
+}

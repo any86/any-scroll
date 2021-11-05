@@ -4,7 +4,6 @@ import AnyEvent from 'any-event';
 import ResizeObserver from 'resize-observer-polyfill';
 import isElement from 'lodash/isElement';
 import Content from './content';
-import watchWheel from './wheel';
 import { SCROLL_END_DELAY } from './const';
 import { setStyle } from '@any-scroll/shared';
 const { setTimeout } = window;
@@ -56,12 +55,12 @@ export default class extends AnyEvent {
     targets: (EventTarget | null)[] = [];
 
     options: Required<Options>;
+    // 当前content实例
+    currentContentRef: InstanceType<typeof Content> | null;
 
     // 存储content实例和元素
     private __contentRefList: ContentRefList = [];
-    // 当前content实例
-    private __currentContentRef: InstanceType<typeof Content> | null;
-
+    
     constructor(el: HTMLElement, options?: Options) {
         super();
         const at = new AnyTouch(el);
@@ -74,13 +73,10 @@ export default class extends AnyEvent {
             overflow: 'hidden',
         });
 
-        if (this.options.watchResize) {
-            const ro = new ResizeObserver(this.update.bind(this));
-            ro.observe(el);
-        }
+
 
         // 遍历content元素
-        // 生成实例
+        // ⭐生成Content实例
         Array.from(el.children).forEach((contentEl) => {
             const ref = new Content(contentEl as HTMLElement, el, this.options);
             ref.on('resize', () => {
@@ -100,12 +96,20 @@ export default class extends AnyEvent {
         });
 
         // 默认contentRef为第一个contentRef
-        this.__currentContentRef = this.getContentRef();
+        this.currentContentRef = this.getContentRef();
+        this.emit('mounted', this);
+
 
         // 加载插件
         plugins.forEach((plugin) => {
             plugin(this);
         });
+
+        // 监视尺寸变化
+        if (this.options.watchResize) {
+            const ro = new ResizeObserver(this.update.bind(this));
+            ro.observe(el);
+        }
 
         // 代理所有手势事件
         at.on('at:after', e => {
@@ -114,7 +118,7 @@ export default class extends AnyEvent {
 
 
         at.on(['panstart', 'panmove'], (e) => {
-            const { __currentContentRef } = this;
+            const { currentContentRef: __currentContentRef } = this;
             if (null !== __currentContentRef) {
                 this.targets = e.targets;
                 const { deltaX, deltaY } = e;
@@ -125,11 +129,11 @@ export default class extends AnyEvent {
 
 
         at.on('panend', (e) => {
-            if (null === this.__currentContentRef) return;
-            this.__currentContentRef.__scrollEndTimeId = setTimeout(() => {
-                if (null !== this.__currentContentRef) {
+            if (null === this.currentContentRef) return;
+            this.currentContentRef.__scrollEndTimeId = setTimeout(() => {
+                if (null !== this.currentContentRef) {
                     this.targets = e.targets;
-                    this.emit('scroll-end', this.__currentContentRef.xy);
+                    this.emit('scroll-end', this.currentContentRef.xy);
                 }
             }, SCROLL_END_DELAY);
         });
@@ -137,13 +141,13 @@ export default class extends AnyEvent {
         at.on('at:start', (e) => {
             this.emit('at:start');
             const targetEl = e.target as HTMLElement;
-            this.__currentContentRef = this.__findContentRef(targetEl);
-            this.__currentContentRef?.stop();
+            this.currentContentRef = this.findContentRef(targetEl);
+            this.currentContentRef?.stop();
         });
 
         at.on('at:end', () => {
             this.emit('at:end');
-            this.__currentContentRef?.snap();
+            this.currentContentRef?.snap();
         });
 
         const swipe = at.get('swipe');
@@ -153,43 +157,10 @@ export default class extends AnyEvent {
             // clearTimeout(this._scrollEndTimeId);
             const deltaX = e.speedX * 200;
             const deltaY = e.speedY * 200;
-            this.__currentContentRef?.dampScroll([
-                this.__currentContentRef.xy[0] + deltaX,
-                this.__currentContentRef.xy[1] + deltaY,
+            this.currentContentRef?.dampScroll([
+                this.currentContentRef.xy[0] + deltaX,
+                this.currentContentRef.xy[1] + deltaY,
             ]);
-        });
-
-        // 滚动鼠标X轴滑动
-        const wheelX = allow[0] && !allow[1];
-
-        watchWheel(el, ({ type, deltaY, vx, vy, target }) => {
-            this.__currentContentRef = this.__findContentRef(target as HTMLElement);
-            if (null === this.__currentContentRef) return;
-            const { xy } = this.__currentContentRef;
-            this.targets = [target];
-            if ('start' === type) {
-                // this.getContentRef()
-                // console.log('wheel-start');
-                this.__currentContentRef.stop();
-                if (wheelX) {
-                    this.dampScroll([xy[0] - deltaY, xy[1]]);
-                } else {
-                    this.dampScroll([xy[0], xy[1] - deltaY]);
-                }
-            } else if ('move' === type) {
-                if (wheelX) {
-                    this.dampScroll([xy[0] - deltaY, xy[1]]);
-                } else {
-                    this.dampScroll([xy[0], xy[1] - deltaY]);
-                }
-            } else if ('end' === type) {
-                // console.warn('wheel-end')
-                if (wheelX) {
-                    this.dampScroll([xy[0] - vy * 5, xy[1]]);
-                } else {
-                    this.dampScroll([xy[0], xy[1] - Math.ceil(vy) * 30]);
-                }
-            }
         });
     }
 
@@ -205,7 +176,7 @@ export default class extends AnyEvent {
      * @param targetEl
      * @returns
      */
-    private __findContentRef(targetEl: HTMLElement) {
+    findContentRef(targetEl: HTMLElement) {
         for (let ref of this.__contentRefList) {
             // 目标元素是否content元素的子元素
             if (ref.el.contains(targetEl)) {
@@ -217,22 +188,22 @@ export default class extends AnyEvent {
     }
 
     moveTo(distXY: readonly [number, number]) {
-        return this.__currentContentRef?.moveTo(distXY);
+        return this.currentContentRef?.moveTo(distXY);
     }
 
     scrollTo(distXY: [number, number], duration = 1000, easing?: (t: number) => number) {
-        this.__currentContentRef?.scrollTo(distXY, duration, easing);
+        this.currentContentRef?.scrollTo(distXY, duration, easing);
     }
 
     dampScroll(distXY: readonly [number, number]) {
-        this.__currentContentRef?.dampScroll(distXY);
+        this.currentContentRef?.dampScroll(distXY);
     }
 
     /**
      * 立即停止滑动
      */
     stop() {
-        this.__currentContentRef?.stop();
+        this.currentContentRef?.stop();
     }
 
     /**
@@ -241,19 +212,20 @@ export default class extends AnyEvent {
      * @returns
      */
     getContentRef(elOrIndex?: HTMLElement | number) {
-        // 返回默认ref
+        // 不传参数, 返回默认ref
         if (void 0 === elOrIndex) {
-            return this.__currentContentRef || this.__contentRefList[0];
+            return this.currentContentRef || this.__contentRefList[0];
         }
 
         // 传入元素
-        if (0 !== elOrIndex && isElement(elOrIndex)) {
+        if (isElement(elOrIndex)) {
             return (
                 this.__contentRefList.find(({ el }) => {
                     return el === elOrIndex;
                 }) || null
             );
         }
+        // 传入数字
         else {
             return this.__contentRefList[Number(elOrIndex)] || null;
         }
