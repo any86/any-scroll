@@ -40,8 +40,9 @@ export const DEFAULT_OPTIONS = {
 
 type ContentRefList = InstanceType<typeof Content>[];
 
-const plugins: any[] = [];
-export default class extends AnyEvent {
+const plugins: ((context: Wrap) => unknown)[] = [];
+export default class Wrap extends AnyEvent {
+
     /**
      * 加载插件
      * @param plugin 插件
@@ -49,16 +50,30 @@ export default class extends AnyEvent {
     static use(plugin: any) {
         plugins.push(plugin);
     }
+
+    /**
+     * wrap元素
+     */
     el: HTMLElement;
 
-    at:AnyTouch;
+    /**
+     * 手势实例
+     * 基于AnyTouch语法
+     */
+    at: AnyTouch;
 
     // size: [number, number] = [0, 0];
     // contentSize: [number, number] = [0, 0];
     targets: (EventTarget | null)[] = [];
 
+    /**
+     * 选项
+     */
     options: Required<Options>;
-    // 当前content实例
+
+    /**
+     * 当前content实例
+     */
     currentContentRef: InstanceType<typeof Content> | null;
 
     // 存储content实例和元素
@@ -98,7 +113,6 @@ export default class extends AnyEvent {
         this.currentContentRef = this.getContentRef();
         this.emit('mounted', this);
 
-
         // 加载插件
         plugins.forEach((plugin) => {
             plugin(this);
@@ -113,17 +127,17 @@ export default class extends AnyEvent {
         const at = new AnyTouch(el);
         this.at = at;
         // 代理所有手势事件
-        at.on('at:after', e => {
+        at.on('at:after', (e) => {
             this.emit(e.type, e);
         });
 
         at.on(['panstart', 'panmove'], (e) => {
-            const { currentContentRef: __currentContentRef } = this;
-            if (null !== __currentContentRef) {
+            const { currentContentRef } = this;
+            if (null !== currentContentRef) {
                 this.targets = e.targets;
                 const { deltaX, deltaY } = e;
-                const { xy } = __currentContentRef;
-                __currentContentRef.moveTo([xy[0] + deltaX, xy[1] + deltaY]);
+                const { xy } = currentContentRef;
+                currentContentRef.moveTo([xy[0] + deltaX, xy[1] + deltaY]);
             }
         });
 
