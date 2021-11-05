@@ -30,6 +30,13 @@ export default function (wrapRef: WarpInstance) {
         updateBar(wrapRef, barRefs, allow);
     })
 
+    wrapRef.on('beforeDestroy', () => {
+        barRefs.forEach(barRef => {
+            barRef.destroy();
+            barRef.el.parentElement?.removeChild(barRef.el);
+        })
+    });
+
     /**
      * 生成bar
      * @param index 0:x轴, 1:y轴

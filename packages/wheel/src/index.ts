@@ -12,7 +12,7 @@ export default function (wrapRef: WarpInstance) {
     const { allow } = wrapRef.options;
 
     const { el } = wrapRef;
-    watchWheel(el, ({ type, deltaX, deltaY, vx, vy, target }) => {
+    const unWatch = watchWheel(el, ({ type, deltaX, deltaY, vx, vy, target }) => {
         wrapRef.currentContentRef = wrapRef.findContentRef(target as HTMLElement);
         if (null === wrapRef.currentContentRef) return;
 
@@ -34,4 +34,6 @@ export default function (wrapRef: WarpInstance) {
             wrapRef.dampScroll(nextXY);
         }
     });
+
+    wrapRef.on('beforeDestroy',unWatch);
 }

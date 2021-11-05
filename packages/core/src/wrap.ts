@@ -50,6 +50,9 @@ export default class extends AnyEvent {
         plugins.push(plugin);
     }
     el: HTMLElement;
+
+    at:AnyTouch;
+
     // size: [number, number] = [0, 0];
     // contentSize: [number, number] = [0, 0];
     targets: (EventTarget | null)[] = [];
@@ -60,20 +63,16 @@ export default class extends AnyEvent {
 
     // 存储content实例和元素
     private __contentRefList: ContentRefList = [];
-    
+
     constructor(el: HTMLElement, options?: Options) {
         super();
-        const at = new AnyTouch(el);
         this.el = el;
         this.options = { ...DEFAULT_OPTIONS, ...options };
-        const { allow } = this.options;
 
         setStyle(el, {
             position: `relative`,
             overflow: 'hidden',
         });
-
-
 
         // 遍历content元素
         // ⭐生成Content实例
@@ -111,11 +110,12 @@ export default class extends AnyEvent {
             ro.observe(el);
         }
 
+        const at = new AnyTouch(el);
+        this.at = at;
         // 代理所有手势事件
         at.on('at:after', e => {
             this.emit(e.type, e);
         });
-
 
         at.on(['panstart', 'panmove'], (e) => {
             const { currentContentRef: __currentContentRef } = this;
@@ -126,7 +126,6 @@ export default class extends AnyEvent {
                 __currentContentRef.moveTo([xy[0] + deltaX, xy[1] + deltaY]);
             }
         });
-
 
         at.on('panend', (e) => {
             if (null === this.currentContentRef) return;
@@ -235,6 +234,8 @@ export default class extends AnyEvent {
      * 销毁
      */
     destroy() {
+        this.emit('beforeDestroy');
+        this.at.destroy();
         super.destroy();
     }
 }
