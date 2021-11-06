@@ -40,7 +40,6 @@ export const DEFAULT_OPTIONS = {
 
 type ContentRefList = InstanceType<typeof Content>[];
 
-
 export default class Wrap extends AnyEvent {
     /**
      * wrap元素
@@ -71,9 +70,9 @@ export default class Wrap extends AnyEvent {
     private __contentRefList: ContentRefList = [];
 
     /**
-     * 
+     *
      * @param el wrap目标元素
-     * @param options 选项 
+     * @param options 选项
      */
     constructor(el: HTMLElement, options?: Options) {
         super();
@@ -107,7 +106,6 @@ export default class Wrap extends AnyEvent {
 
         // 默认contentRef为第一个contentRef
         this.currentContentRef = this.getContentRef();
-        this.emit('mounted', this);
 
         // 监视尺寸变化
         if (this.options.watchResize) {
@@ -115,6 +113,7 @@ export default class Wrap extends AnyEvent {
             ro.observe(el);
         }
 
+        // ========== 手势 ==========
         const at = new AnyTouch(el);
         this.at = at;
         // 代理所有手势事件
