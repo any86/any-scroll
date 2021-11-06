@@ -40,17 +40,8 @@ export const DEFAULT_OPTIONS = {
 
 type ContentRefList = InstanceType<typeof Content>[];
 
-const plugins: ((context: Wrap) => unknown)[] = [];
+
 export default class Wrap extends AnyEvent {
-
-    /**
-     * 加载插件
-     * @param plugin 插件
-     */
-    static use(plugin: any) {
-        plugins.push(plugin);
-    }
-
     /**
      * wrap元素
      */
@@ -79,6 +70,11 @@ export default class Wrap extends AnyEvent {
     // 存储content实例和元素
     private __contentRefList: ContentRefList = [];
 
+    /**
+     * 
+     * @param el wrap目标元素
+     * @param options 选项 
+     */
     constructor(el: HTMLElement, options?: Options) {
         super();
         this.el = el;
@@ -112,11 +108,6 @@ export default class Wrap extends AnyEvent {
         // 默认contentRef为第一个contentRef
         this.currentContentRef = this.getContentRef();
         this.emit('mounted', this);
-
-        // 加载插件
-        plugins.forEach((plugin) => {
-            plugin(this);
-        });
 
         // 监视尺寸变化
         if (this.options.watchResize) {
