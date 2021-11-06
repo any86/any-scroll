@@ -1,5 +1,8 @@
 import raf from 'raf';
-export const enum DIRECTION { X = 'x', Y = 'y' };
+export const enum DIRECTION {
+    X = 'x',
+    Y = 'y',
+}
 
 export function setStyle(el: HTMLElement, styles: Partial<CSSStyleDeclaration>) {
     for (const key in styles) {
@@ -8,7 +11,7 @@ export function setStyle(el: HTMLElement, styles: Partial<CSSStyleDeclaration>) 
     }
 }
 
-export function setTranslate(el: HTMLElement, x: number, y: number) {
+export function render(el: HTMLElement, x: number, y: number) {
     setStyle(el, { transform: `translate3d(${x}px, ${y}px,0)` });
 }
 
@@ -40,26 +43,25 @@ export function changeDOMVisible(el: HTMLElement, visible = true) {
     }
 }
 
-
 export function easing(t: number) {
     return 1 - Math.pow(1 - t, 3);
 }
 
 /**
-* 运行2次
-* @param callback 每次运行传入索引
-*/
+ * 运行2次
+ * @param callback 每次运行传入索引
+ */
 export function runTwice<T>(callback: (n: number) => T): [T, T] {
     return [callback(0), callback(1)];
 }
 
 /**
  * 缓动变化
- * @param to 目标值, 起始值为[0] 
+ * @param to 目标值, 起始值为[0]
  * @param duration 时间间隔
  * @returns [run, stop] 开始和停止函数
  * @example
- * const [run,stop] = tween([10, 30],[100,300], 1000); 
+ * const [run,stop] = tween([10, 30],[100,300], 1000);
  * run(console.log)
  */
 export function tween<T extends number[]>(from: T, to: T, duration: number, easingFunction = easing) {
@@ -83,7 +85,7 @@ export function tween<T extends number[]>(from: T, to: T, duration: number, easi
             const valueProgress = easingFunction(timeProgress);
             if (1 > timeProgress) {
                 const currentValue = _from.map((n, i) => n + valueDiff[i] * valueProgress);
-                onChange(currentValue as T)
+                onChange(currentValue as T);
                 run(onChange);
             } else {
                 onChange(_to);
@@ -91,7 +93,6 @@ export function tween<T extends number[]>(from: T, to: T, duration: number, easi
             }
         });
     }
-
 
     function onDone(cb: () => void) {
         _onDone = cb;
@@ -126,7 +127,6 @@ export function damp(value: number, dist: number, damping = 0.1) {
 // console.warn(damp(-101, -1002));
 
 // console.warn(damp(-192, -2000));
-
 
 // const [run,stop] = tween([0, 0],[-100,-100], 10000);
 //  run(console.log)

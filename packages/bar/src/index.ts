@@ -12,7 +12,6 @@ type ContentInstance = InstanceType<typeof Content>;
  * @returns
  */
 export default function (wrapRef: WarpInstance) {
-    console.log(wrapRef);
     const { allow } = wrapRef.options;
     // 给updateBar函数用
     let timeoutIds = [-1, -1];

@@ -5,7 +5,7 @@ import ResizeObserver from 'resize-observer-polyfill';
 import isElement from 'lodash/isElement';
 import Content from './content';
 import { SCROLL_END_DELAY } from './const';
-import { setStyle } from '@any-scroll/shared';
+import { setStyle,render } from '@any-scroll/shared';
 const { setTimeout } = window;
 // declare const WebKitMutationObserver: MutationObserver;
 // declare const MozMutationObserver: MutationObserver;
@@ -26,6 +26,8 @@ export interface Options {
     hasBar?: boolean;
 
     watchResize?: boolean;
+
+    render?:(el: HTMLElement, x: number, y: number)=>void;
 }
 
 export const DEFAULT_OPTIONS = {
@@ -36,6 +38,7 @@ export const DEFAULT_OPTIONS = {
     snap: true,
     hasBar: true,
     watchResize: true,
+    render,
 };
 
 type ContentRefList = InstanceType<typeof Content>[];

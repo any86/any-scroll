@@ -2,11 +2,15 @@ import AnyEvent from 'any-event';
 import raf from 'raf';
 import clamp from 'lodash/clamp';
 import inRange from 'lodash/inRange';
-import { setStyle, damp, tween, setTranslate, runTwice } from '@any-scroll/shared';
+import { setStyle, damp, tween, runTwice } from '@any-scroll/shared';
 import ResizeObserver from 'resize-observer-polyfill';
 // 类型
 import { Options } from './wrap';
 
+interface ContentOptions extends Required<Options> {
+    minXY?: (context: Content) => [number, number];
+    maxXY?: (context: Content) => [number, number];
+}
 export default class Content extends AnyEvent {
     /**
      * 请用moveTo修改xy;
@@ -122,15 +126,15 @@ export default class Content extends AnyEvent {
             const target = targets[0];
             // 钩子
             this.emit('scroll', { targets, target, x, y });
-            setTranslate(this.el, ...this.xy);
+            this.__options.render(this.el, ...this.xy);
         }
         return this.xy;
     }
 
-    scrollTo(distXY: [number, number], duration = 1000,easing?:(t:number)=>number) {
+    scrollTo(distXY: [number, number], duration = 1000, easing?: (t: number) => number) {
         this.stop();
         this.isScrolling = true;
-        const [run, stop, done] = tween(this.xy, distXY, duration,easing);
+        const [run, stop, done] = tween(this.xy, distXY, duration, easing);
         run(this.moveTo.bind(this));
         this.__stopScroll = stop;
         done(() => {
@@ -215,9 +219,4 @@ export default class Content extends AnyEvent {
     destroy() {
         super.destroy();
     }
-}
-
-interface ContentOptions extends Required<Options> {
-    minXY?: (context: Content) => [number, number];
-    maxXY?: (context: Content) => [number, number];
 }
