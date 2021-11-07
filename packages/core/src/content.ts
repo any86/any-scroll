@@ -30,7 +30,7 @@ export default class Content extends AnyEvent {
     // 控制scroll-end不被频繁触发
     __scrollEndTimeId = -1;
     private __dampScrollRafId = -1;
-    private __stopScroll = () => { };
+    private __stopScroll = () => {};
 
     constructor(contentEl: HTMLElement, wrapEl: HTMLElement, options: ContentOptions) {
         super();
@@ -67,10 +67,12 @@ export default class Content extends AnyEvent {
         // console.log(offsetHeight , clientHeight , scrollHeight);
         this.contentSize = [offsetWidth - clientWidth + scrollWidth, offsetHeight - clientHeight + scrollHeight];
 
-        this.minXY = this.__options.minXY ? this.__options.minXY(this) : [
-            Math.min(0, this.wrapSize[0] - this.contentSize[0]),
-            Math.min(0, this.wrapSize[1] - this.contentSize[1]),
-        ];
+        this.minXY = this.__options.minXY
+            ? this.__options.minXY(this)
+            : [
+                  Math.min(0, this.wrapSize[0] - this.contentSize[0]),
+                  Math.min(0, this.wrapSize[1] - this.contentSize[1]),
+              ];
 
         this.maxXY = this.__options.maxXY ? this.__options.maxXY(this) : [0, 0];
         // console.warn('__warpSize', this.wrapSize, 'contentSize', this.contentSize, '__minXY', this.minXY, '__maxXY', this.maxXY);
@@ -81,7 +83,7 @@ export default class Content extends AnyEvent {
      */
     stop() {
         if (this.isScrolling && this.xy.every((v, i) => inRange(v, this.minXY[i], this.maxXY[i]))) {
-            this.emit('scroll-end');
+            this.emit('scroll-end', this.xy);
         }
         this.isScrolling = false;
         raf.cancel(this.__dampScrollRafId);
@@ -94,7 +96,7 @@ export default class Content extends AnyEvent {
     snap() {
         if (this.__options.snap) {
             // console.log('snap');
-            const xy = runTwice(i => {
+            const xy = runTwice((i) => {
                 return clamp(this.xy[i], this.minXY[i], this.maxXY[i]);
             });
             this.dampScroll(xy);
@@ -112,11 +114,7 @@ export default class Content extends AnyEvent {
         const { allow, overflowDistance } = this.__options;
         runTwice((i) => {
             if (allow[i]) {
-                this.xy[i] = clamp(
-                    distXY[i],
-                    this.minXY[i] - overflowDistance,
-                    this.maxXY[i] + overflowDistance
-                );
+                this.xy[i] = clamp(distXY[i], this.minXY[i] - overflowDistance, this.maxXY[i] + overflowDistance);
             }
         });
 
@@ -150,40 +148,52 @@ export default class Content extends AnyEvent {
      * @param onScroll 滚动回调
      */
     dampScroll(distXY: readonly [number, number]) {
-        if (distXY[0] === this.xy[0] && distXY[1] === this.xy[1]) return;
+        // 参数
+        const { overflowDistance, allow } = this.__options;
+        const noScroll = runTwice((i) => !allow[i] || distXY[i] === this.xy[i]).every((is) => is);
+        if (noScroll) return;
 
         raf.cancel(this.__dampScrollRafId);
         // console.log('_dampScroll', distXY, this.xy);
-        // 参数
-        const { overflowDistance, allow } = this.__options;
 
         // 内部状态, 根据不同位置会发生变化
         const _distXY = [...distXY] as [number, number];
 
-        // AnyScroll实例
-        type AnyScrollInstance = typeof this;
-        function _moveTo(context: AnyScrollInstance) {
+        // 每次位移
+        function _moveTo(context: Content) {
+            // 是否到达终点
             context.isScrolling = true;
-            const { xy, minXY: __minXY, maxXY: __maxXY } = context;
+            const { xy, minXY, maxXY } = context;
 
-            // 获取当前值
+            // 计算有效的当前值
             const _nextXY = runTwice((i) => {
-                // 根据当前位置和目标计算阶"段性的目标位置"(修正distXY)
+                if (!allow[i]) return xy[i];
+
+                // 预判接下来的位置
                 const _nextvalue = damp(context.xy[i], _distXY[i]);
-                // console.log(i, { _nextvalue }, context.xy[i], _distXY[i]);
-                // 当前位置和目标都超过了界限
-                if (xy[i] >= __maxXY[i] + overflowDistance) {
+                // console.log(i, xy[i], _nextvalue, _distXY[i], distXY[i]);
+
+                // ====== 根据当前位置和目标计算"阶段性的目标位置"(修正distXY) ======
+                
+                // 超过了最大界限,需要重新计算_nextValue
+                if (_nextvalue >= maxXY[i] + overflowDistance) {
                     // 复位
-                    _distXY[i] = __maxXY[i];
-                } else if (xy[i] <= __minXY[i] - overflowDistance) {
-                    _distXY[i] = __minXY[i];
-                } else {
-                    // 当前已经到达目标, 且位置超出的边框
-                    if (xy[i] === _distXY[i] && _nextvalue === _distXY[i]) {
-                        if (xy[i] > __maxXY[i]) {
-                            _distXY[i] = __maxXY[i];
-                        } else if (xy[i] < __minXY[i]) {
-                            _distXY[i] = __minXY[i];
+                    _distXY[i] = maxXY[i];
+                }
+                // 超过最小
+                else if (_nextvalue <= minXY[i] - overflowDistance) {
+                    _distXY[i] = minXY[i];
+                }
+                // 可移动范围内
+                else {
+                    // 当前已经到达目标
+                    if ( _nextvalue === _distXY[i]) {
+                        // 但是位置超出的边框
+                        // 重新计算_distXY
+                        if (xy[i] > maxXY[i]) {
+                            _distXY[i] = maxXY[i];
+                        } else if (xy[i] < minXY[i]) {
+                            _distXY[i] = minXY[i];
                         }
                     } else {
                         return _nextvalue;
@@ -195,19 +205,18 @@ export default class Content extends AnyEvent {
             context.moveTo(_nextXY);
 
             // 是否开启的轴已经滚动到终点
-            const _needScroll = runTwice((i) => allow[i] && _distXY[i] !== _nextXY[i]).some((bool) => bool);
+            const _needScroll = runTwice(
+                (i) => allow[i] && _distXY[i] !== _nextXY[i]
+            ).some((bool) => bool);
 
             // 迭代 OR 跳出迭代
             if (_needScroll) {
-                // console.log(_distXY, _nextXY);
                 context.__dampScrollRafId = raf(() => {
                     _moveTo(context);
                 });
             } else {
-                // console.log(_distXY, _nextXY);
-                // _scrollTo(context);
                 context.isScrolling = false;
-                context.emit('scroll-end');
+                context.emit('scroll-end', context.xy);
             }
         }
         _moveTo(this);
