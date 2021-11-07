@@ -2,7 +2,7 @@ import AnyEvent from 'any-event';
 import raf from 'raf';
 import clamp from 'lodash/clamp';
 import inRange from 'lodash/inRange';
-import { setStyle, damp, tween, runTwice } from '@any-scroll/shared';
+import { setStyle, damp, tween, runTwice, easing } from '@any-scroll/shared';
 import ResizeObserver from 'resize-observer-polyfill';
 // 类型
 import { Options } from './wrap';
@@ -174,7 +174,7 @@ export default class Content extends AnyEvent {
                 // console.log(i, xy[i], _nextvalue, _distXY[i], distXY[i]);
 
                 // ====== 根据当前位置和目标计算"阶段性的目标位置"(修正distXY) ======
-                
+
                 // 超过了最大界限,需要重新计算_nextValue
                 if (_nextvalue >= maxXY[i] + overflowDistance) {
                     // 复位
@@ -187,7 +187,7 @@ export default class Content extends AnyEvent {
                 // 可移动范围内
                 else {
                     // 当前已经到达目标
-                    if ( _nextvalue === _distXY[i]) {
+                    if (_nextvalue === _distXY[i]) {
                         // 但是位置超出的边框
                         // 重新计算_distXY
                         if (xy[i] > maxXY[i]) {
@@ -205,9 +205,7 @@ export default class Content extends AnyEvent {
             context.moveTo(_nextXY);
 
             // 是否开启的轴已经滚动到终点
-            const _needScroll = runTwice(
-                (i) => allow[i] && _distXY[i] !== _nextXY[i]
-            ).some((bool) => bool);
+            const _needScroll = runTwice((i) => allow[i] && _distXY[i] !== _nextXY[i]).some((bool) => bool);
 
             // 迭代 OR 跳出迭代
             if (_needScroll) {

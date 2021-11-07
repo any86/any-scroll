@@ -1,6 +1,6 @@
 import { setStyle, createDOMDiv, changeDOMVisible, changeOpacity, runTwice, DIRECTION } from '@any-scroll/shared';
 import { insertCss } from 'insert-css';
-import { TRACK_CLASS_NAME, THUMB_CLASS_NAME, BAR_CSS, } from './const';
+import { TRACK_CLASS_NAME, THUMB_CLASS_NAME, BAR_CSS } from './const';
 import { Wrap, Content } from '@any-scroll/core';
 const { setTimeout } = window;
 type WarpInstance = InstanceType<typeof Wrap>;
@@ -21,20 +21,20 @@ export default function (wrapRef: WarpInstance) {
     const barRefs = runTwice(createBar);
 
     wrapRef.on(['at:start', 'scroll', 'resize'], () => {
-        if (__isDraggingBar) return;
+        // if (__isDraggingBar) return;
         updateBar(wrapRef, barRefs, allow);
     });
 
-    wrapRef.on('change-content', ref => {
+    wrapRef.on('change-content', (ref) => {
         // console.log(ref);
         updateBar(wrapRef, barRefs, allow);
-    })
+    });
 
     wrapRef.on('beforeDestroy', () => {
-        barRefs.forEach(barRef => {
+        barRefs.forEach((barRef) => {
             barRef.destroy();
             barRef.el.parentElement?.removeChild(barRef.el);
-        })
+        });
     });
 
     /**
@@ -51,21 +51,28 @@ export default function (wrapRef: WarpInstance) {
         const bar = new Wrap(trackEl, { allow: [DIRECTION.X === dir, DIRECTION.Y === dir], overflowDistance: 0 });
         setStyle(bar.el as HTMLElement, { position: 'absolute', display: 'none' });
         bar.on('pan', () => {
+            __isDraggingBar = true;
             const thumb = bar.getContentRef() as ContentInstance;
             const contentRef = wrapRef.getContentRef();
             if (null !== contentRef) {
                 // 缩放, bar => scrollView
                 const { xy } = contentRef;
                 const nextXY = [...xy] as [number, number];
-                nextXY[index] = -thumb.xy[index] * contentRef.contentSize[index] / thumb.wrapSize[index];
+                nextXY[index] = (-thumb.xy[index] * contentRef.contentSize[index]) / thumb.wrapSize[index];
                 contentRef.moveTo(nextXY);
-                __isDraggingBar = true;
             }
         });
 
+        // bar.on('tap', e => {
+        //     if (e.target === bar.el) {
+        //         const {height,y} = bar.el.getBoundingClientRect();
+        //         bar.getContentRef()?.scrollTo([0, e.y - y]);
+        //     }
+        // })
+
         bar.on('at:end', () => {
             __isDraggingBar = false;
-        })
+        });
         return bar;
     }
 
@@ -83,10 +90,10 @@ export default function (wrapRef: WarpInstance) {
             const barRef = barRefs[i];
             const trackElement = barRef.el;
 
-            if (!allow[i]) {
-                return;
-            } else {
+            if (allow[i]) {
                 changeDOMVisible(trackElement);
+            } else {
+                return;
             }
 
             if (contentSize[i] > wrapSize[i]) {
@@ -98,6 +105,7 @@ export default function (wrapRef: WarpInstance) {
 
                 const thumbRef = barRefs[i].getContentRef();
                 if (null !== thumbRef) {
+                    // 计算尺寸和位置
                     const [thumbSize, thumbXorY] = calcBarXorY(
                         contentRef.xy[i],
                         wrapSize[i],
@@ -120,13 +128,11 @@ export default function (wrapRef: WarpInstance) {
                     thumbRef.moveTo(xy);
                 }
             } else {
-                changeOpacity(trackElement, 0);
+                changeDOMVisible(trackElement, false);
             }
         });
     }
 }
-
-
 
 /**
  * 创建指定轴的滚动条DOM
