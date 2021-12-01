@@ -5,7 +5,7 @@ import ResizeObserver from 'resize-observer-polyfill';
 import isElement from 'lodash/isElement';
 import Content from './content';
 import { SCROLL_END_DELAY } from './const';
-import { setStyle,render } from '@any-scroll/shared';
+import { setStyle, render } from '@any-scroll/shared';
 const { setTimeout } = window;
 // declare const WebKitMutationObserver: MutationObserver;
 // declare const MozMutationObserver: MutationObserver;
@@ -27,7 +27,7 @@ export interface Options {
 
     watchResize?: boolean;
 
-    render?:(el: HTMLElement, x: number, y: number)=>void;
+    render?: (el: HTMLElement, x: number, y: number) => void;
 }
 
 export const DEFAULT_OPTIONS = {
@@ -119,10 +119,10 @@ export default class Wrap extends AnyEvent {
         // ========== 手势 ==========
         const at = new AnyTouch(el);
         this.at = at;
-        // 代理所有手势事件
-        at.on('at:after', (e) => {
-            this.emit(e.type, e);
-        });
+        // // 代理所有手势事件
+        // at.on('at:after', (e) => {
+        //     this.emit(e.type, e);
+        // });
 
         at.on(['panstart', 'panmove'], (e) => {
             const { currentContentRef } = this;
@@ -157,7 +157,9 @@ export default class Wrap extends AnyEvent {
         });
 
         const swipe = at.get('swipe');
-        swipe && swipe.set({ velocity: 1 });
+        if (swipe) {
+            swipe.velocity = 1;
+        }
         at.on('swipe', (e) => {
             this.targets = e.targets;
             // clearTimeout(this._scrollEndTimeId);
