@@ -1,6 +1,6 @@
 {
     "name": "@any-scroll/shared",
-    "version": "0.2.3",
+    "version": "0.2.4",
     "description": "虚拟滚动",
     "unpkg": "dist/any-scroll.js",
     "jsdelivr": "dist/any-scroll.js",
