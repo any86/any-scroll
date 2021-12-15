@@ -50,7 +50,7 @@ export default function (wrapRef: WarpInstance) {
         // ⭐基于scroll做bar
         const bar = new Wrap(trackEl, { allow: [DIRECTION.X === dir, DIRECTION.Y === dir], overflowDistance: 0 });
         setStyle(bar.el as HTMLElement, { position: 'absolute', display: 'none' });
-        bar.on('pan', () => {
+        bar.at.on('pan', () => {
             __isDraggingBar = true;
             const thumb = bar.getContentRef() as ContentInstance;
             const contentRef = wrapRef.getContentRef();
@@ -70,7 +70,7 @@ export default function (wrapRef: WarpInstance) {
         //     }
         // })
 
-        bar.on('at:end', () => {
+        bar.at.on('at:end', () => {
             __isDraggingBar = false;
         });
         return bar;
