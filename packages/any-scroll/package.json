@@ -24,8 +24,7 @@
         "@any-scroll/bar": "^0.2.3",
         "@any-scroll/core": "^0.2.3",
         "@any-scroll/shared": "^0.2.3",
-        "any-touch": "2.0.0-alpha.2",
-        "resize-observer-polyfill": "^1.5.1",
+        "any-touch": "2.0.0-alpha.4",
         "tslib": "^2.3.0"
     },
     "keywords": [

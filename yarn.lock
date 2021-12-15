@@ -2,48 +2,48 @@
 # yarn lockfile v1
 
 
-"@any-touch/compute@^2.0.0-alpha.2":
-  version "2.0.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/@any-touch/compute/-/compute-2.0.0-alpha.2.tgz#d432a8d71382d7a741d44a6684d1a5675cb4e526"
-  integrity sha512-jQ5Obt0HGse7cBF4ukf/Wjc8svAtaUWchIuaq2PC5Q0REs/Hjnpm5NboXeIdhWQL5UyCkWMvtPYwJifDgWvSeQ==
+"@any-touch/compute@^2.0.0-alpha.4":
+  version "2.0.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/@any-touch/compute/-/compute-2.0.0-alpha.4.tgz#1371590413c1d2290fc825864862e5c35c67d4f5"
+  integrity sha512-TCHfyeOdZOyLdryVoIP2770oTEZh7+axy/Z/PRfRplDybP2sKq6JPgHwW41xJeSF1ke3IXegSMEjtYFpb3qq4A==
   dependencies:
-    "@any-touch/shared" "^2.0.0-alpha.2"
-    "@any-touch/vector" "^2.0.0-alpha.2"
+    "@any-touch/shared" "^2.0.0-alpha.4"
+    "@any-touch/vector" "^2.0.0-alpha.4"
     tslib "^2.3.1"
 
-"@any-touch/core@^2.0.0-alpha.2":
-  version "2.0.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/@any-touch/core/-/core-2.0.0-alpha.2.tgz#9441f080de114bf7be3eb30e99ac4d70bc4ef627"
-  integrity sha512-TKBRuMeUZDlOBEi/8PmYRajMWFG/0M8LDxdpI3GEwmQlp4ygUBs7Ipw2FlB5k8hrLJD1W323XDx7EKEvvRx4cw==
+"@any-touch/core@^2.0.0-alpha.4":
+  version "2.0.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/@any-touch/core/-/core-2.0.0-alpha.4.tgz#2f5c9bb794521897447c2aaefe165ffdfce0c2a3"
+  integrity sha512-qxpSs+Fy26Yl0XCITb9ylAGxsbxgL6zcXMDF45sBc4Cll9MfNwBYLy4LWGv72HzzEDLZx5TZhZZ/1+MT3gvTFQ==
   dependencies:
-    "@any-touch/shared" "^2.0.0-alpha.2"
-    any-event "^2.0.0-alpha.2"
+    "@any-touch/shared" "^2.0.0-alpha.4"
+    any-event "^2.0.0-alpha.4"
 
-"@any-touch/pan@^2.0.0-alpha.2":
-  version "2.0.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/@any-touch/pan/-/pan-2.0.0-alpha.2.tgz#4de46e501c7aad5d1b922c227f07a6c05df59f85"
-  integrity sha512-yCForU09ggKT1aPPYpdD+6SzUOpdsrvf0O48cE68KZTdEf0EiVqiq5AVuuPEQ8e4YSCZEyCc8QA1Fm1A6j2kdw==
+"@any-touch/pan@^2.0.0-alpha.4":
+  version "2.0.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/@any-touch/pan/-/pan-2.0.0-alpha.4.tgz#5f5165ec5248d508573c8a98671d391a3b380fdf"
+  integrity sha512-ZqYsBidG8fXN2at/n3Wt+IobiIqveD42bBbtkxdPR3zbdtR3D59VBT5QAj+TQAwil0BEV9kqSJ4Ov/1J8VbE2w==
   dependencies:
-    "@any-touch/compute" "^2.0.0-alpha.2"
+    "@any-touch/compute" "^2.0.0-alpha.4"
     "@any-touch/recognizer" "^1.0.14"
-    "@any-touch/shared" "^2.0.0-alpha.2"
+    "@any-touch/shared" "^2.0.0-alpha.4"
 
-"@any-touch/pinch@^2.0.0-alpha.2":
-  version "2.0.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/@any-touch/pinch/-/pinch-2.0.0-alpha.2.tgz#a51ea1b76394d1a2d37d851fd31f588b2309d963"
-  integrity sha512-U88Qg3DQBQ4TSRItFFCXd/4PGwCk+cAJTBVIsuHJxBEzZpU6dr3v0NZP8Nfr1fou01NNIB49DF6EASAzRKd8Sw==
+"@any-touch/pinch@^2.0.0-alpha.4":
+  version "2.0.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/@any-touch/pinch/-/pinch-2.0.0-alpha.4.tgz#6f0204758fd63b2f7c801dbf2746d8877c38a972"
+  integrity sha512-Q2Z4rX7DmkXn0/oGDG1qFOW7T0Whegy+JoO3yiVVWgO9bDc01uW17SQYWRNbnA03+9vZsMwPA38zD7s+GYfR4w==
   dependencies:
-    "@any-touch/compute" "^2.0.0-alpha.2"
+    "@any-touch/compute" "^2.0.0-alpha.4"
     "@any-touch/recognizer" "^1.0.14"
 
-"@any-touch/press@^2.0.0-alpha.2":
-  version "2.0.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/@any-touch/press/-/press-2.0.0-alpha.2.tgz#32634ae6ac86f720a8958c5bb567f0b000768f8b"
-  integrity sha512-zwzY7Iw1AyWkW9/99W+EJvGT8x35fr8yBm5MZ5wjWy6+N4b4mHTPaXgesqtSJ5lwrufCVSn8cZeBjV/2LPe2VA==
+"@any-touch/press@^2.0.0-alpha.4":
+  version "2.0.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/@any-touch/press/-/press-2.0.0-alpha.4.tgz#9f6d03915fe94f6b198f9d6e57f9a6aa048c6ae3"
+  integrity sha512-JMNUBv+ITiX7cIJ4nYEXwfnrTYJT3VLxgGXUfqSt0QfUK3demtYVYetDaxzQVGxCM3v3xjdvADEhOwBop5n2IA==
   dependencies:
-    "@any-touch/compute" "^2.0.0-alpha.2"
+    "@any-touch/compute" "^2.0.0-alpha.4"
     "@any-touch/recognizer" "^1.0.14"
-    "@any-touch/shared" "^2.0.0-alpha.2"
+    "@any-touch/shared" "^2.0.0-alpha.4"
 
 "@any-touch/recognizer@^1.0.14":
   version "1.0.15"
@@ -52,12 +52,12 @@
   dependencies:
     "@any-touch/shared" "^1.0.15"
 
-"@any-touch/rotate@^2.0.0-alpha.2":
-  version "2.0.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/@any-touch/rotate/-/rotate-2.0.0-alpha.2.tgz#d6aaa03e61bc0c0db46826c978c0fed64215f4c4"
-  integrity sha512-2o/RkJeNlP6jn8qGFm0R7sMTOKpNK5508rEFyyurrr9BbCa+dSImYApgy+KT4WO+vVCDCEnkZGQvtaJ1DjnG6w==
+"@any-touch/rotate@^2.0.0-alpha.4":
+  version "2.0.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/@any-touch/rotate/-/rotate-2.0.0-alpha.4.tgz#9a30362b85da2d73b8212a21cb4b9ec2fbbe9ceb"
+  integrity sha512-Xle1uRZzwIvvjC58WbPdc59um4c58AQj3d7K+ynr8zrmTyvIr9/WkxYkLE+M1rQDtr/hj5mXjiNYN+14I7i3fQ==
   dependencies:
-    "@any-touch/compute" "^2.0.0-alpha.2"
+    "@any-touch/compute" "^2.0.0-alpha.4"
     "@any-touch/recognizer" "^1.0.14"
 
 "@any-touch/shared@^1.0.15":
@@ -65,36 +65,36 @@
   resolved "https://registry.yarnpkg.com/@any-touch/shared/-/shared-1.0.15.tgz#6bdc20d121080e5cdcc89bde53a0fb7ab2939d79"
   integrity sha512-JRtA6h0Wa2gImvPpsM5JATxCK6t7ezBEEVN6ZsB6v3FAK/QmxrnA0O6W4liai7jKj1tA7JLtsRCZJ9v4CWFxsA==
 
-"@any-touch/shared@^2.0.0-alpha.2":
-  version "2.0.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/@any-touch/shared/-/shared-2.0.0-alpha.2.tgz#db6d27142e088723505d0c1f012706faf1718981"
-  integrity sha512-W8irYjsTaw8COGqUmvSOWYphVflEHJDmnE0MvR34LT7w+e4+6qDvaiw7s7HdwO/PM+MOx8iKf3nXdlbs7ueIWg==
+"@any-touch/shared@^2.0.0-alpha.4":
+  version "2.0.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/@any-touch/shared/-/shared-2.0.0-alpha.4.tgz#dab11b0f26b55855b88c7459450b4d51bdc19be7"
+  integrity sha512-hOWemJlq76/jruCK6W50N1ctrxKl0mQHOKg1UHI0euYZWlym//Z0NCMhRer6LLhmgZYScB16/xUPdff1D5rCxA==
 
-"@any-touch/swipe@^2.0.0-alpha.2":
-  version "2.0.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/@any-touch/swipe/-/swipe-2.0.0-alpha.2.tgz#5b71817ccc42c7a1226b1d42f6f42d4fd94b9eae"
-  integrity sha512-dqZp5lSl3VCxrsrxbGYKz8ht77c6y9IhPkx29Ofy/7+dN3yV9zfQfxU8zkNwOqOrO5tvTDDn4O6Wt5TZZmkPFQ==
+"@any-touch/swipe@^2.0.0-alpha.4":
+  version "2.0.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/@any-touch/swipe/-/swipe-2.0.0-alpha.4.tgz#b1be514a45fec4465d5cbd5719a0fdfc6f979b86"
+  integrity sha512-T/Bn0tJxs3IaG85wXB4zg/94L1JmXISsPQOtxdxIXqXqqgAKAG1lBn5fwJHaBX+9eDgfENs9T1gKezEo0JnMeQ==
   dependencies:
-    "@any-touch/compute" "^2.0.0-alpha.2"
+    "@any-touch/compute" "^2.0.0-alpha.4"
     "@any-touch/recognizer" "^1.0.14"
-    "@any-touch/shared" "^2.0.0-alpha.2"
+    "@any-touch/shared" "^2.0.0-alpha.4"
 
-"@any-touch/tap@^2.0.0-alpha.2":
-  version "2.0.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/@any-touch/tap/-/tap-2.0.0-alpha.2.tgz#9085ce0a7a1413c633621275ef3d450e9f104627"
-  integrity sha512-e6bNt5FJNTdleLfOtP3+siM/Ey9laFElIXsvBORxj0ylRxitcJJ++wjY02U9UOstedF44jsrGE9BUSfwt/UdyQ==
+"@any-touch/tap@^2.0.0-alpha.4":
+  version "2.0.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/@any-touch/tap/-/tap-2.0.0-alpha.4.tgz#0103f28de5bf1f7de4e86fb3210930a939963439"
+  integrity sha512-kgPnG66L7wgHkbbJ8jZAYgCVYYK2hNvE7z22ePktKqbG3OVvuwoWbdVQWmPlE6T6VFWb8wdTHaVHLtI7r+2a1Q==
   dependencies:
-    "@any-touch/compute" "^2.0.0-alpha.2"
+    "@any-touch/compute" "^2.0.0-alpha.4"
     "@any-touch/recognizer" "^1.0.14"
-    "@any-touch/shared" "^2.0.0-alpha.2"
-    "@any-touch/vector" "^2.0.0-alpha.2"
+    "@any-touch/shared" "^2.0.0-alpha.4"
+    "@any-touch/vector" "^2.0.0-alpha.4"
 
-"@any-touch/vector@^2.0.0-alpha.2":
-  version "2.0.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/@any-touch/vector/-/vector-2.0.0-alpha.2.tgz#bafa3fa025aec6a37b7c84468ffaea75775fd56c"
-  integrity sha512-F4vqG9D10Y2a2QjbctmUG1vNJGoRF/r9+gYiHwfnYNuT9G3Jk7pleqRP5zGGWbuA++pddtb83KzNZYAfWo2nLA==
+"@any-touch/vector@^2.0.0-alpha.4":
+  version "2.0.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/@any-touch/vector/-/vector-2.0.0-alpha.4.tgz#ae0bf31b03c2d8be049ed176719ac4abe1474544"
+  integrity sha512-1I9pq+A60UU1vTG8/bEmOTs+F7tB448h+7U2zlhTo0i5XprAS0e0GLTJBlnwj8HhWGez+uC7M2zaKGVzEbu+qQ==
   dependencies:
-    "@any-touch/shared" "^2.0.0-alpha.2"
+    "@any-touch/shared" "^2.0.0-alpha.4"
 
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.16.0", "@babel/code-frame@^7.5.5":
   version "7.16.0"
@@ -1685,26 +1685,26 @@ any-event@^1.0.6:
   dependencies:
     tslib "^1.9.3"
 
-any-event@^2.0.0-alpha.2:
-  version "2.0.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/any-event/-/any-event-2.0.0-alpha.2.tgz#a58c8660980432fbefea81288b9bf4614e54a8ec"
-  integrity sha512-wUhFY47SHX4m/GqmX4kDmPXpycIRVhhIGbnGdKxRXXcYE2m8JbuCGu1SsRrzL8WDGJqQoRihfSOljN3T2jC5fw==
+any-event@^2.0.0-alpha.4:
+  version "2.0.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/any-event/-/any-event-2.0.0-alpha.4.tgz#e0cafea8c3faaf273190a3489214830e29096332"
+  integrity sha512-LaUkIxNSHz9lCC49n1kP3ND87LqYqyMmaGGigACJSBoGvZf2DuEZOhrgT8ThVXgOA7/N4IPeBYzyngza+y9Uaw==
   dependencies:
     tslib "^2.3.1"
 
-any-touch@2.0.0-alpha.2:
-  version "2.0.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/any-touch/-/any-touch-2.0.0-alpha.2.tgz#c329ece101caf41e2938f90ec83e59230856f002"
-  integrity sha512-gNHkGL+aQP97UEdAXuVccec7zXiNpNqd7LENixT33lCkJiQU7nSbpp5Q7FrP76L58BeIfU0pgSkbZxr4XoK2rA==
+any-touch@2.0.0-alpha.4:
+  version "2.0.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/any-touch/-/any-touch-2.0.0-alpha.4.tgz#06938faa4e356b0cdd45e362ddc3c4abba547d8d"
+  integrity sha512-LIdzG1dAG3wtJgXvo23b6EEZWqQrB+UYucAJSYHI4AnX/kI119VxLVjWzOpQLN9G4epHph3GYx2r6U5UtUvDlg==
   dependencies:
-    "@any-touch/core" "^2.0.0-alpha.2"
-    "@any-touch/pan" "^2.0.0-alpha.2"
-    "@any-touch/pinch" "^2.0.0-alpha.2"
-    "@any-touch/press" "^2.0.0-alpha.2"
-    "@any-touch/rotate" "^2.0.0-alpha.2"
-    "@any-touch/swipe" "^2.0.0-alpha.2"
-    "@any-touch/tap" "^2.0.0-alpha.2"
-    any-event "^2.0.0-alpha.2"
+    "@any-touch/core" "^2.0.0-alpha.4"
+    "@any-touch/pan" "^2.0.0-alpha.4"
+    "@any-touch/pinch" "^2.0.0-alpha.4"
+    "@any-touch/press" "^2.0.0-alpha.4"
+    "@any-touch/rotate" "^2.0.0-alpha.4"
+    "@any-touch/swipe" "^2.0.0-alpha.4"
+    "@any-touch/tap" "^2.0.0-alpha.4"
+    any-event "^2.0.0-alpha.4"
     tslib "^2.3.1"
 
 anymatch@^2.0.0:
