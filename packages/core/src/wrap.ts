@@ -161,13 +161,17 @@ export default class Wrap extends AnyEvent {
             swipe.velocity = 1;
         }
         at.on('swipe', (e) => {
+            const { currentContentRef } = this;
+            if (null === currentContentRef) return;
             this.targets = e.targets;
             // clearTimeout(this._scrollEndTimeId);
-            const deltaX = e.speedX * 200;
-            const deltaY = e.speedY * 200;
-            this.currentContentRef?.dampScroll([
-                this.currentContentRef.xy[0] + deltaX,
-                this.currentContentRef.xy[1] + deltaY,
+            const deltaX = Math.min(e.speedX * 200, currentContentRef.contentSize[0] / 2);
+            const deltaY = Math.min(e.speedY * 200, currentContentRef.contentSize[1] / 2);
+            console.log(e.speedY * 200, deltaY);
+
+            currentContentRef.dampScroll([
+                currentContentRef.xy[0] + deltaX,
+                currentContentRef.xy[1] + deltaY,
             ]);
         });
     }
@@ -203,8 +207,8 @@ export default class Wrap extends AnyEvent {
         this.currentContentRef?.scrollTo(distXY, duration, easing);
     }
 
-    dampScroll(distXY: readonly [number, number]) {
-        this.currentContentRef?.dampScroll(distXY);
+    dampScroll(distXY: readonly [number, number], damping = this.options.damping) {
+        this.currentContentRef?.dampScroll(distXY, damping);
     }
 
     /**

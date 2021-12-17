@@ -21,7 +21,6 @@ export default function (wrapRef: WarpInstance) {
     const barRefs = runTwice(createBar);
 
     wrapRef.on(['at:start', 'scroll', 'resize'], () => {
-        // if (__isDraggingBar) return;
         updateBar(wrapRef, barRefs, allow);
     });
 
@@ -95,7 +94,7 @@ export default function (wrapRef: WarpInstance) {
             } else {
                 return;
             }
-
+            // 内容尺寸大于外层尺寸才能显示进度条
             if (contentSize[i] > wrapSize[i]) {
                 changeOpacity(trackElement, 1);
                 clearTimeout(timeoutIds[i]);
@@ -115,6 +114,7 @@ export default function (wrapRef: WarpInstance) {
                         thumbRef.minXY[i],
                         thumbRef.maxXY[i]
                     );
+                    // console.log(i,{thumbSize, thumbXorY});
                     const thumbElement = barRef.getContentRef()!.el;
                     setStyle(thumbElement, { [['width', 'height'][i]]: `${thumbSize}px` });
 
@@ -124,8 +124,13 @@ export default function (wrapRef: WarpInstance) {
 
                     // 移动thumb
                     const { xy } = thumbRef;
-                    xy[i] = thumbXorY;
-                    thumbRef.moveTo(xy);
+                    // 此处要克隆xy, 
+                    // 不然moveTo的内部判断xy没有变化, 
+                    // 是不会执行的, 
+                    // 触发不了scroll事件
+                    const newXY: [number, number] = [...xy];
+                    newXY[i] = thumbXorY;
+                    thumbRef.moveTo(newXY);
                 }
             } else {
                 changeDOMVisible(trackElement, false);

@@ -30,7 +30,7 @@ export default class Content extends AnyEvent {
     // 控制scroll-end不被频繁触发
     __scrollEndTimeId = -1;
     private __dampScrollRafId = -1;
-    private __stopScroll = () => {};
+    private __stopScroll = () => { };
 
     constructor(contentEl: HTMLElement, wrapEl: HTMLElement, options: ContentOptions) {
         super();
@@ -70,9 +70,9 @@ export default class Content extends AnyEvent {
         this.minXY = this.__options.minXY
             ? this.__options.minXY(this)
             : [
-                  Math.min(0, this.wrapSize[0] - this.contentSize[0]),
-                  Math.min(0, this.wrapSize[1] - this.contentSize[1]),
-              ];
+                Math.min(0, this.wrapSize[0] - this.contentSize[0]),
+                Math.min(0, this.wrapSize[1] - this.contentSize[1]),
+            ];
 
         this.maxXY = this.__options.maxXY ? this.__options.maxXY(this) : [0, 0];
         // console.warn('__warpSize', this.wrapSize, 'contentSize', this.contentSize, '__minXY', this.minXY, '__maxXY', this.maxXY);
@@ -110,6 +110,9 @@ export default class Content extends AnyEvent {
      * @returns
      */
     moveTo(distXY: readonly [number, number]): [number, number] {
+        const isChanged = this.xy.some((xOrY, i) => xOrY !== distXY[i]);
+        if (!isChanged) return this.xy;
+        console.log();
         clearTimeout(this.__scrollEndTimeId);
         const { allow, overflowDistance } = this.__options;
         runTwice((i) => {
@@ -147,7 +150,7 @@ export default class Content extends AnyEvent {
      * @param distXY 目标点
      * @param onScroll 滚动回调
      */
-    dampScroll(distXY: readonly [number, number]) {
+    dampScroll(distXY: readonly [number, number],damping?:number) {
         // 参数
         const { overflowDistance, allow } = this.__options;
         const noScroll = runTwice((i) => !allow[i] || distXY[i] === this.xy[i]).every((is) => is);
@@ -170,7 +173,7 @@ export default class Content extends AnyEvent {
                 if (!allow[i]) return xy[i];
 
                 // 预判接下来的位置
-                const _nextvalue = damp(context.xy[i], _distXY[i]);
+                const _nextvalue = damp(context.xy[i], _distXY[i],damping);
                 // console.log(i, xy[i], _nextvalue, _distXY[i], distXY[i]);
 
                 // ====== 根据当前位置和目标计算"阶段性的目标位置"(修正distXY) ======
