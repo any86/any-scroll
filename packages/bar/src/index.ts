@@ -15,12 +15,18 @@ export default function (wrapRef: WarpInstance) {
     const { allow } = wrapRef.options;
     // 给updateBar函数用
     let timeoutIds = [-1, -1];
-    let __isDraggingBar = false;
+    let __isFoucsInBar = false;
     insertCss(BAR_CSS);
     // 构建x|y轴滚动条DOM
     const barRefs = runTwice(createBar);
 
-    wrapRef.on(['at:start', 'scroll', 'resize'], () => {
+    wrapRef.on(['scroll', 'resize'], () => {
+        updateBar(wrapRef, barRefs, allow);
+    });
+
+    wrapRef.at.on('at:start', () => {
+        // 取消bar拖拽的状体
+        __isFoucsInBar = false;
         updateBar(wrapRef, barRefs, allow);
     });
 
@@ -49,8 +55,15 @@ export default function (wrapRef: WarpInstance) {
         // ⭐基于scroll做bar
         const bar = new Wrap(trackEl, { allow: [DIRECTION.X === dir, DIRECTION.Y === dir], overflowDistance: 0 });
         setStyle(bar.el as HTMLElement, { position: 'absolute', display: 'none' });
-        bar.at.on('pan', () => {
-            __isDraggingBar = true;
+
+        bar.at.on('panstart', () => {
+            __isFoucsInBar = true;
+        });
+
+        bar.on('scroll', () => {
+            // 只响应bar的pan/swipe等产生的滚动
+            // 防止bar传给content, content再传给bar这种情况.
+            if (!__isFoucsInBar) return;
             const thumb = bar.getContentRef() as ContentInstance;
             const contentRef = wrapRef.getContentRef();
             if (null !== contentRef) {
@@ -62,6 +75,18 @@ export default function (wrapRef: WarpInstance) {
             }
         });
 
+        /**
+         * 按住track空白处
+         * 滑动到目标位置
+         */
+        // bar.on('press')
+
+        /**
+         * 点击track空白处,
+         * 移动一页,
+         
+         */
+
         // bar.on('tap', e => {
         //     if (e.target === bar.el) {
         //         const {height,y} = bar.el.getBoundingClientRect();
@@ -69,9 +94,6 @@ export default function (wrapRef: WarpInstance) {
         //     }
         // })
 
-        bar.at.on('at:end', () => {
-            __isDraggingBar = false;
-        });
         return bar;
     }
 
@@ -124,9 +146,9 @@ export default function (wrapRef: WarpInstance) {
 
                     // 移动thumb
                     const { xy } = thumbRef;
-                    // 此处要克隆xy, 
-                    // 不然moveTo的内部判断xy没有变化, 
-                    // 是不会执行的, 
+                    // 此处要克隆xy,
+                    // 不然moveTo的内部判断xy没有变化,
+                    // 是不会执行的,
                     // 触发不了scroll事件
                     const newXY: [number, number] = [...xy];
                     newXY[i] = thumbXorY;

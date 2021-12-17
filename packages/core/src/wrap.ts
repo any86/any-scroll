@@ -165,14 +165,10 @@ export default class Wrap extends AnyEvent {
             if (null === currentContentRef) return;
             this.targets = e.targets;
             // clearTimeout(this._scrollEndTimeId);
-            const deltaX = Math.min(e.speedX * 200, currentContentRef.contentSize[0] / 2);
-            const deltaY = Math.min(e.speedY * 200, currentContentRef.contentSize[1] / 2);
+            const deltaX = e.speedX * 200;
+            const deltaY = e.speedY * 200;
             console.log(e.speedY * 200, deltaY);
-
-            currentContentRef.dampScroll([
-                currentContentRef.xy[0] + deltaX,
-                currentContentRef.xy[1] + deltaY,
-            ]);
+            currentContentRef.dampScroll([currentContentRef.xy[0] + deltaX, currentContentRef.xy[1] + deltaY]);
         });
     }
 
