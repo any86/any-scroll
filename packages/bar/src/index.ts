@@ -44,57 +44,55 @@ export default function (wrapRef: WarpInstance) {
 
     /**
      * 生成bar
-     * @param index 0:x轴, 1:y轴
+     * @param axisIndex 0:x轴, 1:y轴
      * @returns bar的track和thumb元素
      */
-    function createBar(index: number) {
-        const dir = [DIRECTION.X, DIRECTION.Y][index];
+    function createBar(axisIndex: 0 | 1) {
+        const dir = [DIRECTION.X, DIRECTION.Y][axisIndex];
         const trackEl = createDOM(wrapRef.el as HTMLElement, dir);
         // console.log(trackEl.clientHeight);
 
         // ⭐基于scroll做bar
-        const bar = new Wrap(trackEl, { allow: [DIRECTION.X === dir, DIRECTION.Y === dir], overflowDistance: 0 });
-        setStyle(bar.el as HTMLElement, { position: 'absolute', display: 'none' });
+        const barRef = new Wrap(trackEl, { allow: [DIRECTION.X === dir, DIRECTION.Y === dir], overflowDistance: 0 });
+        setStyle(barRef.el as HTMLElement, { position: 'absolute', display: 'none' });
 
-        bar.at.on('panstart', () => {
+        barRef.at.on('panstart', () => {
             __isFoucsInBar = true;
         });
 
-        bar.on('scroll', () => {
+        barRef.on('scroll', () => {
             // 只响应bar的pan/swipe等产生的滚动
             // 防止bar传给content, content再传给bar这种情况.
             if (!__isFoucsInBar) return;
-            const thumb = bar.getContentRef() as ContentInstance;
+            const thumb = barRef.getContentRef() as ContentInstance;
             const contentRef = wrapRef.getContentRef();
             if (null !== contentRef) {
                 // 缩放, bar => scrollView
                 const { xy } = contentRef;
                 const nextXY = [...xy] as [number, number];
-                nextXY[index] = (-thumb.xy[index] * contentRef.contentSize[index]) / thumb.wrapSize[index];
+                nextXY[axisIndex] =
+                    (-thumb.xy[axisIndex] * contentRef.contentSize[axisIndex]) / thumb.wrapSize[axisIndex];
                 contentRef.moveTo(nextXY);
             }
         });
 
         /**
-         * 按住track空白处
-         * 滑动到目标位置
-         */
-        // bar.on('press')
-
-        /**
          * 点击track空白处,
-         * 移动一页,
-         
+         * 移动到点击处
          */
+        barRef.at.on('tap', (e) => {
+            const thumbRef = barRef.getContentRef();
+            if (null !== thumbRef && e.target === barRef.el) {
+                __isFoucsInBar = true;
+                const { x, y } = barRef.el.getBoundingClientRect();
+                const { contentSize } = thumbRef;
+                const newXY: [number, number] = [0, 0];
+                newXY[axisIndex] = [e.x, e.y][axisIndex] - [x, y][axisIndex] - contentSize[axisIndex] / 2;
+                thumbRef.dampScroll(newXY);
+            }
+        });
 
-        // bar.on('tap', e => {
-        //     if (e.target === bar.el) {
-        //         const {height,y} = bar.el.getBoundingClientRect();
-        //         bar.getContentRef()?.scrollTo([0, e.y - y]);
-        //     }
-        // })
-
-        return bar;
+        return barRef;
     }
 
     /**

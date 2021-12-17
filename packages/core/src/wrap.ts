@@ -167,7 +167,6 @@ export default class Wrap extends AnyEvent {
             // clearTimeout(this._scrollEndTimeId);
             const deltaX = e.speedX * 200;
             const deltaY = e.speedY * 200;
-            console.log(e.speedY * 200, deltaY);
             currentContentRef.dampScroll([currentContentRef.xy[0] + deltaX, currentContentRef.xy[1] + deltaY]);
         });
     }
