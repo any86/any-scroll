@@ -119,10 +119,7 @@ export default class Wrap extends AnyEvent {
         // ========== 手势 ==========
         const at = new AnyTouch(el);
         this.at = at;
-        // // 代理所有手势事件
-        // at.on('at:after', (e) => {
-        //     this.emit(e.type, e);
-        // });
+
 
         at.on(['panstart', 'panmove'], (e) => {
             const { currentContentRef } = this;
@@ -169,6 +166,11 @@ export default class Wrap extends AnyEvent {
             const deltaY = e.speedY * 200;
             currentContentRef.dampScroll([currentContentRef.xy[0] + deltaX, currentContentRef.xy[1] + deltaY]);
         });
+
+        // 把any-touch的事件冒泡到any-scroll
+        at.on('at:after', e => {
+            this.emit(e.name, e);
+        })
     }
 
     update() {

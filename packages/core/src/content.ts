@@ -96,9 +96,7 @@ export default class Content extends AnyEvent {
     snap() {
         if (this.__options.snap) {
             // console.log('snap');
-            const xy = runTwice((i) => {
-                return clamp(this.xy[i], this.minXY[i], this.maxXY[i]);
-            });
+            const xy = runTwice((i) => clamp(this.xy[i], this.minXY[i], this.maxXY[i]));
             this.dampScroll(xy);
         }
     }
@@ -135,7 +133,8 @@ export default class Content extends AnyEvent {
     scrollTo(distXY: [number, number], duration = 1000, easing?: (t: number) => number) {
         this.stop();
         this.isScrolling = true;
-        const [run, stop, done] = tween(this.xy, distXY, duration, easing);
+        const realDist = runTwice(i => clamp(distXY[i], this.minXY[i], this.maxXY[i]));
+        const [run, stop, done] = tween(this.xy, realDist, duration, easing);
         run(this.moveTo.bind(this));
         this.__stopScroll = stop;
         done(() => {
@@ -150,7 +149,7 @@ export default class Content extends AnyEvent {
      * @param distXY 目标点
      * @param onScroll 滚动回调
      */
-    dampScroll(distXY: readonly [number, number],damping?:number) {
+    dampScroll(distXY: readonly [number, number], damping?: number) {
         // 参数
         const { overflowDistance, allow } = this.__options;
         const noScroll = runTwice((i) => !allow[i] || distXY[i] === this.xy[i]).every((is) => is);
@@ -173,7 +172,7 @@ export default class Content extends AnyEvent {
                 if (!allow[i]) return xy[i];
 
                 // 预判接下来的位置
-                const _nextvalue = damp(context.xy[i], _distXY[i],damping);
+                const _nextvalue = damp(context.xy[i], _distXY[i], damping);
                 // console.log(i, xy[i], _nextvalue, _distXY[i], distXY[i]);
 
                 // ====== 根据当前位置和目标计算"阶段性的目标位置"(修正distXY) ======

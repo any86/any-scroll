@@ -86,7 +86,7 @@
             const content = document.getElementById('content');
             if (content) {
                 const html = [];
-                for (let i = 1; i <= 10; i++) {
+                for (let i = 1; i <= 30; i++) {
                     html.push(`<span class="box">${i}</span>`);
                 }
                 content.innerHTML = html.join('');
@@ -96,7 +96,7 @@
             const el = document.getElementById('scroll');
             const as = new AnyScroll(el, {
                 overflowDistance: 100,
-                allow: [true, true],
+                allow: [true, false],
                 // render(el, x, y) {
                 //     el.style.marginTop = y + 'px';
                 //     el.style.marginLeft = x + 'px';
@@ -120,13 +120,13 @@
             });
 
             function scrollTo2() {
-                as.scrollTo([-200, 0], 1000);
+                as.scrollTo([-5200, 0], 3000);
             }
 
             function add() {
                 const startIndex = ~~content.lastChild.innerHTML + 1;
                 const frag = document.createDocumentFragment();
-                for (let i = startIndex; i <= startIndex + 100; i++) {
+                for (let i = startIndex; i <= startIndex + 10; i++) {
                     const span = document.createElement('span');
                     span.classList.add('box');
                     span.innerHTML = i;
@@ -137,7 +137,7 @@
 
             function prepend() {
                 const startIndex = ~~content.firstChild.innerHTML + 1;
-                for (let i = startIndex; i <= startIndex + 100; i++) {
+                for (let i = startIndex; i <= startIndex + 10; i++) {
                     const span = document.createElement('span');
                     span.classList.add('box');
                     span.innerHTML = i;
