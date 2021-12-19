@@ -1,4 +1,4 @@
-import { setStyle, createDOMDiv, changeDOMVisible, changeOpacity, runTwice, DIRECTION } from '@any-scroll/shared';
+import { setStyle, createDOMDiv, changeDOMVisible, changeOpacity, runTwice, Axis,AxisList } from '@any-scroll/shared';
 import { insertCss } from 'insert-css';
 import { TRACK_CLASS_NAME, THUMB_CLASS_NAME, BAR_CSS } from './const';
 import { Wrap, Content } from '@any-scroll/core';
@@ -48,12 +48,12 @@ export default function (wrapRef: WarpInstance) {
      * @returns bar的track和thumb元素
      */
     function createBar(axisIndex: 0 | 1) {
-        const dir = [DIRECTION.X, DIRECTION.Y][axisIndex];
-        const trackEl = createDOM(wrapRef.el as HTMLElement, dir);
+        const currentAxis = AxisList[axisIndex];
+        const trackEl = createDOM(wrapRef.el as HTMLElement, currentAxis);
         // console.log(trackEl.clientHeight);
 
         // ⭐基于scroll做bar
-        const barRef = new Wrap(trackEl, { allow: [DIRECTION.X === dir, DIRECTION.Y === dir], overflowDistance: 0 });
+        const barRef = new Wrap(trackEl, { allow: [Axis.X === currentAxis, Axis.Y === currentAxis], overflowDistance: 0 });
         setStyle(barRef.el as HTMLElement, { position: 'absolute', display: 'none' });
 
         barRef.at.on('panstart', () => {
@@ -165,7 +165,7 @@ export default function (wrapRef: WarpInstance) {
  * @param axis 轴
  * @returns [滚动条轨道,把手]
  */
-function createDOM(el: HTMLElement, axis: 'x' | 'y' = DIRECTION.X) {
+function createDOM(el: HTMLElement, axis: 'x' | 'y' = Axis.X) {
     const trackEl = createDOMDiv([TRACK_CLASS_NAME, `${TRACK_CLASS_NAME}-${axis}`]);
     const thumbEl = createDOMDiv([THUMB_CLASS_NAME, `${THUMB_CLASS_NAME}-${axis}`]);
     trackEl.appendChild(thumbEl);

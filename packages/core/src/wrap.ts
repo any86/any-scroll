@@ -27,7 +27,7 @@ export interface Options {
 
     watchResize?: boolean;
 
-    render?: (el: HTMLElement, x: number, y: number) => void;
+    render?: (el: HTMLElement, [x, y]: readonly [number, number]) => void;
 }
 
 export const DEFAULT_OPTIONS = {

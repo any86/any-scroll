@@ -1,8 +1,25 @@
 import raf from 'raf';
-export const enum DIRECTION {
+
+export type XY = readonly [number, number] | { readonly x: number, readonly y: number };
+
+/**
+ * 统一xy的表现形式为[x,y]
+ * @param xy 
+ * @returns [x,y]形式的坐标
+ */
+export function xY2Tuple(xy: XY): readonly [number, number] {
+    if ('x' in xy) {
+        return [xy.x, xy.y];
+    }
+    return xy;
+}
+
+export const enum Axis {
     X = 'x',
     Y = 'y',
 }
+
+export const AxisList = [Axis.X, Axis.Y];
 
 export function setStyle(el: HTMLElement, styles: Partial<CSSStyleDeclaration>) {
     for (const key in styles) {
@@ -11,7 +28,7 @@ export function setStyle(el: HTMLElement, styles: Partial<CSSStyleDeclaration>) 
     }
 }
 
-export function render(el: HTMLElement, x: number, y: number) {
+export function render(el: HTMLElement, [x, y]: readonly [number, number]) {
     setStyle(el, { transform: `translate3d(${x}px, ${y}px,0)` });
 }
 
