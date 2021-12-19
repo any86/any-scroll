@@ -2,10 +2,13 @@ import AnyEvent from 'any-event';
 import raf from 'raf';
 import clamp from 'lodash/clamp';
 import inRange from 'lodash/inRange';
-import { setStyle, damp, tween, runTwice, easing } from '@any-scroll/shared';
+import { setStyle, damp, tween, runTwice } from '@any-scroll/shared';
 import ResizeObserver from 'resize-observer-polyfill';
+import { xY2Tuple } from '@any-scroll/shared';
+
 // 类型
-import { Options } from './wrap';
+import type { Options } from './wrap';
+import type { XY } from '@any-scroll/shared';
 
 interface ContentOptions extends Required<Options> {
     minXY?: (context: Content) => [number, number];
@@ -107,33 +110,46 @@ export default class Content extends AnyEvent {
      * @param y
      * @returns
      */
-    moveTo(distXY: readonly [number, number]): [number, number] {
-        const isChanged = this.xy.some((xOrY, i) => xOrY !== distXY[i]);
-        if (!isChanged) return this.xy;
-        console.log();
-        clearTimeout(this.__scrollEndTimeId);
+    moveTo(distXY: XY): [number, number] {
         const { allow, overflowDistance } = this.__options;
-        runTwice((i) => {
-            if (allow[i]) {
-                this.xy[i] = clamp(distXY[i], this.minXY[i] - overflowDistance, this.maxXY[i] + overflowDistance);
+        if (!allow.includes(true)) return this.xy;
+
+        clearTimeout(this.__scrollEndTimeId);
+        const tupleXY = xY2Tuple(distXY);
+        const nextXY = runTwice((i) => {
+            if (allow[i] && void 0 !== tupleXY[i]) {
+                return clamp(tupleXY[i], this.minXY[i] - overflowDistance, this.maxXY[i] + overflowDistance);
             }
+            return this.xy[i];
         });
 
-        if (allow.includes(true)) {
-            const [x, y] = this.xy;
-            const { targets } = this;
-            const target = targets[0];
-            // 钩子
-            this.emit('scroll', { targets, target, x, y });
-            this.__options.render(this.el, ...this.xy);
-        }
+        // 计算是否需要移动
+        const isChanged = this.xy.some((xOrY, i) => xOrY !== nextXY[i]);
+        if (!isChanged) return this.xy;
+
+        // 移动到目标
+        runTwice(i => this.xy[i] = nextXY[i]);
+
+        const [x, y] = this.xy;
+        const { targets } = this;
+        const target = targets[0];
+        // 钩子
+        this.emit('scroll', { targets, target, x, y });
+        this.__options.render(this.el, this.xy);
         return this.xy;
     }
 
-    scrollTo(distXY: [number, number], duration = 1000, easing?: (t: number) => number) {
+    /**
+     * 滚动到目标位置, 支持动画
+     * @param distXY 目标位置
+     * @param duration 动画时长
+     * @param easing 缓动函数
+     */
+    scrollTo(distXY: XY, duration = 1000, easing?: (t: number) => number) {
+        const tupleXY = xY2Tuple(distXY);
         this.stop();
         this.isScrolling = true;
-        const realDist = runTwice(i => clamp(distXY[i], this.minXY[i], this.maxXY[i]));
+        const realDist = runTwice((i) => clamp(tupleXY[i], this.minXY[i], this.maxXY[i]));
         const [run, stop, done] = tween(this.xy, realDist, duration, easing);
         run(this.moveTo.bind(this));
         this.__stopScroll = stop;
@@ -146,20 +162,21 @@ export default class Content extends AnyEvent {
     /**
      * swipe手势对应的滚动逻辑
      * 和对外的scrollTo的区别是:与时间无关的迭代衰减
-     * @param distXY 目标点
+     * @param tupleXY 目标点
      * @param onScroll 滚动回调
      */
-    dampScroll(distXY: readonly [number, number], damping?: number) {
+    dampScroll(distXY: XY, damping?: number) {
+        const tupleXY = xY2Tuple(distXY);
         // 参数
         const { overflowDistance, allow } = this.__options;
-        const noScroll = runTwice((i) => !allow[i] || distXY[i] === this.xy[i]).every((is) => is);
+        const noScroll = runTwice((i) => !allow[i] || tupleXY[i] === this.xy[i]).every((isMoved) => isMoved);
         if (noScroll) return;
 
         raf.cancel(this.__dampScrollRafId);
         // console.log('_dampScroll', distXY, this.xy);
 
         // 内部状态, 根据不同位置会发生变化
-        const _distXY = [...distXY] as [number, number];
+        const _distXY: [number, number] = [...tupleXY];
 
         // 每次位移
         function _moveTo(context: Content) {
