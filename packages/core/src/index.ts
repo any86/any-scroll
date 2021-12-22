@@ -9,7 +9,6 @@ export interface Plugin {
     (context: InstanceType<typeof Wrap>, options?: PluginOptions): unknown;
 }
 
-
 // console.log(process.env)
 export default class extends Wrap {
     /**

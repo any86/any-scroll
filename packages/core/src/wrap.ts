@@ -1,15 +1,14 @@
 import AnyTouch from 'any-touch';
 import AnyEvent from 'any-event';
-
-import ResizeObserver from 'resize-observer-polyfill';
-import isElement from 'lodash/isElement';
-import Content from './content';
-import { SCROLL_END_DELAY } from './const';
-import { setStyle, render } from '@any-scroll/shared';
-const { setTimeout } = window;
 // declare const WebKitMutationObserver: MutationObserver;
 // declare const MozMutationObserver: MutationObserver;
-
+// import ResizeObserver from 'resize-observer-polyfill';
+import isElement from 'lodash/isElement';
+import Content from './content';
+import { SCROLL_END_DELAY, TYPE_BEFORE_DESTROY } from './const';
+import { setStyle, render } from '@any-scroll/shared';
+// 防止ResizeObserver不存在报错
+const { setTimeout, ResizeObserver } = window;
 export interface Options {
     // 允许超过边界的最大距离
     overflowDistance?: number;
@@ -17,16 +16,7 @@ export interface Options {
     damping?: number;
     // 允许X&Y轴线滑动
     allow?: [boolean, boolean];
-
-    hideBar?: [boolean, boolean];
-    // 超出界限后自动吸附边框
-    snap?: boolean;
-    // 是否允许滑动出界限, 超过tolerance
-    // limit?: [XY,XY];
-    hasBar?: boolean;
-
-    watchResize?: boolean;
-
+    // 位移渲染函数
     render?: (el: HTMLElement, [x, y]: readonly [number, number]) => void;
 }
 
@@ -34,15 +24,10 @@ export const DEFAULT_OPTIONS = {
     overflowDistance: 100,
     damping: 0.1,
     allow: [true, true] as [boolean, boolean],
-    hideBar: [false, false] as [boolean, boolean],
-    snap: true,
-    hasBar: true,
-    watchResize: true,
     render,
 };
 
 type ContentRefList = InstanceType<typeof Content>[];
-
 export default class Wrap extends AnyEvent {
     /**
      * wrap元素
@@ -90,36 +75,43 @@ export default class Wrap extends AnyEvent {
         // 遍历content元素
         // ⭐生成Content实例
         Array.from(el.children).forEach((contentEl) => {
-            const ref = new Content(contentEl as HTMLElement, el, this.options);
-            ref.on('resize', () => {
+            const contentRef = new Content(contentEl as HTMLElement, this);
+            contentRef.on('resize', () => {
                 this.update();
+                this.emit('resize');
             });
 
-            ref.on('scroll', (arg) => {
-                clearTimeout(ref.__scrollEndTimeId);
+            contentRef.on('scroll', (arg) => {
                 this.emit('scroll', arg);
             });
 
-            ref.on('scroll-end', (arg) => {
+            contentRef.on('scroll-end', (arg) => {
                 this.emit('scroll-end', arg);
             });
 
-            this.__contentRefList.push(ref);
+            // 销毁content实例
+            this.on(TYPE_BEFORE_DESTROY, () => {
+                contentRef.destroy();
+            });
+
+            this.__contentRefList.push(contentRef);
         });
 
         // 默认contentRef为第一个contentRef
         this.currentContentRef = this.getContentRef();
 
         // 监视尺寸变化
-        if (this.options.watchResize) {
+        if (ResizeObserver) {
             const ro = new ResizeObserver(this.update.bind(this));
             ro.observe(el);
+            this.on(TYPE_BEFORE_DESTROY, () => {
+                ro.disconnect();
+            });
         }
 
         // ========== 手势 ==========
         const at = new AnyTouch(el);
         this.at = at;
-
 
         at.on(['panstart', 'panmove'], (e) => {
             const { currentContentRef } = this;
@@ -174,10 +166,11 @@ export default class Wrap extends AnyEvent {
     }
 
     update() {
+        // 通知每个contentRef计算属性
         this.__contentRefList.forEach((contentRef) => {
             contentRef.update();
         });
-        this.emit('resize');
+        this.emit('update');
     }
 
     /**
@@ -244,7 +237,7 @@ export default class Wrap extends AnyEvent {
      * 销毁
      */
     destroy() {
-        this.emit('beforeDestroy');
+        this.emit(TYPE_BEFORE_DESTROY);
         this.at.destroy();
         super.destroy();
     }

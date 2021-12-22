@@ -123,6 +123,8 @@ export default function (wrapRef: WarpInstance) {
                 }, 1000);
 
                 const thumbRef = barRefs[i].getContentRef();
+                // 更新尺寸
+                thumbRef!.update();
                 if (null !== thumbRef) {
                     // 计算尺寸和位置
                     const [thumbSize, thumbXorY] = calcBarXorY(

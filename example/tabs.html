@@ -4,6 +4,8 @@
         <meta charset="UTF-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script src="https://cdn.bootcdn.net/ajax/libs/es6-shim/0.35.6/es6-sham.min.js"></script>
+        <script  src="https://cdn.bootcdn.net/ajax/libs/es6-shim/0.35.6/es6-shim.js"></script>
         <!-- <script src="https://unpkg.com/any-scroll/dist/any-scroll.umd.min.js"></script> -->
         <script src="../packages/any-scroll/dist/any-scroll.umd.js"></script>
         <!-- <script src="./any-scroll.umd.js"></script> -->
@@ -87,7 +89,7 @@
             if (content) {
                 const html = [];
                 for (let i = 1; i <= 30; i++) {
-                    html.push(`<span class="box">${i}</span>`);
+                    html.push('<span class="box">'+i+'</span>');
                 }
                 content.innerHTML = html.join('');
             }
@@ -103,24 +105,16 @@
                 // },
             });
 
-            as.on('scroll', (e) => {
+            as.on('scroll', function(e){
                 // console.log(`scroll`, e);
             });
 
-            as.on('scroll-end', (e) => {
+            as.on('scroll-end', function(e){
                 console.warn('scroll-end', e);
             });
 
-
-            const as2 = as.getContentRef(1);
-            as2?.set({
-                maxXY: ({ wrapSize, contentSize }) => {
-                    return [wrapSize[0] - contentSize[0], wrapSize[1] - contentSize[1]];
-                },
-            });
-
             function scrollTo2() {
-                as.scrollTo({x:-5200}, 3000);
+                as.scrollTo({x:-5200}, 1000);
             }
 
             function add() {

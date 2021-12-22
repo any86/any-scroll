@@ -104,10 +104,10 @@
             const as = new AnyScroll(el, {
                 overflowDistance: 100,
                 allow: [true, true],
-                render(el, [x, y]) {
-                    el.style.marginTop = y + 'px';
-                    el.style.marginLeft = x + 'px';
-                },
+                // render(el, [x, y]) {
+                //     el.style.marginTop = y + 'px';
+                //     el.style.marginLeft = x + 'px';
+                // },
             });
 
             as.on('scroll', (e) => {

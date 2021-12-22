@@ -3,17 +3,22 @@ import raf from 'raf';
 import clamp from 'lodash/clamp';
 import inRange from 'lodash/inRange';
 import { setStyle, damp, tween, runTwice } from '@any-scroll/shared';
-import ResizeObserver from 'resize-observer-polyfill';
+// import ResizeObserver from 'resize-observer-polyfill';
 import { xY2Tuple } from '@any-scroll/shared';
-
+import { TYPE_BEFORE_DESTROY } from './const';
 // 类型
 import type { Options } from './wrap';
 import type { XY } from '@any-scroll/shared';
+import Wrap from './wrap';
 
 interface ContentOptions extends Required<Options> {
     minXY?: (context: Content) => [number, number];
     maxXY?: (context: Content) => [number, number];
 }
+
+// 防止ResizeObserver/MutationObserver不存在报错
+const { ResizeObserver, MutationObserver } = window;
+
 export default class Content extends AnyEvent {
     /**
      * 请用moveTo修改xy;
@@ -35,19 +40,51 @@ export default class Content extends AnyEvent {
     private __dampScrollRafId = -1;
     private __stopScroll = () => { };
 
-    constructor(contentEl: HTMLElement, wrapEl: HTMLElement, options: ContentOptions) {
+    /**
+     * 初始化content
+     * @param contentEl 内容元素
+     * @param wrapRef wrap实例
+     */
+    constructor(contentEl: HTMLElement, wrapRef: Wrap) {
         super();
         this.el = contentEl;
-        this.wrapEl = wrapEl;
+        const { el, options } = wrapRef;
+        this.wrapEl = el;
         this.__options = options;
         setStyle(contentEl, { position: 'absolute' });
         this.update();
-        if (this.__options.watchResize) {
+
+        // this.on('scroll', () => {
+        //     clearTimeout(this.__scrollEndTimeId);
+        // });
+
+        // 监视content元素尺寸变化
+        if (ResizeObserver) {
             const ro = new ResizeObserver(() => {
                 this.update();
                 this.emit('resize');
             });
             ro.observe(contentEl);
+            this.on(TYPE_BEFORE_DESTROY, () => {
+                ro.disconnect();
+            })
+        }
+        // 降级用MutationObserver兼容
+        else if (MutationObserver) {
+            const observer = new MutationObserver(() => {
+                this.update();
+                this.emit('resize');
+            });
+
+            observer.observe(contentEl, {
+                childList: true, // 观察目标子节点的变化，是否有添加或者删除
+                // attributes: true, // 观察属性变动, content上transform的变化会频繁触发
+                subtree: true, // 观察后代节点，默认为 false
+            });
+
+            this.on(TYPE_BEFORE_DESTROY, () => {
+                observer.disconnect();
+            })
         }
     }
 
@@ -60,8 +97,8 @@ export default class Content extends AnyEvent {
      * 更新尺寸
      */
     update() {
-        const { wrapEl, el: contentEl } = this;
-        const { offsetWidth, offsetHeight, clientWidth, clientHeight, scrollWidth, scrollHeight } = contentEl;
+        const { wrapEl, el } = this;
+        const { offsetWidth, offsetHeight, clientWidth, clientHeight, scrollWidth, scrollHeight } = el;
         // scrollView尺寸
         this.wrapSize = [wrapEl.clientWidth, wrapEl.clientHeight];
         // 内容尺寸
@@ -97,18 +134,15 @@ export default class Content extends AnyEvent {
      * 吸附到最近的边缘
      */
     snap() {
-        if (this.__options.snap) {
-            // console.log('snap');
-            const xy = runTwice((i) => clamp(this.xy[i], this.minXY[i], this.maxXY[i]));
-            this.dampScroll(xy);
-        }
+        // console.log('snap');
+        const xy = runTwice((i) => clamp(this.xy[i], this.minXY[i], this.maxXY[i]));
+        this.dampScroll(xy);
     }
 
     /**
-     * 设置位置
-     * @param x
-     * @param y
-     * @returns
+     * 瞬移到目标位置
+     * @param distXY 目标位置
+     * @returns 目标位置
      */
     moveTo(distXY: XY): [number, number] {
         const { allow, overflowDistance } = this.__options;
@@ -128,7 +162,7 @@ export default class Content extends AnyEvent {
         if (!isChanged) return this.xy;
 
         // 移动到目标
-        runTwice(i => this.xy[i] = nextXY[i]);
+        runTwice((i) => (this.xy[i] = nextXY[i]));
 
         const [x, y] = this.xy;
         const { targets } = this;
@@ -147,9 +181,12 @@ export default class Content extends AnyEvent {
      */
     scrollTo(distXY: XY, duration = 1000, easing?: (t: number) => number) {
         const tupleXY = xY2Tuple(distXY);
+        const { overflowDistance } = this.__options;
         this.stop();
         this.isScrolling = true;
-        const realDist = runTwice((i) => clamp(tupleXY[i], this.minXY[i], this.maxXY[i]));
+        const realDist = runTwice((i) =>
+            clamp(tupleXY[i], this.minXY[i] - overflowDistance, this.maxXY[i] + overflowDistance)
+        );
         const [run, stop, done] = tween(this.xy, realDist, duration, easing);
         run(this.moveTo.bind(this));
         this.__stopScroll = stop;
