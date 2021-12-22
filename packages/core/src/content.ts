@@ -10,6 +10,7 @@ import { TYPE_BEFORE_DESTROY } from './const';
 import type { Options } from './wrap';
 import type { XY } from '@any-scroll/shared';
 import Wrap from './wrap';
+import { wrap } from 'lodash';
 
 interface ContentOptions extends Required<Options> {
     minXY?: (context: Content) => [number, number];
@@ -53,6 +54,12 @@ export default class Content extends AnyEvent {
         this.__options = options;
         setStyle(contentEl, { position: 'absolute' });
         this.update();
+
+        wrapRef.on(['update', 'at:start'], () => {
+            this.update();
+        })
+
+
 
         // this.on('scroll', () => {
         //     clearTimeout(this.__scrollEndTimeId);

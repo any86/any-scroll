@@ -1,4 +1,4 @@
-import { setStyle, createDOMDiv, changeDOMVisible, changeOpacity, runTwice, Axis,AxisList } from '@any-scroll/shared';
+import { setStyle, createDOMDiv, changeDOMVisible, changeOpacity, runTwice, Axis, AxisList } from '@any-scroll/shared';
 import { insertCss } from 'insert-css';
 import { TRACK_CLASS_NAME, THUMB_CLASS_NAME, BAR_CSS } from './const';
 import { Wrap, Content } from '@any-scroll/core';
@@ -19,7 +19,6 @@ export default function (wrapRef: WarpInstance) {
     insertCss(BAR_CSS);
     // 构建x|y轴滚动条DOM
     const barRefs = runTwice(createBar);
-
     wrapRef.on(['scroll', 'resize'], () => {
         updateBar(wrapRef, barRefs, allow);
     });
@@ -114,6 +113,7 @@ export default function (wrapRef: WarpInstance) {
             } else {
                 return;
             }
+            // console.log(contentSize[i] , wrapSize[i],i);
             // 内容尺寸大于外层尺寸才能显示进度条
             if (contentSize[i] > wrapSize[i]) {
                 changeOpacity(trackElement, 1);
@@ -123,8 +123,6 @@ export default function (wrapRef: WarpInstance) {
                 }, 1000);
 
                 const thumbRef = barRefs[i].getContentRef();
-                // 更新尺寸
-                thumbRef!.update();
                 if (null !== thumbRef) {
                     // 计算尺寸和位置
                     const [thumbSize, thumbXorY] = calcBarXorY(
@@ -139,7 +137,10 @@ export default function (wrapRef: WarpInstance) {
                     // console.log(i,{thumbSize, thumbXorY});
                     const thumbElement = barRef.getContentRef()!.el;
                     setStyle(thumbElement, { [['width', 'height'][i]]: `${thumbSize}px` });
-
+                    // 更新bar的可滑动范围
+                    // 此时的maxXY/minXY还是按照内容尺寸计算的,
+                    // 所以不能滑动
+                    thumbRef.update();
                     // 设置thumb的滑动范围
                     thumbRef.maxXY[i] = thumbRef.wrapSize[i] - thumbSize;
                     thumbRef.minXY[i] = 0;
@@ -181,7 +182,7 @@ function createDOM(el: HTMLElement, axis: 'x' | 'y' = Axis.X) {
  * @param trackLength scrollView的外框尺寸做滚动轨道尺寸
  * @param maxXorY scrollView的xy的最大值
  * @param maxXorY scrollView的xy的最小值
- * @returns 把手的尺寸和位置
+ * @returns 把手的尺寸(最长边)和位置
  */
 function calcBarXorY(
     scrollViewXOrY: number,

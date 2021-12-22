@@ -166,10 +166,6 @@ export default class Wrap extends AnyEvent {
     }
 
     update() {
-        // 通知每个contentRef计算属性
-        this.__contentRefList.forEach((contentRef) => {
-            contentRef.update();
-        });
         this.emit('update');
     }
 
