@@ -2,6 +2,7 @@ import { setStyle, createDOMDiv, changeDOMVisible, changeOpacity, runTwice, Axis
 import { insertCss } from 'insert-css';
 import { TRACK_CLASS_NAME, THUMB_CLASS_NAME, BAR_CSS } from './const';
 import { Wrap, Content } from '@any-scroll/core';
+import { TYPE_UPDATE } from 'packages/core/src/const';
 const { setTimeout } = window;
 type WarpInstance = InstanceType<typeof Wrap>;
 type ContentInstance = InstanceType<typeof Content>;
@@ -19,6 +20,13 @@ export default function (wrapRef: WarpInstance) {
     insertCss(BAR_CSS);
     // 构建x|y轴滚动条DOM
     const barRefs = runTwice(createBar);
+
+
+    wrapRef.on(TYPE_UPDATE,()=>{
+        updateBar(wrapRef, barRefs, allow);
+    })
+
+
     wrapRef.on(['scroll', 'resize'], () => {
         updateBar(wrapRef, barRefs, allow);
     });
@@ -29,8 +37,7 @@ export default function (wrapRef: WarpInstance) {
         updateBar(wrapRef, barRefs, allow);
     });
 
-    wrapRef.on('change-content', (ref) => {
-        // console.log(ref);
+    wrapRef.on('change-content', () => {
         updateBar(wrapRef, barRefs, allow);
     });
 
@@ -53,11 +60,15 @@ export default function (wrapRef: WarpInstance) {
 
         // ⭐基于scroll做bar
         const barRef = new Wrap(trackEl, { allow: [Axis.X === currentAxis, Axis.Y === currentAxis], overflowDistance: 0 });
-        setStyle(barRef.el as HTMLElement, { position: 'absolute', display: 'none' });
+        setStyle(barRef.el as HTMLElement, { position: 'absolute'});
 
-        barRef.at.on('panstart', () => {
+        barRef.on('panstart', () => {
             __isFoucsInBar = true;
         });
+
+        barRef.on('at:start', () => {
+            updateBar(wrapRef, barRefs, allow);
+        })
 
         barRef.on('scroll', () => {
             // 只响应bar的pan/swipe等产生的滚动
@@ -86,7 +97,7 @@ export default function (wrapRef: WarpInstance) {
                 const { x, y } = barRef.el.getBoundingClientRect();
                 const { contentSize } = thumbRef;
                 const newXY: [number, number] = [0, 0];
-                newXY[axisIndex] = [e.x, e.y][axisIndex] - [x, y][axisIndex] - contentSize[axisIndex] / 2;
+                newXY[axisIndex] = [x, y][axisIndex] - [e.x, e.y][axisIndex] + contentSize[axisIndex] / 2;
                 thumbRef.dampScroll(newXY);
             }
         });
@@ -104,6 +115,7 @@ export default function (wrapRef: WarpInstance) {
     function updateBar(wrapRef: WarpInstance, barRefs: WarpInstance[], allow: [boolean, boolean]) {
         const contentRef = wrapRef.getContentRef() as ContentInstance;
         const { contentSize, minXY, maxXY } = contentRef;
+        // console.warn(wrapRef.currentContentRef?.el);
         const wrapSize = wrapRef.size;
         runTwice((i) => {
             const barRef = barRefs[i];
@@ -112,9 +124,9 @@ export default function (wrapRef: WarpInstance) {
             if (allow[i]) {
                 changeDOMVisible(trackElement);
             } else {
+                changeDOMVisible(trackElement, false);
                 return;
             }
-            // console.log(contentSize[i] , wrapSize[i],i);
             // 内容尺寸大于外层尺寸才能显示进度条
             if (contentSize[i] > wrapSize[i]) {
                 changeOpacity(trackElement, 1);
@@ -144,7 +156,7 @@ export default function (wrapRef: WarpInstance) {
                     thumbRef.update();
                     // 设置thumb的滑动范围
                     thumbRef.maxXY[i] = 0;
-                    thumbRef.minXY[i] = thumbSize - barRef.size[i];
+                    thumbRef.minXY[i] =  Math.min(0,thumbSize-barRef.size[i]);
 
                     // 移动thumb
                     const { xy } = thumbRef;
@@ -152,6 +164,7 @@ export default function (wrapRef: WarpInstance) {
                     // 不然moveTo的内部判断xy没有变化,
                     // 是不会执行的,
                     // 触发不了scroll事件
+
                     const newXY: [number, number] = [...xy];
                     newXY[i] = thumbXorY;
                     thumbRef.moveTo(newXY);

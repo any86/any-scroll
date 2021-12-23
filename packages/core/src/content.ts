@@ -9,6 +9,7 @@ import { TYPE_BEFORE_DESTROY, TYPE_UPDATE } from './const';
 import type { Options } from './wrap';
 import type { XY } from '@any-scroll/shared';
 import Wrap from './wrap';
+import { wrap } from 'lodash';
 
 interface ContentOptions extends Required<Options> {
     minXY?: (context: Content) => [number, number];
@@ -58,7 +59,7 @@ export default class Content extends AnyEvent {
         this.__options = options;
         setStyle(contentEl, { position: 'absolute' });
 
-        wrapRef.on(['update', 'at:start'], () => {
+        wrapRef.on(TYPE_UPDATE, () => {
             this.update();
         });
 
@@ -124,7 +125,7 @@ export default class Content extends AnyEvent {
 
         this.minXY = this.__options.minXY ? this.__options.minXY(this) : [0, 0];
         this.emit(TYPE_UPDATE, this.contentSize);
-        console.log(this.minXY, this.maxXY);
+        // console.log(this.minXY, this.maxXY);
     }
 
     /**

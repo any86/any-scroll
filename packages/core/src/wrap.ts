@@ -97,9 +97,6 @@ export default class Wrap extends AnyEvent {
                 this.emit('scroll-end', arg);
             });
 
-            // contentRef.on(TYPE_UPDATE, contentSize => {
-
-            // });
 
             // 销毁content实例
             this.on(TYPE_BEFORE_DESTROY, () => {
@@ -151,6 +148,7 @@ export default class Wrap extends AnyEvent {
             this.emit('at:start');
             const targetEl = e.target as HTMLElement;
             this.currentContentRef = this.findContentRef(targetEl);
+            console.log(targetEl, this.currentContentRef);
             this.currentContentRef?.stop();
         });
 
@@ -201,7 +199,7 @@ export default class Wrap extends AnyEvent {
                 return ref;
             }
         }
-        return null;
+        return this.currentContentRef;
     }
 
     /**
@@ -249,22 +247,23 @@ export default class Wrap extends AnyEvent {
      * @returns
      */
     getContentRef(elOrIndex?: HTMLElement | number) {
+        const { __contentRefList } = this;
         // 不传参数, 返回默认ref
         if (void 0 === elOrIndex) {
-            return this.currentContentRef || this.__contentRefList[0];
+            return this.currentContentRef || __contentRefList[__contentRefList.length - 1];
         }
 
         // 传入元素
         if (isElement(elOrIndex)) {
             return (
-                this.__contentRefList.find(({ el }) => {
+                __contentRefList.find(({ el }) => {
                     return el === elOrIndex;
                 }) || null
             );
         }
         // 传入数字
         else {
-            return this.__contentRefList[Number(elOrIndex)] || null;
+            return __contentRefList[Number(elOrIndex)] || null;
         }
     }
 
