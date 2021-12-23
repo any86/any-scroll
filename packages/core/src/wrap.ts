@@ -133,7 +133,7 @@ export default class Wrap extends AnyEvent {
                 this.targets = e.targets;
                 const { deltaX, deltaY } = e;
                 const { xy } = currentContentRef;
-                currentContentRef.moveTo([xy[0] + deltaX, xy[1] + deltaY]);
+                currentContentRef.moveTo([xy[0] - deltaX, xy[1] - deltaY]);
             }
         });
 
@@ -170,7 +170,7 @@ export default class Wrap extends AnyEvent {
             // clearTimeout(this._scrollEndTimeId);
             const deltaX = e.speedX * 200;
             const deltaY = e.speedY * 200;
-            currentContentRef.dampScroll([currentContentRef.xy[0] + deltaX, currentContentRef.xy[1] + deltaY]);
+            currentContentRef.dampScroll([currentContentRef.xy[0] - deltaX, currentContentRef.xy[1] - deltaY]);
         });
 
         // 把any-touch的事件冒泡到any-scroll

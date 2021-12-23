@@ -143,8 +143,8 @@ export default function (wrapRef: WarpInstance) {
                     // 所以不能滑动
                     thumbRef.update();
                     // 设置thumb的滑动范围
-                    thumbRef.maxXY[i] = barRef.size[i] - thumbSize;
-                    thumbRef.minXY[i] = 0;
+                    thumbRef.maxXY[i] = 0;
+                    thumbRef.minXY[i] = thumbSize - barRef.size[i];
 
                     // 移动thumb
                     const { xy } = thumbRef;

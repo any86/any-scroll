@@ -27,10 +27,10 @@ export default function (wrapRef: WarpInstance) {
             wrapRef.currentContentRef.stop();
         }
         if ('move' === type || 'start' === type) {
-            const nextXY: [number, number] = isWheelX ? [xy[0] - deltaXOrY, xy[1]] : [xy[0], xy[1] - deltaXOrY];
+            const nextXY: [number, number] = isWheelX ? [xy[0] + deltaXOrY, xy[1]] : [xy[0], xy[1] + deltaXOrY];
             wrapRef.dampScroll(nextXY);
         } else if ('end' === type) {
-            const nextXY: [number, number] = isWheelX ? [xy[0] - vXorY * 5, xy[1]] : [xy[0], xy[1] - Math.ceil(vXorY) * 30];
+            const nextXY: [number, number] = isWheelX ? [xy[0] + vXorY * 5, xy[1]] : [xy[0], xy[1] + Math.ceil(vXorY) * 30];
             wrapRef.dampScroll(nextXY);
         }
     });

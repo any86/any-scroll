@@ -24,7 +24,13 @@ export default class Content extends AnyEvent {
      */
     readonly xy: [number, number] = [0, 0];
 
+    /**
+     * warp左上角和content左上角的最小距离
+     */
     minXY: [number, number] = [0, 0];
+    /**
+     * warp左上角和content左上角的最大距离
+     */
     maxXY: [number, number] = [0, 0];
     wrapSize: [number, number] = [0, 0];
     contentSize: [number, number] = [0, 0];
@@ -108,15 +114,17 @@ export default class Content extends AnyEvent {
         // 参考smooth-scroll
         this.contentSize = [offsetWidth - clientWidth + scrollWidth, offsetHeight - clientHeight + scrollHeight];
 
-        this.minXY = this.__options.minXY
-            ? this.__options.minXY(this)
+        // warp左上角和content左上角的距离
+        this.maxXY = this.__options.maxXY
+            ? this.__options.maxXY(this)
             : [
-                Math.min(0, this.wrapSize[0] - this.contentSize[0]),
-                Math.min(0, this.wrapSize[1] - this.contentSize[1]),
+                Math.max(0, this.contentSize[0] - this.wrapSize[0]),
+                Math.max(0, this.contentSize[1] - this.wrapSize[1]),
             ];
 
-        this.maxXY = this.__options.maxXY ? this.__options.maxXY(this) : [0, 0];
+        this.minXY = this.__options.minXY ? this.__options.minXY(this) : [0, 0];
         this.emit(TYPE_UPDATE, this.contentSize);
+        console.log(this.minXY, this.maxXY);
     }
 
     /**
@@ -170,7 +178,7 @@ export default class Content extends AnyEvent {
         const target = targets[0];
         // 钩子
         this.emit('scroll', { targets, target, x, y });
-        this.__options.render(this.el, this.xy);
+        this.__options.render(this.el, [-this.xy[0], -this.xy[1]]);
         return this.xy;
     }
 
