@@ -63,14 +63,14 @@ export default function (wrapRef: WarpInstance) {
             // 只响应bar的pan/swipe等产生的滚动
             // 防止bar传给content, content再传给bar这种情况.
             if (!__isFoucsInBar) return;
-            const thumb = barRef.getContentRef() as ContentInstance;
+            const thumbRef = barRef.getContentRef() as ContentInstance;
             const contentRef = wrapRef.getContentRef();
             if (null !== contentRef) {
                 // 缩放, bar => scrollView
                 const { xy } = contentRef;
                 const nextXY = [...xy] as [number, number];
                 nextXY[axisIndex] =
-                    (-thumb.xy[axisIndex] * contentRef.contentSize[axisIndex]) / thumb.wrapSize[axisIndex];
+                    (-thumbRef.xy[axisIndex] * contentRef.contentSize[axisIndex]) / barRef.size[axisIndex];
                 contentRef.moveTo(nextXY);
             }
         });
@@ -103,7 +103,8 @@ export default function (wrapRef: WarpInstance) {
      */
     function updateBar(wrapRef: WarpInstance, barRefs: WarpInstance[], allow: [boolean, boolean]) {
         const contentRef = wrapRef.getContentRef() as ContentInstance;
-        const { contentSize, wrapSize, minXY, maxXY } = contentRef;
+        const { contentSize, minXY, maxXY } = contentRef;
+        const wrapSize = wrapRef.size;
         runTwice((i) => {
             const barRef = barRefs[i];
             const trackElement = barRef.el;
@@ -142,7 +143,7 @@ export default function (wrapRef: WarpInstance) {
                     // 所以不能滑动
                     thumbRef.update();
                     // 设置thumb的滑动范围
-                    thumbRef.maxXY[i] = thumbRef.wrapSize[i] - thumbSize;
+                    thumbRef.maxXY[i] = barRef.size[i] - thumbSize;
                     thumbRef.minXY[i] = 0;
 
                     // 移动thumb

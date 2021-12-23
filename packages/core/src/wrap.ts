@@ -5,7 +5,7 @@ import AnyEvent from 'any-event';
 // import ResizeObserver from 'resize-observer-polyfill';
 import isElement from 'lodash/isElement';
 import Content from './content';
-import { SCROLL_END_DELAY, TYPE_BEFORE_DESTROY } from './const';
+import { SCROLL_END_DELAY, TYPE_BEFORE_DESTROY, TYPE_UPDATE } from './const';
 import { setStyle, render } from '@any-scroll/shared';
 // 防止ResizeObserver不存在报错
 const { setTimeout, ResizeObserver } = window;
@@ -40,8 +40,19 @@ export default class Wrap extends AnyEvent {
      */
     at: AnyTouch;
 
-    // size: [number, number] = [0, 0];
+    /**
+     * wrap的尺寸
+     */
+    size: [number, number] = [0, 0];
+
+    /**
+     * 当前content的尺寸
+     */
     // contentSize: [number, number] = [0, 0];
+
+    /**
+     * 当前触碰的元素
+     */
     targets: (EventTarget | null)[] = [];
 
     /**
@@ -53,6 +64,7 @@ export default class Wrap extends AnyEvent {
      * 当前content实例
      */
     currentContentRef: InstanceType<typeof Content> | null;
+
 
     // 存储content实例和元素
     private __contentRefList: ContentRefList = [];
@@ -76,10 +88,6 @@ export default class Wrap extends AnyEvent {
         // ⭐生成Content实例
         Array.from(el.children).forEach((contentEl) => {
             const contentRef = new Content(contentEl as HTMLElement, this);
-            contentRef.on('resize', () => {
-                this.update();
-                this.emit('resize');
-            });
 
             contentRef.on('scroll', (arg) => {
                 this.emit('scroll', arg);
@@ -88,6 +96,10 @@ export default class Wrap extends AnyEvent {
             contentRef.on('scroll-end', (arg) => {
                 this.emit('scroll-end', arg);
             });
+
+            // contentRef.on(TYPE_UPDATE, contentSize => {
+
+            // });
 
             // 销毁content实例
             this.on(TYPE_BEFORE_DESTROY, () => {
@@ -107,6 +119,8 @@ export default class Wrap extends AnyEvent {
             this.on(TYPE_BEFORE_DESTROY, () => {
                 ro.disconnect();
             });
+        } else {
+            this.update();
         }
 
         // ========== 手势 ==========
@@ -165,8 +179,13 @@ export default class Wrap extends AnyEvent {
         })
     }
 
+    /**
+     * 更新"可滑动范围"
+     */
     update() {
-        this.emit('update');
+        const { clientWidth, clientHeight } = this.el;
+        this.size = [clientWidth, clientHeight];
+        this.emit(TYPE_UPDATE, this.size);
     }
 
     /**
@@ -185,14 +204,34 @@ export default class Wrap extends AnyEvent {
         return null;
     }
 
+    /**
+     * 瞬移到目标位置
+     * @param distXY 目标位置
+     * @returns 目标位置
+     */
     moveTo(distXY: readonly [number, number]) {
         return this.currentContentRef?.moveTo(distXY);
     }
 
+    /**
+     * 滚动到目标位置, 支持动画
+     * @param distXY 目标位置
+     * @param duration 动画时长
+     * @param easing 缓动函数
+     */
     scrollTo(distXY: [number, number], duration = 1000, easing?: (t: number) => number) {
         this.currentContentRef?.scrollTo(distXY, duration, easing);
     }
 
+    /**
+     * 衰减滚动
+     * 作用同scrollTo,
+     * 只是滚动效果不同, 
+     * 其不能指定时间. 
+     * 模拟快速划动scrollView产生的滚动.
+     * @param distXY 目标坐标
+     * @param damping 每次衰减比例. 
+     */
     dampScroll(distXY: readonly [number, number], damping = this.options.damping) {
         this.currentContentRef?.dampScroll(distXY, damping);
     }

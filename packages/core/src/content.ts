@@ -3,14 +3,12 @@ import raf from 'raf';
 import clamp from 'lodash/clamp';
 import inRange from 'lodash/inRange';
 import { setStyle, damp, tween, runTwice } from '@any-scroll/shared';
-// import ResizeObserver from 'resize-observer-polyfill';
 import { xY2Tuple } from '@any-scroll/shared';
-import { TYPE_BEFORE_DESTROY } from './const';
+import { TYPE_BEFORE_DESTROY, TYPE_UPDATE } from './const';
 // 类型
 import type { Options } from './wrap';
 import type { XY } from '@any-scroll/shared';
 import Wrap from './wrap';
-import { wrap } from 'lodash';
 
 interface ContentOptions extends Required<Options> {
     minXY?: (context: Content) => [number, number];
@@ -22,7 +20,7 @@ const { ResizeObserver, MutationObserver } = window;
 
 export default class Content extends AnyEvent {
     /**
-     * 请用moveTo修改xy;
+     * 请用{@link moveTo}修改xy;
      */
     readonly xy: [number, number] = [0, 0];
 
@@ -31,7 +29,7 @@ export default class Content extends AnyEvent {
     wrapSize: [number, number] = [0, 0];
     contentSize: [number, number] = [0, 0];
     el: HTMLElement;
-    wrapEl: HTMLElement;
+    wrapRef: Wrap;
     targets: (EventTarget | null)[] = [];
     isScrolling = false;
 
@@ -49,17 +47,14 @@ export default class Content extends AnyEvent {
     constructor(contentEl: HTMLElement, wrapRef: Wrap) {
         super();
         this.el = contentEl;
-        const { el, options } = wrapRef;
-        this.wrapEl = el;
+        this.wrapRef = wrapRef;
+        const { options } = wrapRef;
         this.__options = options;
         setStyle(contentEl, { position: 'absolute' });
-        this.update();
 
         wrapRef.on(['update', 'at:start'], () => {
             this.update();
-        })
-
-
+        });
 
         // this.on('scroll', () => {
         //     clearTimeout(this.__scrollEndTimeId);
@@ -69,7 +64,6 @@ export default class Content extends AnyEvent {
         if (ResizeObserver) {
             const ro = new ResizeObserver(() => {
                 this.update();
-                this.emit('resize');
             });
             ro.observe(contentEl);
             this.on(TYPE_BEFORE_DESTROY, () => {
@@ -78,9 +72,9 @@ export default class Content extends AnyEvent {
         }
         // 降级用MutationObserver兼容
         else if (MutationObserver) {
+            this.update();
             const observer = new MutationObserver(() => {
                 this.update();
-                this.emit('resize');
             });
 
             observer.observe(contentEl, {
@@ -104,14 +98,14 @@ export default class Content extends AnyEvent {
      * 更新尺寸
      */
     update() {
-        const { wrapEl, el } = this;
+        const { el } = this;
         const { offsetWidth, offsetHeight, clientWidth, clientHeight, scrollWidth, scrollHeight } = el;
         // scrollView尺寸
-        this.wrapSize = [wrapEl.clientWidth, wrapEl.clientHeight];
+        this.wrapSize = [this.wrapRef.size[0], this.wrapRef.size[1]];
+
         // 内容尺寸
         // 保留边框
         // 参考smooth-scroll
-        // console.log(offsetHeight , clientHeight , scrollHeight);
         this.contentSize = [offsetWidth - clientWidth + scrollWidth, offsetHeight - clientHeight + scrollHeight];
 
         this.minXY = this.__options.minXY
@@ -122,7 +116,7 @@ export default class Content extends AnyEvent {
             ];
 
         this.maxXY = this.__options.maxXY ? this.__options.maxXY(this) : [0, 0];
-        // console.warn('__warpSize', this.wrapSize, 'contentSize', this.contentSize, '__minXY', this.minXY, '__maxXY', this.maxXY);
+        this.emit(TYPE_UPDATE, this.contentSize);
     }
 
     /**

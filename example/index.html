@@ -1,158 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <!-- <script src="https://unpkg.com/any-scroll/dist/any-scroll.umd.min.js"></script> -->
-        <script src="../packages/any-scroll/dist/any-scroll.umd.js"></script>
-        <!-- <script src="./any-scroll.umd.js"></script> -->
-        <title>Document</title>
-        <!-- <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js"></script> -->
-        <style>
-            * {
-                padding: 0;
-                margin: 0;
-            }
 
-            .app {
-                padding: 32px;
-                display: flex;
-            }
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- <script src="https://unpkg.com/any-scroll/dist/any-scroll.umd.min.js"></script> -->
+    <script src="../packages/any-scroll/dist/any-scroll.umd.js"></script>
+    <!-- <script src="./any-scroll.umd.js"></script> -->
+    <title>Document</title>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js"></script> -->
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
 
-            .app .left {
-                width: 420px;
-            }
+        .app {
+            padding: 32px;
+            display: flex;
+        }
+
+        .app .left {
+            width: 420px;
+        }
 
 
 
-            .app .left .any-scroll-1 {
-                width: 384px;
-                height: 80vh;
-                border-radius: 4px;
-                box-shadow: 1px 2px 15px 5px rgba(0, 0, 0, 0.1), 1px 2px 32px 5px rgba(0, 0, 0, 0.4);
-            }
+        .app .left .any-scroll-1 {
+            width: 384px;
+            height: 80vh;
+            border-radius: 4px;
+            box-shadow: 1px 2px 15px 5px rgba(0, 0, 0, 0.1), 1px 2px 32px 5px rgba(0, 0, 0, 0.4);
+        }
 
-            .app .right {
-                flex: 1;
-            }
+        .app .right {
+            flex: 1;
+        }
 
-            .box {
-                display: inline-block;
-                width: 128px;
-                text-align: center;
-                height: 128px;
-                line-height: 128px;
-                background: #5227b8;
-                color: rgba(255, 255, 255, 0.9);
-                font-size: 48px;
-            }
+        .box {
+            display: inline-block;
+            width: 128px;
+            text-align: center;
+            height: 128px;
+            line-height: 128px;
+            background: #5227b8;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 48px;
+        }
 
-            .box:nth-child(4n + 1) {
-                background-color: #2196f3;
-            }
+        .box:nth-child(4n + 1) {
+            background-color: #2196f3;
+        }
 
-            .box:nth-child(4n + 2) {
-                background-color: #ffc107;
-            }
+        .box:nth-child(4n + 2) {
+            background-color: #ffc107;
+        }
 
-            .box:nth-child(4n + 3) {
-                background-color: rgba(216, 18, 18, 0.7);
-            }
+        .box:nth-child(4n + 3) {
+            background-color: rgba(216, 18, 18, 0.7);
+        }
 
-            </style
-        </style>
-    </head>
+        </style
+    </style>
+</head>
 
-    <body>
-        <h1 style="margin: 16px">🎨 AnyScroll</h1>
+<body>
+    <h1 style="margin: 16px">🎨 AnyScroll</h1>
 
-        <article class="app">
-            <div class="left">
-                <div id="scroll" class="any-scroll-1">
-                    <div class="content" id="content2" style="width: 768px"></div>
-                    <div class="content" id="content"></div>
-                </div>
+    <article class="app">
+        <div class="left">
+            <div id="scroll" class="any-scroll-1">
+                <div class="content" id="content2" style="width: 768px"></div>
+                <div class="content" id="content"></div>
             </div>
+        </div>
 
-            <div class="right">
-                <button onclick="scrollTo2()">scrollTo2</button>
-                <button onclick="prepend()">prepend</button>
-                <button onclick="add()">add</button>
-            </div>
-        </article>
+        <div class="right">
+            <button onclick="scrollTo2()">scrollTo2</button>
+            <button onclick="prepend()">prepend</button>
+            <button onclick="add()">add</button>
+        </div>
+    </article>
 
-        <script>
-            const content = document.getElementById('content');
-            if (content) {
-                const html = [];
-                for (let i = 1; i <= 3; i++) {
-                    html.push(`<span class="box">${i}</span>`);
-                }
-                content.innerHTML = html.join('');
+    <script>
+        const content = document.getElementById('content');
+        if (content) {
+            const html = [];
+            for (let i = 1; i <= 3; i++) {
+                html.push(`<span class="box">${i}</span>`);
             }
+            content.innerHTML = html.join('');
+        }
 
-            const content2 = document.getElementById('content2');
-            if (content2) {
-                const html2 = [];
-                for (let i = 1; i <= 103; i++) {
-                    html2.push(`<span class="box">${i}</span>`);
-                }
-                content2.innerHTML = html2.join('');
+        const content2 = document.getElementById('content2');
+        if (content2) {
+            const html2 = [];
+            for (let i = 1; i <= 103; i++) {
+                html2.push(`<span class="box">${i}</span>`);
             }
-            const el = document.getElementById('scroll');
-            const as = new AnyScroll(el, {
-                overflowDistance: 100,
-                allow: [true, true],
-                // render(el, [x, y]) {
-                //     el.style.marginTop = y + 'px';
-                //     el.style.marginLeft = x + 'px';
-                // },
-            });
+            content2.innerHTML = html2.join('');
+        }
+        const el = document.getElementById('scroll');
+        const as = new AnyScroll(el, {
+            overflowDistance: 100,
+            allow: [true, true],
+            // render(el, [x, y]) {
+            //     el.style.marginTop = y + 'px';
+            //     el.style.marginLeft = x + 'px';
+            // },
+        });
 
-            as.on('scroll', (e) => {
-                // console.log(`scroll`, e);
-            });
+        as.on('scroll', (e) => {
+            // console.log(`scroll`, e);
+        });
 
-            as.on('scroll-end', (e) => {
-                console.warn('scroll-end', e);
-                // as._dampScroll([0, -4002]);
-            });
+        as.on('scroll-end', (e) => {
+            console.warn('scroll-end', e);
+            // as._dampScroll([0, -4002]);
+        });
 
-            // as.scrollTo([100, 200], 300);
+        // as.scrollTo([100, 200], 300);
 
-            const as2 = as.getContentRef(1);
-            as2?.set({
-                maxXY: ({ wrapSize, contentSize }) => {
-                    return [wrapSize[0] - contentSize[0], wrapSize[1] - contentSize[1]];
-                },
-            });
+        const as2 = as.getContentRef(1);
+        as2?.set({
+            maxXY: ({ wrapSize, contentSize }) => {
+                return [wrapSize[0] - contentSize[0], wrapSize[1] - contentSize[1]];
+            },
+        });
 
-            function scrollTo2() {
-                as.scrollTo([-100, -500], 2000);
+        function scrollTo2() {
+            as.scrollTo([-100, -500], 2000);
+        }
+
+        function add() {
+            const startIndex = ~~content2.lastChild.innerHTML + 1;
+            const frag = document.createDocumentFragment();
+            for (let i = startIndex; i <= startIndex + 100; i++) {
+                const span = document.createElement('span');
+                span.classList.add('box');
+                span.innerHTML = i;
+                frag.appendChild(span);
             }
+            content2.appendChild(frag);
+        }
 
-            function add() {
-                const startIndex = ~~content2.lastChild.innerHTML + 1;
-                const frag = document.createDocumentFragment();
-                for (let i = startIndex; i <= startIndex + 100; i++) {
-                    const span = document.createElement('span');
-                    span.classList.add('box');
-                    span.innerHTML = i;
-                    frag.appendChild(span);
-                }
-                content2.appendChild(frag);
+        function prepend() {
+            const startIndex = ~~content2.firstChild.innerHTML + 1;
+            for (let i = startIndex; i <= startIndex + 100; i++) {
+                const span = document.createElement('span');
+                span.classList.add('box');
+                span.innerHTML = i;
+                content2.insertAdjacentElement('afterbegin', span);
             }
+        }
+    </script>
+</body>
 
-            function prepend() {
-                const startIndex = ~~content2.firstChild.innerHTML + 1;
-                for (let i = startIndex; i <= startIndex + 100; i++) {
-                    const span = document.createElement('span');
-                    span.classList.add('box');
-                    span.innerHTML = i;
-                    content2.insertAdjacentElement('afterbegin', span);
-                }
-            }
-        </script>
-    </body>
 </html>

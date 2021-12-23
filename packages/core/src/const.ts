@@ -11,3 +11,4 @@ export const SCROLL_END_DELAY = 16;
 export const CLASS_NAME_ANY_SCROLL = 'any-scroll';
 
 export const TYPE_BEFORE_DESTROY = 'beforeDestroy';
+export const TYPE_UPDATE = 'update';

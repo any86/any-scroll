@@ -1,5 +1,7 @@
 import raf from 'raf';
-
+/**
+ * 坐标
+ */
 export type XY = readonly [number, number] | { readonly x: number, readonly y: number };
 
 /**
@@ -14,6 +16,9 @@ export function xY2Tuple(xy: XY): readonly [number, number] {
     return xy;
 }
 
+/**
+ * 轴线
+ */
 export const enum Axis {
     X = 'x',
     Y = 'y',
@@ -28,6 +33,11 @@ export function setStyle(el: HTMLElement, styles: Partial<CSSStyleDeclaration>) 
     }
 }
 
+/**
+ * 位移渲染函数
+ * @param el 元素
+ * @param param 位移x和y
+ */
 export function render(el: HTMLElement, [x, y]: readonly [number, number]) {
     setStyle(el, { transform: `translate3d(${x}px, ${y}px,0)` });
 }
@@ -40,6 +50,11 @@ export function render(el: HTMLElement, [x, y]: readonly [number, number]) {
 //     }
 // }
 
+/**
+ * 新建div
+ * @param className class名 
+ * @returns div
+ */
 export function createDOMDiv(className?: string[]) {
     const div = document.createElement(`div`);
     if (className) {
@@ -48,18 +63,36 @@ export function createDOMDiv(className?: string[]) {
     return div;
 }
 
+/**
+ * 改变透明度
+ * @param el 元素
+ * @param opacity 透明度 
+ */
 export function changeOpacity(el: HTMLElement, opacity = 1) {
     setStyle(el, { opacity: String(opacity) });
 }
 
+/**
+ * 改变dom显示/隐藏
+ * @param el 元素
+ * @param visible 是否显示
+ */
 export function changeDOMVisible(el: HTMLElement, visible = true) {
+    const NONE = 'none';
     if (visible) {
-        setStyle(el, { display: '' });
+        if (NONE === el.style.display) {
+            setStyle(el, { display: '' });
+        }
     } else {
-        setStyle(el, { display: 'none' });
+        setStyle(el, { display: NONE });
     }
 }
 
+/**
+ * 互动动画
+ * @param t 0~1秒
+ * @returns 
+ */
 export function easing(t: number) {
     return 1 - Math.pow(1 - t, 3);
 }
