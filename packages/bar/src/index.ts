@@ -37,9 +37,9 @@ export default function (wrapRef: WarpInstance) {
         updateBar(wrapRef, barRefs, allow);
     });
 
-    wrapRef.on('change-content', () => {
-        updateBar(wrapRef, barRefs, allow);
-    });
+    // wrapRef.on('change-content', () => {
+    //     updateBar(wrapRef, barRefs, allow);
+    // });
 
     wrapRef.on('beforeDestroy', () => {
         barRefs.forEach((barRef) => {

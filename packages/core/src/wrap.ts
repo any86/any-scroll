@@ -147,7 +147,7 @@ export default class Wrap extends AnyEvent {
         at.on('at:start', (e) => {
             this.emit('at:start');
             const targetEl = e.target as HTMLElement;
-            this.currentContentRef = this.findContentRef(targetEl);
+            this.currentContentRef = this.getContentRef(targetEl);
             console.log(targetEl, this.currentContentRef);
             this.currentContentRef?.stop();
         });
@@ -187,19 +187,32 @@ export default class Wrap extends AnyEvent {
     }
 
     /**
-     * 根据元素找contentRef
-     * @param targetEl
+     * 获取content实例,
+     * 参数如果是元素,
+     * 元素可以是content的子元素
+     * @param elOrIndex 元素或者索引
      * @returns
      */
-    findContentRef(targetEl: HTMLElement) {
-        for (let ref of this.__contentRefList) {
-            // 目标元素是否content元素的子元素
-            if (ref.el.contains(targetEl)) {
-                this.emit('change-content', ref);
-                return ref;
-            }
+    getContentRef(elOrIndex?: HTMLElement | number) {
+        const { __contentRefList } = this;
+        // 不传参数, 返回默认ref
+        if (void 0 === elOrIndex) {
+            return this.currentContentRef || __contentRefList[__contentRefList.length - 1];
         }
-        return this.currentContentRef;
+        // 传入数字
+        else if ('number' === typeof elOrIndex) {
+            return __contentRefList[Number(elOrIndex)] || null;
+        }
+        // 传入元素
+        else {
+            for (let ref of __contentRefList) {
+                // 目标元素是否content元素的子元素
+                if (ref.el.contains(elOrIndex)) {
+                    return ref;
+                }
+            }
+            return this.currentContentRef;
+        }
     }
 
     /**
@@ -239,32 +252,6 @@ export default class Wrap extends AnyEvent {
      */
     stop() {
         this.currentContentRef?.stop();
-    }
-
-    /**
-     * 获取content实例
-     * @param elOrIndex 元素或者索引
-     * @returns
-     */
-    getContentRef(elOrIndex?: HTMLElement | number) {
-        const { __contentRefList } = this;
-        // 不传参数, 返回默认ref
-        if (void 0 === elOrIndex) {
-            return this.currentContentRef || __contentRefList[__contentRefList.length - 1];
-        }
-
-        // 传入元素
-        if (isElement(elOrIndex)) {
-            return (
-                __contentRefList.find(({ el }) => {
-                    return el === elOrIndex;
-                }) || null
-            );
-        }
-        // 传入数字
-        else {
-            return __contentRefList[Number(elOrIndex)] || null;
-        }
     }
 
     /**

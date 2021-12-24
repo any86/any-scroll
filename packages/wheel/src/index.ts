@@ -13,7 +13,7 @@ export default function (wrapRef: WarpInstance) {
 
     const { el } = wrapRef;
     const unWatch = watchWheel(el, ({ type, deltaX, deltaY, vx, vy, target }) => {
-        wrapRef.currentContentRef = wrapRef.findContentRef(target as HTMLElement);
+        wrapRef.currentContentRef = wrapRef.getContentRef(target as HTMLElement);
         if (null === wrapRef.currentContentRef) return;
 
         const isWheelX = allow[0] && (!allow[1] || deltaX);
