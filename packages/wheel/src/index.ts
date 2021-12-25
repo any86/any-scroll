@@ -1,4 +1,5 @@
 import { Wrap } from '@any-scroll/core';
+import { TYPE_BEFORE_DESTROY } from 'packages/core/src/const';
 import watchWheel from './watchWheel';
 type WarpInstance = InstanceType<typeof Wrap>;
 
@@ -13,18 +14,18 @@ export default function (wrapRef: WarpInstance) {
 
     const { el } = wrapRef;
     const unWatch = watchWheel(el, ({ type, deltaX, deltaY, vx, vy, target }) => {
-        wrapRef.currentContentRef = wrapRef.getContentRef(target as HTMLElement);
-        if (null === wrapRef.currentContentRef) return;
-
+        const currentContentRef = wrapRef.getContentRef(target as HTMLElement);
+        if (null === currentContentRef) return;
+        wrapRef.active(currentContentRef);
         const isWheelX = allow[0] && (!allow[1] || deltaX);
         const deltaXOrY = deltaY || deltaX;
         const vXorY = vy || vx;
 
-        const { xy } = wrapRef.currentContentRef;
+        const { xy } = currentContentRef;
         wrapRef.targets = [target];
 
         if ('start' === type) {
-            wrapRef.currentContentRef.stop();
+            currentContentRef.stop();
         }
         if ('move' === type || 'start' === type) {
             const nextXY: [number, number] = isWheelX ? [xy[0] + deltaXOrY, xy[1]] : [xy[0], xy[1] + deltaXOrY];
@@ -35,5 +36,5 @@ export default function (wrapRef: WarpInstance) {
         }
     });
 
-    wrapRef.on('beforeDestroy',unWatch);
+    wrapRef.on(TYPE_BEFORE_DESTROY, unWatch);
 }

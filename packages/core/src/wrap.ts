@@ -62,7 +62,7 @@ export default class Wrap extends AnyEvent {
     /**
      * 当前content实例
      */
-    currentContentRef: InstanceType<typeof Content> | null;
+    private __currentContentRef: InstanceType<typeof Content> | null;
 
 
     // 存储content实例和元素
@@ -109,7 +109,7 @@ export default class Wrap extends AnyEvent {
         });
 
         // 默认contentRef为第一个contentRef
-        this.currentContentRef = this.getContentRef();
+        this.__currentContentRef = this.getContentRef();
 
         // 监视尺寸变化
         if (ResizeObserver) {
@@ -127,7 +127,7 @@ export default class Wrap extends AnyEvent {
         this.at = at;
 
         at.on(['panstart', 'panmove'], (e) => {
-            const { currentContentRef } = this;
+            const { __currentContentRef: currentContentRef } = this;
             if (null !== currentContentRef) {
                 this.targets = e.targets;
                 const { deltaX, deltaY } = e;
@@ -137,11 +137,11 @@ export default class Wrap extends AnyEvent {
         });
 
         at.on('panend', (e) => {
-            if (null === this.currentContentRef) return;
-            this.currentContentRef.__scrollEndTimeId = setTimeout(() => {
-                if (null !== this.currentContentRef) {
+            if (null === this.__currentContentRef) return;
+            this.__currentContentRef.__scrollEndTimeId = setTimeout(() => {
+                if (null !== this.__currentContentRef) {
                     this.targets = e.targets;
-                    this.emit(TYPE_SCROLL_END, this.currentContentRef.xy);
+                    this.emit(TYPE_SCROLL_END, this.__currentContentRef.xy);
                 }
             }, SCROLL_END_DELAY);
         });
@@ -149,13 +149,13 @@ export default class Wrap extends AnyEvent {
         at.on('at:start', (e) => {
             this.emit('at:start');
             const targetEl = e.target as HTMLElement;
-            this.currentContentRef = this.getContentRef(targetEl);
-            this.currentContentRef?.stop();
+            this.__currentContentRef = this.getContentRef(targetEl);
+            this.__currentContentRef?.stop();
         });
 
         at.on('at:end', () => {
             this.emit('at:end');
-            this.currentContentRef?.snap();
+            this.__currentContentRef?.snap();
         });
 
         const swipe = at.get('swipe');
@@ -163,7 +163,7 @@ export default class Wrap extends AnyEvent {
             swipe.velocity = 1;
         }
         at.on('swipe', (e) => {
-            const { currentContentRef } = this;
+            const { __currentContentRef: currentContentRef } = this;
             if (null === currentContentRef) return;
             this.targets = e.targets;
             // clearTimeout(this._scrollEndTimeId);
@@ -198,7 +198,7 @@ export default class Wrap extends AnyEvent {
         const { __contentRefList } = this;
         // 不传参数, 返回默认ref
         if (void 0 === elOrIndex) {
-            return this.currentContentRef || __contentRefList[__contentRefList.length - 1];
+            return this.__currentContentRef || __contentRefList[__contentRefList.length - 1];
         }
         // 传入数字
         else if ('number' === typeof elOrIndex) {
@@ -212,8 +212,16 @@ export default class Wrap extends AnyEvent {
                     return ref;
                 }
             }
-            return this.currentContentRef;
+            return this.__currentContentRef;
         }
+    }
+
+    /**
+     * 指定content为激活状态
+     * @param contentRef 
+     */
+    active(contentRef: Content) {
+        this.__currentContentRef = contentRef;
     }
 
     /**
@@ -222,7 +230,7 @@ export default class Wrap extends AnyEvent {
      * @returns 目标位置
      */
     moveTo(distXY: readonly [number, number]) {
-        return this.currentContentRef?.moveTo(distXY);
+        return this.__currentContentRef?.moveTo(distXY);
     }
 
     /**
@@ -232,7 +240,7 @@ export default class Wrap extends AnyEvent {
      * @param easing 缓动函数
      */
     scrollTo(distXY: [number, number], duration = 1000, easing?: (t: number) => number) {
-        this.currentContentRef?.scrollTo(distXY, duration, easing);
+        this.__currentContentRef?.scrollTo(distXY, duration, easing);
     }
 
     /**
@@ -245,14 +253,14 @@ export default class Wrap extends AnyEvent {
      * @param damping 每次衰减比例. 
      */
     dampScroll(distXY: readonly [number, number], damping = this.options.damping) {
-        this.currentContentRef?.dampScroll(distXY, damping);
+        this.__currentContentRef?.dampScroll(distXY, damping);
     }
 
     /**
      * 立即停止滑动
      */
     stop() {
-        this.currentContentRef?.stop();
+        this.__currentContentRef?.stop();
     }
 
     /**

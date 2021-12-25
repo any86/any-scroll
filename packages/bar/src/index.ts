@@ -22,7 +22,7 @@ export default function (wrapRef: WarpInstance) {
     const barRefs = runTwice(createBar);
 
 
-    wrapRef.on(TYPE_UPDATED,()=>{
+    wrapRef.on(TYPE_UPDATED, () => {
         updateBar(wrapRef, barRefs, allow);
     })
 
@@ -60,7 +60,7 @@ export default function (wrapRef: WarpInstance) {
 
         // ⭐基于scroll做bar
         const barRef = new Wrap(trackEl, { allow: [Axis.X === currentAxis, Axis.Y === currentAxis], overflowDistance: 0 });
-        setStyle(barRef.el as HTMLElement, { position: 'absolute'});
+        setStyle(barRef.el as HTMLElement, { position: 'absolute' });
 
         barRef.on('panstart', () => {
             __isFoucsInBar = true;
@@ -144,8 +144,8 @@ export default function (wrapRef: WarpInstance) {
                         contentSize[i],
                         maxXY[i],
                         minXY[i],
-                        thumbRef.minXY[i],
-                        thumbRef.maxXY[i]
+                        // thumbRef.minXY[i],
+                        // thumbRef.maxXY[i]
                     );
                     // console.log(i,{thumbSize, thumbXorY});
                     const thumbElement = barRef.getContentRef()!.el;
@@ -156,7 +156,7 @@ export default function (wrapRef: WarpInstance) {
                     thumbRef.update();
                     // 设置thumb的滑动范围
                     thumbRef.maxXY[i] = 0;
-                    thumbRef.minXY[i] =  Math.min(0,thumbSize-barRef.size[i]);
+                    thumbRef.minXY[i] = Math.min(0, thumbSize - barRef.size[i]);
 
                     // 移动thumb
                     const { xy } = thumbRef;
@@ -204,8 +204,8 @@ function calcBarXorY(
     contentSize: number,
     maxXorY: number,
     minXorY: number,
-    thumbMinXOrY: number,
-    thumbMaxXOrY: number
+    // thumbMinXOrY: number,
+    // thumbMaxXOrY: number
 ): [number, number] {
     const trackSize = wrapSize;
     const scrollViewMaxDistance = maxXorY - minXorY;
