@@ -5,7 +5,7 @@ import AnyEvent from 'any-event';
 // import ResizeObserver from 'resize-observer-polyfill';
 import isElement from 'lodash/isElement';
 import Content from './content';
-import { SCROLL_END_DELAY, TYPE_BEFORE_DESTROY, TYPE_UPDATE } from './const';
+import { SCROLL_END_DELAY, TYPE_BEFORE_DESTROY, TYPE_BEFORE_UPDATED, TYPE_UPDATED } from './const';
 import { setStyle, render } from '@any-scroll/shared';
 // 防止ResizeObserver不存在报错
 const { setTimeout, ResizeObserver } = window;
@@ -97,6 +97,9 @@ export default class Wrap extends AnyEvent {
                 this.emit('scroll-end', arg);
             });
 
+            contentRef.on(TYPE_UPDATED, arg => {
+                this.emit(TYPE_UPDATED, arg);
+            });
 
             // 销毁content实例
             this.on(TYPE_BEFORE_DESTROY, () => {
@@ -148,7 +151,6 @@ export default class Wrap extends AnyEvent {
             this.emit('at:start');
             const targetEl = e.target as HTMLElement;
             this.currentContentRef = this.getContentRef(targetEl);
-            console.log(targetEl, this.currentContentRef);
             this.currentContentRef?.stop();
         });
 
@@ -183,7 +185,7 @@ export default class Wrap extends AnyEvent {
     update() {
         const { clientWidth, clientHeight } = this.el;
         this.size = [clientWidth, clientHeight];
-        this.emit(TYPE_UPDATE, this.size);
+        this.emit(TYPE_BEFORE_UPDATED, this.size);
     }
 
     /**

@@ -2,7 +2,7 @@ import { setStyle, createDOMDiv, changeDOMVisible, changeOpacity, runTwice, Axis
 import { insertCss } from 'insert-css';
 import { TRACK_CLASS_NAME, THUMB_CLASS_NAME, BAR_CSS } from './const';
 import { Wrap, Content } from '@any-scroll/core';
-import { TYPE_UPDATE } from 'packages/core/src/const';
+import { TYPE_UPDATED } from 'packages/core/src/const';
 const { setTimeout } = window;
 type WarpInstance = InstanceType<typeof Wrap>;
 type ContentInstance = InstanceType<typeof Content>;
@@ -22,7 +22,7 @@ export default function (wrapRef: WarpInstance) {
     const barRefs = runTwice(createBar);
 
 
-    wrapRef.on(TYPE_UPDATE,()=>{
+    wrapRef.on(TYPE_UPDATED,()=>{
         updateBar(wrapRef, barRefs, allow);
     })
 
