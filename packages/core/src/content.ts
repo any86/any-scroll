@@ -4,7 +4,7 @@ import clamp from 'lodash/clamp';
 import inRange from 'lodash/inRange';
 import { setStyle, damp, tween, runTwice } from '@any-scroll/shared';
 import { xY2Tuple } from '@any-scroll/shared';
-import { TYPE_BEFORE_DESTROY, TYPE_BEFORE_UPDATED, TYPE_UPDATED } from './const';
+import { TYPE_BEFORE_DESTROY, TYPE_BEFORE_UPDATED, TYPE_SCROLL_END, TYPE_UPDATED } from './const';
 // 类型
 import type { Options } from './wrap';
 import type { XY } from '@any-scroll/shared';
@@ -124,7 +124,7 @@ export default class Content extends AnyEvent {
             ];
 
         this.minXY = this.__options.minXY ? this.__options.minXY(this) : [0, 0];
-        this.emit(TYPE_UPDATED, this.contentSize);
+        this.emit(TYPE_UPDATED, this);
         // console.log(this.minXY, this.maxXY);
     }
 
@@ -133,7 +133,7 @@ export default class Content extends AnyEvent {
      */
     stop() {
         if (this.isScrolling && this.xy.every((v, i) => inRange(v, this.minXY[i], this.maxXY[i]))) {
-            this.emit('scroll-end', this.xy);
+            this.emit(TYPE_SCROLL_END, this.xy);
         }
         this.isScrolling = false;
         raf.cancel(this.__dampScrollRafId);

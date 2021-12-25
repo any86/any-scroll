@@ -3,9 +3,8 @@ import AnyEvent from 'any-event';
 // declare const WebKitMutationObserver: MutationObserver;
 // declare const MozMutationObserver: MutationObserver;
 // import ResizeObserver from 'resize-observer-polyfill';
-import isElement from 'lodash/isElement';
 import Content from './content';
-import { SCROLL_END_DELAY, TYPE_BEFORE_DESTROY, TYPE_BEFORE_UPDATED, TYPE_UPDATED } from './const';
+import { SCROLL_END_DELAY, TYPE_BEFORE_DESTROY, TYPE_BEFORE_UPDATED, TYPE_SCROLL, TYPE_SCROLL_END, TYPE_UPDATED } from './const';
 import { setStyle, render } from '@any-scroll/shared';
 // 防止ResizeObserver不存在报错
 const { setTimeout, ResizeObserver } = window;
@@ -89,12 +88,12 @@ export default class Wrap extends AnyEvent {
         Array.from(el.children).forEach((contentEl) => {
             const contentRef = new Content(contentEl as HTMLElement, this);
 
-            contentRef.on('scroll', (arg) => {
-                this.emit('scroll', arg);
+            contentRef.on(TYPE_SCROLL, (arg) => {
+                this.emit(TYPE_SCROLL, arg);
             });
 
-            contentRef.on('scroll-end', (arg) => {
-                this.emit('scroll-end', arg);
+            contentRef.on(TYPE_SCROLL_END, (arg) => {
+                this.emit(TYPE_SCROLL_END, arg);
             });
 
             contentRef.on(TYPE_UPDATED, arg => {
@@ -142,7 +141,7 @@ export default class Wrap extends AnyEvent {
             this.currentContentRef.__scrollEndTimeId = setTimeout(() => {
                 if (null !== this.currentContentRef) {
                     this.targets = e.targets;
-                    this.emit('scroll-end', this.currentContentRef.xy);
+                    this.emit(TYPE_SCROLL_END, this.currentContentRef.xy);
                 }
             }, SCROLL_END_DELAY);
         });
