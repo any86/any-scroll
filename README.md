@@ -1,4 +1,12 @@
-# any-scroll
+# any-scroll [![NPM Version][npm-image]][npm-url] [![NPM Downloads][downloads-image]][downloads-url] [![size-image]][size-url] 
+
+[size-image]: https://badgen.net/bundlephobia/minzip/any-scroll
+[size-url]: https://bundlephobia.com/result?p=any-scroll
+[npm-image]: https://badgen.net/npm/v/any-scroll
+[npm-url]: https://npmjs.org/package/any-scroll
+[downloads-image]: https://badgen.net/npm/dt/any-scroll
+[downloads-url]: https://npmjs.org/package/any-scroll
+
 模拟滚动插件, 手势识别基于[any-touch](https://github.com/any86/any-touch).
 
 ## 概念(wrap/content)
@@ -39,14 +47,23 @@ any-scroll的滚动实际是通过2个"**父子div**"的相对位置变化模拟
         - [at : any-touch实例](#at)
     - [实例方法](#实例方法)
         - [on : 监听事件](#on)
-        - [scrollTo : 动画滚动](#scrollTo)
-        - [moveTo : 瞬移](#moveTo)
-        - [scrollToElement : 移动元素到wrap左上角](#scrollToElement)
-        - [dampScroll : 衰减滚动](#dampScroll)
+        - [scrollTo : 动画滚动](#scrollto)
+        - [moveTo : 瞬移](#moveto)
+        - [scrollToElement : 移动元素到wrap左上角](#scrolltoelement)
+        - [dampScroll : 衰减滚动](#dampscroll)
         - [update : 更新"可滑动范围"](#update)
-        - [getContentRef : 获取content实例(其上有尺寸数据)](#getContentRef)
+        - [getContentRef : 获取content实例(其上有尺寸数据)](#getcontentref)
         - [active : 激活content实例"](#active)
-
+    - [事件](#事件)
+        - [scroll : 滚动](#事件)
+        - [scrollEnd : 滚动结束](#事件)
+        - [tap : 单击](#事件)
+        - [press : 按压](#事件)
+        - [pressup : 按压释放](#事件)
+        - [pan : 拖拽](#事件)
+        - [swipe : 滑动](#事件)
+        - [pinch : 缩放](#事件)
+        - [rotate : 旋转](#事件)
 - [常见问题](#常见问题)
     - [监视内容变化](#监视内容变化)
 
@@ -81,7 +98,7 @@ as.scrollTo({y:-100},1000);
 - [选项](#选项)
 - [实例属性](#实例属性)
 - [实例方法](#实例方法)
-
+- [事件](#事件)
 ### 选项
 |名称|默认值|说明|
 |---|---|---|
@@ -278,6 +295,40 @@ console.log(as.size);
 
 [🚀返回目录](#目录)
 
+### 事件
+
+```javascript
+as.on('scroll', context=>{
+    // 当前位置信息
+    // context === as
+    console.log(context.xy);
+});
+```
+|事件名称|说明|
+|---|---|
+|scroll| 滚动|
+|scrollEnd| 滚动结束|
+|tap| 单击|
+|press| 按压|
+|pressup| 按压释放|
+|pan| 拖拽|
+|swipe| 滑动|
+|pinch| 缩放|
+|rotate| 旋转|
+
+
+除了"**scroll**"和"**scroll-end**", 其他事件都是any-touch实现的, 其事件对象上包含当前触点/距离/速度等信息, 更多请参考[any-touch](https://github.com/any86/any-touch)
+
+```javascript
+as.on('tap', e=>{
+    // 当前触点x坐标
+    console.log(e.x)
+})
+```
+
+
+
+[🚀返回目录](#目录)
 
 ## 常见问题
 
