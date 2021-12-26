@@ -5,9 +5,9 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- <script src="https://unpkg.com/any-scroll/dist/any-scroll.umd.min.js"></script> -->
-    <!-- <script src="../packages/any-scroll/dist/any-scroll.umd.js"></script> -->
-    <script src="./any-scroll.umd.js"></script>
+    <script src="https://unpkg.com/any-scroll/dist/any-scroll.umd.min.js"></script>
+    <!-- <script src="./any-scroll.umd.min.js"></script> -->
+    <!-- <script src="./any-scroll.umd.js"></script> -->
     <title>Document</title>
     <!-- <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js"></script> -->
     <style>
@@ -40,13 +40,13 @@
 
         .box {
             display: inline-block;
-            width: 128px;
+            width: 100px;
             text-align: center;
-            height: 128px;
-            line-height: 128px;
+            height: 100px;
+            line-height: 100px;
             background: #5227b8;
             color: rgba(255, 255, 255, 0.9);
-            font-size: 48px;
+            font-size: 36px;
         }
 
         .box:nth-child(4n + 1) {
@@ -66,48 +66,51 @@
 </head>
 
 <body>
-    <h1 style="margin:16px;"> 🎨 AnyScroll</h1>
+    <h1 style="margin: 16px">🎨 AnyScroll</h1>
 
     <article class="app">
-
         <div class="left">
             <div id="scroll" class="any-scroll-1">
-                <div class="content" id="content2" style="width:768px"></div>
-                <div class="content" id="content"></div>
+                <div class="content" id="content2" style="width: 1000px"></div>
             </div>
         </div>
 
         <div class="right">
-            <button onclick="scrollTo2()">scrollTo2</button>
+            <button onclick="scrollTo2()">scrollTo</button>
+            <button onclick="moveTo()">moveTo(0,0)</button>
+            <button onclick="scrollToElement()">scrollToElement到125的元素</button>
+            <button onclick="prepend()">prepend</button>
             <button onclick="add()">add</button>
         </div>
-
-
-
     </article>
-
 
     <script>
         const content = document.getElementById('content');
         if (content) {
             const html = [];
             for (let i = 1; i <= 3; i++) {
-                html.push(`<span class="box">${i}</span>`);
+                html.push(`<span class="box" id="box-${i}">${i}</span>`);
             }
             content.innerHTML = html.join('');
         }
 
-
         const content2 = document.getElementById('content2');
         if (content2) {
             const html2 = [];
-            for (let i = 1; i <= 103; i++) {
-                html2.push(`<span class="box">${i}</span>`);
+            for (let i = 1; i <= 1002; i++) {
+                html2.push(`<span class="box" id="box-${i}">${i}</span>`);
             }
             content2.innerHTML = html2.join('');
         }
         const el = document.getElementById('scroll');
-        const as = new AnyScroll(el, { overflowDistance: 100, allow: [true, true] });
+        const as = new AnyScroll(el, {
+            overflowDistance: 100,
+            allow: [true, true],
+            // render(el, [x, y]) {
+            //     el.style.marginTop = y + 'px';
+            //     el.style.marginLeft = x + 'px';
+            // },
+        });
 
         as.on('scroll', (e) => {
             // console.log(`scroll`, e);
@@ -122,50 +125,45 @@
 
         const as2 = as.getContentRef(1);
         as2?.set({
-            maxXY: ({ wrapSize, contentSize }) => {
-                return [
-                    wrapSize[0] - contentSize[0],
-                    wrapSize[1] - contentSize[1],
-                ]
-            }
-        })
-
-
-
-        var b1 = 4 / 11,
-    b2 = 6 / 11,
-    b3 = 8 / 11,
-    b4 = 3 / 4,
-    b5 = 9 / 11,
-    b6 = 10 / 11,
-    b7 = 15 / 16,
-    b8 = 21 / 22,
-    b9 = 63 / 64,
-    b0 = 1 / b1 / b1;
-
-function bounceIn(t) {
-  return 1 - bounceOut(1 - t);
-}
-
-function bounceOut(t) {
-  return (t = +t) < b1 ? b0 * t * t : t < b3 ? b0 * (t -= b2) * t + b4 : t < b6 ? b0 * (t -= b5) * t + b7 : b0 * (t -= b8) * t + b9;
-}
-
-function bounceInOut(t) {
-  return ((t *= 2) <= 1 ? 1 - bounceOut(1 - t) : bounceOut(t - 1) + 1) / 2;
-}
+            minXY: ({ wrapSize, contentSize }) => {
+                return [contentSize[0] - wrapSize[0], contentSize[1] - wrapSize[1]];
+            },
+        });
 
         function scrollTo2() {
-            as.scrollTo([-100, -100], 2000);
+            as.scrollTo([100, 500], 500);
         }
 
-        function add() {
-            const html2 = [];
-            for (let i = 62; i <= 161; i++) {
-                html2.push(`<span class="box">${i}</span>`);
-            }
-            content2.innerHTML += html2.join('');
+        function scrollToElement(){
+            const el = document.querySelector('#box-115');
+            as.scrollToElement(el,[,100]);
+        }
 
+        function moveTo() {
+            as.moveTo([0, 0]);
+        }
+
+
+        function add() {
+            const startIndex = ~~content2.lastChild.innerHTML + 1;
+            const frag = document.createDocumentFragment();
+            for (let i = startIndex; i <= startIndex + 100; i++) {
+                const span = document.createElement('span');
+                span.classList.add('box');
+                span.innerHTML = i;
+                frag.appendChild(span);
+            }
+            content2.appendChild(frag);
+        }
+
+        function prepend() {
+            const startIndex = ~~content2.firstChild.innerHTML + 1;
+            for (let i = startIndex; i <= startIndex + 100; i++) {
+                const span = document.createElement('span');
+                span.classList.add('box');
+                span.innerHTML = i;
+                content2.insertAdjacentElement('afterbegin', span);
+            }
         }
     </script>
 </body>
