@@ -13,7 +13,7 @@ export function xY2Tuple(xy: XY, defaultXY: readonly [number, number]): readonly
     if ('x' in xy || 'y' in xy) {
         return [xy.x || defaultXY[0], xy.y || defaultXY[1]] as const;
     }
-    return runTwice(i => xy[i] || defaultXY[i]);
+    return runTwice(i => xy[i] ?? defaultXY[i]);
 }
 
 /**
