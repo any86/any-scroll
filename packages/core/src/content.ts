@@ -3,13 +3,12 @@ import raf from 'raf';
 import clamp from 'lodash/clamp';
 import inRange from 'lodash/inRange';
 import { setStyle, damp, tween, runTwice } from '@any-scroll/shared';
-import { xY2Tuple } from '@any-scroll/shared';
+import { xY2Tuple, easing } from '@any-scroll/shared';
 import { TYPE_BEFORE_DESTROY, TYPE_BEFORE_UPDATED, TYPE_SCROLL_END, TYPE_UPDATED } from './const';
 // 类型
 import type { Options } from './wrap';
 import type { XY } from '@any-scroll/shared';
 import Wrap from './wrap';
-import { wrap } from 'lodash';
 
 interface ContentOptions extends Required<Options> {
     minXY?: (context: Content) => [number, number];
@@ -159,7 +158,7 @@ export default class Content extends AnyEvent {
         if (!allow.includes(true)) return this.xy;
 
         clearTimeout(this.__scrollEndTimeId);
-        const tupleXY = xY2Tuple(distXY);
+        const tupleXY = xY2Tuple(distXY, this.xy);
         const nextXY = runTwice((i) => {
             if (allow[i] && void 0 !== tupleXY[i]) {
                 return clamp(tupleXY[i], this.minXY[i] - overflowDistance, this.maxXY[i] + overflowDistance);
@@ -190,7 +189,7 @@ export default class Content extends AnyEvent {
      * @param easing 缓动函数
      */
     scrollTo(distXY: XY, duration = 1000, easing?: (t: number) => number) {
-        const tupleXY = xY2Tuple(distXY);
+        const tupleXY = xY2Tuple(distXY, this.xy);
         const { overflowDistance } = this.__options;
         this.stop();
         this.isScrolling = true;
@@ -207,13 +206,30 @@ export default class Content extends AnyEvent {
     }
 
     /**
+     * 滚动到目标元素, 
+     * 元素左上角尽量与wrap左上角重合
+     * @param el 目标元素
+     * @param offset 对目标位置的修正
+     * @param duration 动画时长
+     * @param easingFunction 缓动函数
+     */
+    scrollToElement(el: HTMLElement, offset: XY = [0, 0], duration = 1000, easingFunction = easing) {
+        const offsetTuple = xY2Tuple(offset, [0, 0]);
+        console.log(offsetTuple);
+        const rect = this.wrapRef.el.getBoundingClientRect();
+        const { x, y } = el.getBoundingClientRect();
+        const distXY = runTwice(i => this.xy[i] + [x, y][i] - [rect.x, rect.y][i] + offsetTuple[i]);
+        this.scrollTo(distXY, duration, easingFunction)
+    }
+
+    /**
      * swipe手势对应的滚动逻辑
      * 和对外的scrollTo的区别是:与时间无关的迭代衰减
      * @param tupleXY 目标点
      * @param onScroll 滚动回调
      */
     dampScroll(distXY: XY, damping?: number) {
-        const tupleXY = xY2Tuple(distXY);
+        const tupleXY = xY2Tuple(distXY, this.xy);
         // 参数
         const { overflowDistance, allow } = this.__options;
         const noScroll = runTwice((i) => !allow[i] || tupleXY[i] === this.xy[i]).every((isMoved) => isMoved);
@@ -225,7 +241,7 @@ export default class Content extends AnyEvent {
         // 内部状态, 根据不同位置会发生变化
         const _distXY: [number, number] = [...tupleXY];
 
-        // 每次位移
+        // raf刷新的移动,
         function _moveTo(context: Content) {
             // 是否到达终点
             context.isScrolling = true;
@@ -236,24 +252,24 @@ export default class Content extends AnyEvent {
                 if (!allow[i]) return xy[i];
 
                 // 预判接下来的位置
-                const _nextvalue = damp(context.xy[i], _distXY[i], damping);
+                const _nextValue = damp(context.xy[i], _distXY[i], damping);
                 // console.log(i, xy[i], _nextvalue, _distXY[i], distXY[i]);
 
                 // ====== 根据当前位置和目标计算"阶段性的目标位置"(修正distXY) ======
 
                 // 超过了最大界限,需要重新计算_nextValue
-                if (_nextvalue >= maxXY[i] + overflowDistance) {
-                    // 复位
+                if (_nextValue >= maxXY[i] + overflowDistance) {
+                    // 复位到最近的边
                     _distXY[i] = maxXY[i];
                 }
                 // 超过最小
-                else if (_nextvalue <= minXY[i] - overflowDistance) {
+                else if (_nextValue <= minXY[i] - overflowDistance) {
                     _distXY[i] = minXY[i];
                 }
                 // 可移动范围内
                 else {
                     // 当前已经到达目标
-                    if (_nextvalue === _distXY[i]) {
+                    if (_nextValue === _distXY[i]) {
                         // 但是位置超出的边框
                         // 重新计算_distXY
                         if (xy[i] > maxXY[i]) {
@@ -262,10 +278,10 @@ export default class Content extends AnyEvent {
                             _distXY[i] = minXY[i];
                         }
                     } else {
-                        return _nextvalue;
+                        return _nextValue;
                     }
                 }
-                return damp(context.xy[i], _distXY[i]);
+                return damp(context.xy[i], _distXY[i], damping);
             });
 
             context.moveTo(_nextXY);

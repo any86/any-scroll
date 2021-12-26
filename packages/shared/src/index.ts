@@ -6,14 +6,14 @@ export type XY = readonly [number, number] | { readonly x: number, readonly y: n
 
 /**
  * 统一xy的表现形式为[x,y]
- * @param xy 
+ * @param xy
  * @returns [x,y]形式的坐标
  */
-export function xY2Tuple(xy: XY): readonly [number, number] {
-    if ('x' in xy) {
-        return [xy.x, xy.y];
+export function xY2Tuple(xy: XY, defaultXY: readonly [number, number]): readonly [number, number] {
+    if ('x' in xy || 'y' in xy) {
+        return [xy.x || defaultXY[0], xy.y || defaultXY[1]] as const;
     }
-    return xy;
+    return runTwice(i => xy[i] || defaultXY[i]);
 }
 
 /**

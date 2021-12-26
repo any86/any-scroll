@@ -5,7 +5,7 @@ import AnyEvent from 'any-event';
 // import ResizeObserver from 'resize-observer-polyfill';
 import Content from './content';
 import { SCROLL_END_DELAY, TYPE_BEFORE_DESTROY, TYPE_BEFORE_UPDATED, TYPE_SCROLL, TYPE_SCROLL_END, TYPE_UPDATED } from './const';
-import { setStyle, render } from '@any-scroll/shared';
+import { setStyle, render, XY } from '@any-scroll/shared';
 // 防止ResizeObserver不存在报错
 const { setTimeout, ResizeObserver } = window;
 export interface Options {
@@ -243,6 +243,18 @@ export default class Wrap extends AnyEvent {
         this.__currentContentRef?.scrollTo(distXY, duration, easing);
     }
 
+    /**
+     * 滚动到目标元素, 
+     * 元素左上角尽量与wrap左上角重合
+     * @param el 目标元素
+     * @param offset 对目标位置的修正
+     * @param duration 动画时长
+     * @param easingFunction 缓动函数
+     */
+    scrollToElement(el: HTMLElement,  offset?:XY, duration?:number, easing?: (t: number) => number) {
+        this.__currentContentRef?.scrollToElement(el,offset,duration,easing);
+    }
+    
     /**
      * 衰减滚动
      * 作用同scrollTo,
