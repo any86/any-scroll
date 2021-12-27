@@ -19,5 +19,5 @@ export const TYPE_BEFORE_DESTROY = 'beforeDestroy';
 export const TYPE_BEFORE_UPDATED = 'beforeUpdate';
 export const TYPE_UPDATED = 'updated';
 export const TYPE_SCROLL = 'scroll';
-export const TYPE_SCROLL_END = 'scroll-end';
+export const TYPE_SCROLL_END = 'scrollEnd';
 
