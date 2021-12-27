@@ -83,9 +83,10 @@ export default class Wrap extends AnyEvent {
             overflow: 'hidden',
         });
 
-        // 遍历content元素
-        // ⭐生成Content实例
+        // ⭐遍历生成Content实例
         Array.from(el.children).forEach((contentEl) => {
+            // 跳过no-scroll元素
+            if (contentEl.hasAttribute('no-scroll')) return;
             const contentRef = new Content(contentEl as HTMLElement, this);
 
             contentRef.on(TYPE_SCROLL, (arg) => {
@@ -251,10 +252,10 @@ export default class Wrap extends AnyEvent {
      * @param duration 动画时长
      * @param easingFunction 缓动函数
      */
-    scrollToElement(el: HTMLElement,  offset?:XY, duration?:number, easing?: (t: number) => number) {
-        this.__currentContentRef?.scrollToElement(el,offset,duration,easing);
+    scrollToElement(el: HTMLElement, offset?: XY, duration?: number, easing?: (t: number) => number) {
+        this.__currentContentRef?.scrollToElement(el, offset, duration, easing);
     }
-    
+
     /**
      * 衰减滚动
      * 作用同scrollTo,
