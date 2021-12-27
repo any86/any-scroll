@@ -72,7 +72,7 @@
         <div class="left">
             <div id="scroll" class="any-scroll-1">
                 <div class="content" id="content2" style="width: 1000px"></div>
-                <div class="content" id="content"></div>
+                <div no-scroll class="content" id="content"></div>
             </div>
         </div>
 
@@ -135,9 +135,9 @@
             as.scrollTo([100, 500], 500);
         }
 
-        function scrollToElement(){
+        function scrollToElement() {
             const el = document.querySelector('#box-115');
-            as.scrollToElement(el,[,100]);
+            as.scrollToElement(el, [, 100]);
         }
 
         function moveTo() {
