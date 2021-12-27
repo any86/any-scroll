@@ -65,8 +65,8 @@ any-scroll的滚动实际是通过2个"**父子div**"的相对位置变化模拟
         - [pinch : 缩放](#事件)
         - [rotate : 旋转](#事件)
 - [常见问题](#常见问题)
-    - [no-scroll](#no-scroll)
-    - [监视内容变化](#监视内容变化)
+    - [no-scroll : 不滚动](#no-scroll)
+    - [ResizeObserver : 监视内容变化](#监视内容变化)
 
 
 ## 安装
@@ -308,8 +308,8 @@ as.on('scroll', context=>{
 ```
 |事件名称|说明|
 |---|---|
-|scroll| 滚动|
-|scrollEnd| 滚动结束|
+|**scroll**| 滚动|
+|**scrollEnd**| 滚动结束|
 |tap| 单击|
 |press| 按压|
 |pressup| 按压释放|
@@ -338,9 +338,12 @@ as.on('tap', e=>{
 如果wrap下的子元素, 有些你并不想让他"滚动", 可以给其加"no-scroll"标记.
 ```html
 <div>
-    <div no-scroll></div>
+    <div></div> <!-- 能滚动 -->
+    <div no-scroll></div> <!-- 不能滚动 -->
 </div>
 ```
+
+[🚀返回目录](#目录)
 
 ### 监视内容变化
 当content中的子元素发生变化(增/减去/尺寸), any-scroll需要重新计算"**可滑动范围**".
