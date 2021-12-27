@@ -1,7 +1,7 @@
 var ghpages = require('gh-pages');
 const shell = require('shelljs');
 const chalk = require('chalk');
-const DIST_DIR = './example/dist/';
+const DIST_DIR = './example/';
 // 发布
 ghpages.publish(DIST_DIR, {
     branch: 'gh-pages',
@@ -9,7 +9,6 @@ ghpages.publish(DIST_DIR, {
     if(err) {
         console.log(chalk.red(err));
     } else {
-        shell.rm('-rf', DIST_DIR);
         console.log(chalk.green('demo同步完成!'));
     }
 });

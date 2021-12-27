@@ -1,70 +1,108 @@
-import { setStyle, setTranslate, createDOMDiv, hideDOM } from '@any-scroll/shared';
+import { setStyle, createDOMDiv, changeDOMVisible, changeOpacity, runTwice, Axis, AxisList } from '@any-scroll/shared';
 import { insertCss } from 'insert-css';
-import AnyTouch from 'any-touch'
-import { TRACK_CLASS_NAME, THUMB_CLASS_NAME, BAR_CSS, DIRECTION } from './const';
-import clamp from 'lodash/clamp';
+import { TRACK_CLASS_NAME, THUMB_CLASS_NAME, BAR_CSS } from './const';
+import { Wrap, Content } from '@any-scroll/core';
+import { TYPE_UPDATED } from 'packages/core/src/const';
+const { setTimeout } = window;
+type WarpInstance = InstanceType<typeof Wrap>;
+type ContentInstance = InstanceType<typeof Content>;
 
-const sizeProps = ['width', 'height'];
 /**
  * 创建滚动条
  * @param el 容器元素
- * @returns 
+ * @returns
  */
-export default function (el: HTMLElement) {
+export default function (wrapRef: WarpInstance) {
+    const { allow } = wrapRef.options;
+    // 给updateBar函数用
+    let timeoutIds = [-1, -1];
+    let __isFoucsInBar = false;
     insertCss(BAR_CSS);
-    const barElementsXY = [DIRECTION.X, DIRECTION.Y].map(dir => {
-        return __createDOM(el, dir);
+    // 构建x|y轴滚动条DOM
+    const barRefs = runTwice(createBar);
+
+
+    wrapRef.on(TYPE_UPDATED, () => {
+        updateBar(wrapRef, barRefs, allow);
+    })
+
+
+    wrapRef.on(['scroll', 'resize'], () => {
+        updateBar(wrapRef, barRefs, allow);
+    });
+
+    wrapRef.at.on('at:start', () => {
+        // 取消bar拖拽的状体
+        __isFoucsInBar = false;
+        updateBar(wrapRef, barRefs, allow);
+    });
+
+    // wrapRef.on('change-content', () => {
+    //     updateBar(wrapRef, barRefs, allow);
+    // });
+
+    wrapRef.on('beforeDestroy', () => {
+        barRefs.forEach((barRef) => {
+            barRef.destroy();
+            barRef.el.parentElement?.removeChild(barRef.el);
+        });
     });
 
     /**
-     * 创建指定轴的滚动条DOM
-     * @param el view元素
-     * @param axis 轴
-     * @returns [滚动条轨道,把手]
+     * 生成bar
+     * @param axisIndex 0:x轴, 1:y轴
+     * @returns bar的track和thumb元素
      */
-    function __createDOM(el: HTMLElement, axis: 'x' | 'y' = DIRECTION.X) {
-        const trackEl = createDOMDiv();
-        const thumbEl = createDOMDiv();
-        trackEl.className = `${TRACK_CLASS_NAME} ${TRACK_CLASS_NAME}-${axis}`;
-        thumbEl.className = `${THUMB_CLASS_NAME} ${THUMB_CLASS_NAME}-${axis}`;
-        trackEl.appendChild(thumbEl);
-        el.appendChild(trackEl);
+    function createBar(axisIndex: 0 | 1) {
+        const currentAxis = AxisList[axisIndex];
+        const trackEl = createDOM(wrapRef.el as HTMLElement, currentAxis);
+        // console.log(trackEl.clientHeight);
 
+        // ⭐基于scroll做bar
+        const barRef = new Wrap(trackEl, { allow: [Axis.X === currentAxis, Axis.Y === currentAxis], overflowDistance: 0 });
+        setStyle(barRef.el as HTMLElement, { position: 'absolute' });
 
-        // const at = new AnyTouch(thumbEl);
-        // at.on('panmove', ({ deltaX, deltaY }) => {
-        //     if (DIRECTION.X === axis) {
-        //         newValue += deltaX;
-        //         setTranslate(thumbEl, newValue, 0);
-        //     } else {
-        //         __barY += deltaY;
-        //         setTranslate(thumbEl, 0, __barY);
-        //     }
-        //     onChange(newValue, __barY, thumbWidth, thumbHeight);
-        // });
+        barRef.on('panstart', () => {
+            __isFoucsInBar = true;
+        });
 
-        return [trackEl, thumbEl];
-    }
+        barRef.on('at:start', () => {
+            updateBar(wrapRef, barRefs, allow);
+        })
 
+        barRef.on('scroll', () => {
+            // 只响应bar的pan/swipe等产生的滚动
+            // 防止bar传给content, content再传给bar这种情况.
+            if (!__isFoucsInBar) return;
+            const thumbRef = barRef.getContentRef() as ContentInstance;
+            const contentRef = wrapRef.getContentRef();
+            if (null !== contentRef) {
+                // 缩放, bar => scrollView
+                const { xy } = contentRef;
+                const nextXY = [...xy] as [number, number];
+                nextXY[axisIndex] =
+                    (-thumbRef.xy[axisIndex] * contentRef.contentSize[axisIndex]) / barRef.size[axisIndex];
+                contentRef.moveTo(nextXY);
+            }
+        });
 
-    /**
-     * 计算滚动条把手的尺寸和位置
-     * @param position view的位置
-     * @param trackLength view的外框尺寸
-     * @param minValue view的最小位置
-     * @returns 把手的尺寸和位置
-     */
-    function __calcBar(position: number, trackLength: number, minValue: number): [number, number] {
-        let scale = 1;
-        let thumbLength = Math.abs(trackLength / (minValue - trackLength) * trackLength);
-        if (0 < position) {
-            scale = 1 - (position / trackLength);
-        } else if (minValue > position) {
-            scale = 1 - (minValue - position) / trackLength
-        }
-        thumbLength *= scale
-        const newPosition = clamp(position / (minValue) * (trackLength - thumbLength), 0, trackLength - thumbLength);
-        return [thumbLength, newPosition];
+        /**
+         * 点击track空白处,
+         * 移动到点击处
+         */
+        barRef.at.on('tap', (e) => {
+            const thumbRef = barRef.getContentRef();
+            if (null !== thumbRef && e.target === barRef.el) {
+                __isFoucsInBar = true;
+                const { x, y } = barRef.el.getBoundingClientRect();
+                const { contentSize } = thumbRef;
+                const newXY: [number, number] = [0, 0];
+                newXY[axisIndex] = [x, y][axisIndex] - [e.x, e.y][axisIndex] + contentSize[axisIndex] / 2;
+                thumbRef.dampScroll(newXY);
+            }
+        });
+
+        return barRef;
     }
 
     /**
@@ -74,19 +112,121 @@ export default function (el: HTMLElement) {
      * @param min view可以到达的最小xy
      * @param contentSize 内容尺寸
      */
-    function updateBar(position: [number, number], warpSize: [number, number], min: [number, number], contentSize: [number, number]) {
-        for (let i = 0; i < 2; i++) {
-            if (contentSize[i] > warpSize[i]) {
-                const [thumbLength, newPosition] = __calcBar(position[i], warpSize[i], min[i]);
-                const __thumbEl = barElementsXY[i][1];
-                const positionMaybe = [newPosition, 0];
-                setStyle(__thumbEl, { [sizeProps[i]]: `${thumbLength}px` });
-                setTranslate(__thumbEl, positionMaybe[i], positionMaybe[1 ^ i]);
-            } else {
-                hideDOM(barElementsXY[i][0]);
-            }
-        }
-    }
+    function updateBar(wrapRef: WarpInstance, barRefs: WarpInstance[], allow: [boolean, boolean]) {
+        const contentRef = wrapRef.getContentRef() as ContentInstance;
+        const { contentSize, minXY, maxXY } = contentRef;
+        // console.warn(wrapRef.currentContentRef?.el);
+        const wrapSize = wrapRef.size;
+        runTwice((i) => {
+            const barRef = barRefs[i];
+            const trackElement = barRef.el;
 
-    return updateBar;
+            if (allow[i]) {
+                changeDOMVisible(trackElement);
+            } else {
+                changeDOMVisible(trackElement, false);
+                return;
+            }
+            // 内容尺寸大于外层尺寸才能显示进度条
+            if (contentSize[i] > wrapSize[i]) {
+                changeOpacity(trackElement, 1);
+                clearTimeout(timeoutIds[i]);
+                timeoutIds[i] = setTimeout(() => {
+                    changeOpacity(trackElement, 0);
+                }, 1000);
+
+                const thumbRef = barRefs[i].getContentRef();
+                if (null !== thumbRef) {
+                    // 计算尺寸和位置
+                    const [thumbSize, thumbXorY] = calcBarXorY(
+                        contentRef.xy[i],
+                        wrapSize[i],
+                        contentSize[i],
+                        maxXY[i],
+                        minXY[i],
+                        // thumbRef.minXY[i],
+                        // thumbRef.maxXY[i]
+                    );
+                    // console.log(i,{thumbSize, thumbXorY});
+                    const thumbElement = barRef.getContentRef()!.el;
+                    setStyle(thumbElement, { [['width', 'height'][i]]: `${thumbSize}px` });
+                    // 更新bar的可滑动范围
+                    // 此时的maxXY/minXY还是按照内容尺寸计算的,
+                    // 所以不能滑动
+                    thumbRef.update();
+                    // 设置thumb的滑动范围
+                    thumbRef.maxXY[i] = 0;
+                    thumbRef.minXY[i] = Math.min(0, thumbSize - barRef.size[i]);
+
+                    // 移动thumb
+                    const { xy } = thumbRef;
+                    // 此处要克隆xy,
+                    // 不然moveTo的内部判断xy没有变化,
+                    // 是不会执行的,
+                    // 触发不了scroll事件
+
+                    const newXY: [number, number] = [...xy];
+                    newXY[i] = thumbXorY;
+                    thumbRef.moveTo(newXY);
+                }
+            } else {
+                changeDOMVisible(trackElement, false);
+            }
+        });
+    }
+}
+
+/**
+ * 创建指定轴的滚动条DOM
+ * @param el view元素
+ * @param axis 轴
+ * @returns [滚动条轨道,把手]
+ */
+function createDOM(el: HTMLElement, axis: 'x' | 'y' = Axis.X) {
+    const trackEl = createDOMDiv([TRACK_CLASS_NAME, `${TRACK_CLASS_NAME}-${axis}`]);
+    const thumbEl = createDOMDiv([THUMB_CLASS_NAME, `${THUMB_CLASS_NAME}-${axis}`]);
+    trackEl.appendChild(thumbEl);
+    el.appendChild(trackEl);
+    return trackEl;
+}
+
+/**
+ * 计算滚动条把手的尺寸和位置
+ * @param scrollViewXOrY scrollView当前的X|Y值
+ * @param trackLength scrollView的外框尺寸做滚动轨道尺寸
+ * @param maxXorY scrollView的xy的最大值
+ * @param maxXorY scrollView的xy的最小值
+ * @returns 把手的尺寸(最长边)和位置
+ */
+function calcBarXorY(
+    scrollViewXOrY: number,
+    wrapSize: number,
+    contentSize: number,
+    maxXorY: number,
+    minXorY: number,
+    // thumbMinXOrY: number,
+    // thumbMaxXOrY: number
+): [number, number] {
+    const trackSize = wrapSize;
+    const scrollViewMaxDistance = maxXorY - minXorY;
+    let scale = 1;
+    let thumbLength = (wrapSize / contentSize) * trackSize;
+
+    // 如果超出边界要thumb要缩短
+    if (minXorY >= scrollViewXOrY) {
+        scale = 1 - (minXorY - scrollViewXOrY) / wrapSize;
+    } else if (maxXorY < scrollViewXOrY) {
+        scale = 1 - (scrollViewXOrY - maxXorY) / wrapSize;
+    }
+    thumbLength *= scale;
+
+    // 缩放, scrollView => bar
+    // const thumbXorY = clamp(
+    //     -((scrollViewXOrY / scrollViewMaxDistance) * (trackSize - thumbLength)),
+    //     thumbMinXOrY,
+    //     thumbMaxXOrY
+    // );
+
+    const thumbXorY = -((scrollViewXOrY / scrollViewMaxDistance) * (trackSize - thumbLength));
+    return [thumbLength, thumbXorY];
 }

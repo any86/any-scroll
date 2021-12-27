@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <!-- <script src="https://cdn.bootcdn.net/ajax/libs/es6-shim/0.35.6/es6-sham.min.js"></script>
+        <script  src="https://cdn.bootcdn.net/ajax/libs/es6-shim/0.35.6/es6-shim.js"></script> -->
+        <!-- <script src="https://unpkg.com/any-scroll/dist/any-scroll.umd.min.js"></script> -->
+        <script src="../packages/any-scroll/dist/any-scroll.umd.js"></script>
+        <!-- <script src="./any-scroll.umd.js"></script> -->
+        <title>Document</title>
+        <!-- <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js"></script> -->
+        <style>
+            * {
+                padding: 0;
+                margin: 0;
+            }
+
+            .app {
+                padding: 32px;
+                display: flex;
+            }
+
+            .app .left {
+                width: 420px;
+            }
+
+            .app .left .any-scroll {
+                width: 384px;
+                height: 56px;
+                border-radius: 4px;
+                box-shadow: 1px 2px 15px 5px rgba(0, 0, 0, 0.1), 1px 2px 32px 5px rgba(0, 0, 0, 0.4);
+            }
+
+            .app .right {
+                flex: 1;
+            }
+            .content{
+                display: flex;
+                flex-wrap: nowrap;
+            }
+
+            .box {
+                text-align: center;
+                padding: 0 32px;
+                height: 56px;
+                line-height: 56px;
+                background: #5227b8;
+                color: rgba(255, 255, 255, 0.9);
+                font-size: 48px;
+            }
+
+            .box:nth-child(4n + 1) {
+                background-color: #2196f3;
+            }
+
+            .box:nth-child(4n + 2) {
+                background-color: #ffc107;
+            }
+
+            .box:nth-child(4n + 3) {
+                background-color: rgba(216, 18, 18, 0.7);
+            }
+
+            </style
+        </style>
+    </head>
+
+    <body>
+        <h1 style="margin: 16px">🎨 AnyScroll</h1>
+
+        <article class="app">
+            <div class="left">
+                <div id="scroll" class="any-scroll">
+                    <div class="content" id="content"></div>
+                </div>
+            </div>
+
+            <div class="right">
+                <button onclick="scrollTo2()">scrollTo2</button>
+                <button onclick="prepend()">prepend</button>
+                <button onclick="add()">add</button>
+            </div>
+        </article>
+
+        <script>
+            const content = document.getElementById('content');
+            if (content) {
+                const html = [];
+                for (let i = 1; i <= 30; i++) {
+                    html.push('<span class="box">'+i+'</span>');
+                }
+                content.innerHTML = html.join('');
+            }
+
+        
+            const el = document.getElementById('scroll');
+            const as = new AnyScroll(el, {
+                overflowDistance: 100,
+                allow: [true, false],
+                // render(el, x, y) {
+                //     el.style.marginTop = y + 'px';
+                //     el.style.marginLeft = x + 'px';
+                // },
+            });
+
+            as.on('scroll', function(e){
+                // console.log(`scroll`, e);
+            });
+
+            as.on('scroll-end', function(e){
+                console.warn('scroll-end', e);
+            });
+
+            function scrollTo2() {
+                as.scrollTo({x:-5200}, 1000);
+            }
+
+            function add() {
+                const startIndex = ~~content.lastChild.innerHTML + 1;
+                const frag = document.createDocumentFragment();
+                for (let i = startIndex; i <= startIndex + 10; i++) {
+                    const span = document.createElement('span');
+                    span.classList.add('box');
+                    span.innerHTML = i;
+                    frag.appendChild(span);
+                }
+                content.appendChild(frag);
+            }
+
+            function prepend() {
+                const startIndex = ~~content.firstChild.innerHTML + 1;
+                for (let i = startIndex; i <= startIndex + 10; i++) {
+                    const span = document.createElement('span');
+                    span.classList.add('box');
+                    span.innerHTML = i;
+                    content.insertAdjacentElement('afterbegin', span);
+                }
+            }
+        </script>
+    </body>
+</html>

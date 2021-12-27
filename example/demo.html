@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- <script src="https://unpkg.com/any-scroll/dist/any-scroll.umd.min.js"></script> -->
+    <script src="../packages/any-scroll/dist/any-scroll.umd.js"></script>
+    <!-- <script src="./any-scroll.umd.js"></script> -->
+    <title>Document</title>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js"></script> -->
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        .app {
+            padding: 32px;
+            display: flex;
+        }
+
+        .any-scroll {
+            border:6px solid #e91e63;
+            width: 384px;
+            height: 80vh;
+            border-radius: 4px;
+        }
+
+        .content {
+            height: 2000px;
+            width: 100%;
+            background-image: linear-gradient(0deg, rgb(0, 140, 255), rgb(208, 230, 110));
+        }
+    </style>
+</head>
+
+<body>
+    <h1 style="margin: 16px">🎨 AnyScroll</h1>
+
+    <article class="app">
+        <div id="scroll" class="any-scroll">
+            <h1 align="center" style="color:#e91e63;width:100%;top:6%">红色边框的元素是wrap</h1>
+            <div class="content">
+                <h1 align="center" style="color:rgba(0,0,0,1);line-height: 80vh;">我是Content</h1>
+            </div>
+        </div>
+    </article>
+
+    <script>
+        const el = document.getElementById('scroll');
+        const as = new AnyScroll(el,{allow:[true,true]});
+
+
+    </script>
+</body>
+
+</html>

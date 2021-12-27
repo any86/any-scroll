@@ -1,5 +1,5 @@
 {
-    "name": "@any-scroll/core",
+    "name": "@any-scroll/wheel",
     "version": "0.2.6",
     "description": "虚拟滚动",
     "unpkg": "dist/any-scroll.js",
@@ -21,17 +21,16 @@
     },
     "homepage": "https://github.com/any86/any-scroll#readme",
     "dependencies": {
-        "@any-scroll/bar": "^0.2.6",
-        "any-event": "^1.0.6",
+        "@any-scroll/shared": "^0.2.6",
         "any-touch": "2.0.0-alpha.4",
+        "insert-css": "^2.0.0",
         "lodash": "^4.17.15",
-        "raf": "^3.4.1",
         "resize-observer-polyfill": "^1.5.1",
         "tslib": "^2.3.0"
     },
     "devDependencies": {
-        "@types/lodash": "^4.14.149",
-        "@types/raf": "^3.4.0"
+        "@types/insert-css": "^2.0.0",
+        "@types/lodash": "^4.14.149"
     },
     "keywords": [
         "scroll"
