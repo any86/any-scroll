@@ -1,5 +1,5 @@
 import Core from '@any-scroll/core';
-import { Options, Plugin, PluginOptions } from '@any-scroll/core';
+import { Options } from '@any-scroll/core';
 import bar from '@any-scroll/bar';
 import wheel from '@any-scroll/wheel';
 

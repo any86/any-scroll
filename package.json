@@ -16,7 +16,7 @@
     "release:next": "npm run cp-md && npm run build && lerna publish --force-publish --dist-tag next",
     "release:last": "npm run cp-md && npm run build && lerna publish --force-publish",
     "rm": "rimraf packages/**/dist",
-    "clean": "rimraf packages/**/node_modules",
+    "clean": "rimraf packages/**/node_modules && rimraf ./node_modules",
     "cp-md": "node  ./scripts/cp-md",
     "build": "npm-run-all rm build:umd build:cjs build:es build:dts",
     "build:cjs": "node ./scripts/build.cjs",
@@ -30,7 +30,6 @@
     "test:q": "jest --collectCoverage false",
     "size": "node ./scripts/calcSize",
     "test-no-cache": "jest --no-cache",
-    "removeAll": "rimraf ./node_modules",
     "commit": "git-cz",
     "version": "standard-version"
   },
