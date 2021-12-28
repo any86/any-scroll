@@ -56,8 +56,8 @@ export default class Content extends AnyEvent {
         this.wrapRef = wrapRef;
         const { options } = wrapRef;
         this.__options = options;
-        setStyle(contentEl, { position: 'absolute' });
-
+        // setStyle(contentEl, { position: 'absolute' });
+        // this.__options.render(this.el, this.xy);
         wrapRef.on(TYPE_BEFORE_UPDATED, () => {
             this.update();
         });
@@ -214,8 +214,9 @@ export default class Content extends AnyEvent {
      * @param easingFunction 缓动函数
      */
     scrollToElement(el: HTMLElement, offset: XY = [0, 0], duration = 1000, easingFunction = easing) {
+        // 确保是激活content的子元素
+        if (!this.el.contains(el)) return;
         const offsetTuple = xY2Tuple(offset, [0, 0]);
-        console.log(offsetTuple);
         const rect = this.wrapRef.el.getBoundingClientRect();
         const { x, y } = el.getBoundingClientRect();
         const distXY = runTwice(i => this.xy[i] + [x, y][i] - [rect.x, rect.y][i] + offsetTuple[i]);

@@ -22,7 +22,7 @@
         }
 
         .any-scroll {
-            border:6px solid #e91e63;
+            border: 6px solid #e91e63;
             width: 384px;
             height: 80vh;
             border-radius: 4px;
@@ -41,18 +41,19 @@
 
     <article class="app">
         <div id="scroll" class="any-scroll">
-            <h1 align="center" style="color:#e91e63;width:100%;top:6%">红色边框的元素是wrap</h1>
-            <div class="content">
-                <h1 align="center" style="color:rgba(0,0,0,1);line-height: 80vh;">我是Content</h1>
+            <div>
+                <article class="content">
+                    <h1 align="center" style="color:rgba(0,0,0,1);line-height: 80vh;">
+                        我是Content
+                    </h1>
+                </article>
             </div>
         </div>
     </article>
 
     <script>
         const el = document.getElementById('scroll');
-        const as = new AnyScroll(el,{allow:[true,true]});
-
-
+        const as = new AnyScroll(el, { allow: [true, true] });
     </script>
 </body>
 

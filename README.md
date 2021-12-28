@@ -76,18 +76,19 @@ npm i any-scroll -S
 [🚀返回目录](#目录)
 
 ## 使用
-首先在页面构造如下html结构.
+首先在页面构造如下html结构, 同时**给wrap一个固定尺寸**. 
 ```html
-<div id="scroll-view">
+<div id="scroll-view" style="height:600px;width:360px;">
     <div><div>
 </div>
 ```
 
-初始化
+初始化:
 ```javascript
 import AnyScroll from 'any-scroll';
 const el = document.getElementById('scroll-view');
 const as = new AnyScroll(el);
+
 // 滚动到x=-100,y=-100的位置.
 as.scrollTo([-100,-100]);
 

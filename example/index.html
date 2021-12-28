@@ -72,7 +72,7 @@
         <div class="left">
             <div id="scroll" class="any-scroll-1">
                 <div class="content" id="content2" style="width: 1000px"></div>
-                <div no-scroll class="content" id="content"></div>
+                <div class="content" id="content" style="position: absolute;top:0;left:0;"></div>
             </div>
         </div>
 
@@ -112,7 +112,7 @@
             //     el.style.marginLeft = x + 'px';
             // },
         });
-
+as.moveTo([0,0])
         as.on('scroll', (e) => {
             // console.log(`scroll`, e);
         });
