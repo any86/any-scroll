@@ -2,7 +2,7 @@ import AnyEvent from 'any-event';
 import raf from 'raf';
 import clamp from 'lodash/clamp';
 import inRange from 'lodash/inRange';
-import { setStyle, damp, tween, runTwice } from '@any-scroll/shared';
+import {  damp, tween, runTwice } from '@any-scroll/shared';
 import { xY2Tuple, easing } from '@any-scroll/shared';
 import { TYPE_BEFORE_DESTROY, TYPE_BEFORE_UPDATED, TYPE_SCROLL_END, TYPE_UPDATED } from './const';
 // 类型
