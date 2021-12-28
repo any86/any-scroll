@@ -148,7 +148,7 @@ as.moveTo([0,0])
         function add() {
             const startIndex = ~~content2.lastChild.innerHTML + 1;
             const frag = document.createDocumentFragment();
-            for (let i = startIndex; i <= startIndex + 100; i++) {
+            for (let i = startIndex; i <= startIndex + 1000; i++) {
                 const span = document.createElement('span');
                 span.classList.add('box');
                 span.innerHTML = i;
@@ -159,7 +159,7 @@ as.moveTo([0,0])
 
         function prepend() {
             const startIndex = ~~content2.firstChild.innerHTML + 1;
-            for (let i = startIndex; i <= startIndex + 100; i++) {
+            for (let i = startIndex; i <= startIndex + 1000; i++) {
                 const span = document.createElement('span');
                 span.classList.add('box');
                 span.innerHTML = i;

@@ -78,8 +78,10 @@ npm i any-scroll -S
 ## 使用
 首先在页面构造如下html结构, 同时**给wrap一个固定尺寸**. 
 ```html
-<div id="scroll-view" style="height:600px;width:360px;">
-    <div><div>
+<div id="scroll-view" style="height:600px;width:360px;"><!-- wrap -->
+    <div><!-- content -->
+        <!-- 你的内容写在这里 -->
+    <div>
 </div>
 ```
 
