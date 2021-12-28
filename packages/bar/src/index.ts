@@ -2,7 +2,7 @@ import { setStyle, createDOMDiv, changeDOMVisible, changeOpacity, runTwice, Axis
 import { insertCss } from 'insert-css';
 import { TRACK_CLASS_NAME, THUMB_CLASS_NAME, BAR_CSS } from './const';
 import { Wrap, Content } from '@any-scroll/core';
-import { TYPE_UPDATED } from 'packages/core/src/const';
+import { TYPE_SCROLL, TYPE_UPDATED } from 'packages/core/src/const';
 const { setTimeout } = window;
 type WarpInstance = InstanceType<typeof Wrap>;
 type ContentInstance = InstanceType<typeof Content>;
@@ -17,19 +17,21 @@ export default function (wrapRef: WarpInstance) {
     // 给updateBar函数用
     let timeoutIds = [-1, -1];
     let __isFoucsInBar = false;
+    let __isScrolled = false;
     insertCss(BAR_CSS);
     // 构建x|y轴滚动条DOM
     const barRefs = runTwice(createBar);
 
-
-    wrapRef.on(TYPE_UPDATED, () => {
-        updateBar(wrapRef, barRefs, allow);
-    })
-
-
-    wrapRef.on(['scroll', 'resize'], () => {
+    wrapRef.on([TYPE_SCROLL], () => {
+        __isScrolled = true;
         updateBar(wrapRef, barRefs, allow);
     });
+
+
+    wrapRef.on([TYPE_UPDATED], () => {
+        updateBar(wrapRef, barRefs, allow);
+    });
+
 
     wrapRef.at.on('at:start', () => {
         // 取消bar拖拽的状体
@@ -37,9 +39,6 @@ export default function (wrapRef: WarpInstance) {
         updateBar(wrapRef, barRefs, allow);
     });
 
-    // wrapRef.on('change-content', () => {
-    //     updateBar(wrapRef, barRefs, allow);
-    // });
 
     wrapRef.on('beforeDestroy', () => {
         barRefs.forEach((barRef) => {
@@ -55,12 +54,12 @@ export default function (wrapRef: WarpInstance) {
      */
     function createBar(axisIndex: 0 | 1) {
         const currentAxis = AxisList[axisIndex];
-        const trackEl = createDOM(wrapRef.el as HTMLElement, currentAxis);
+        const trackEl = createDOM(wrapRef.el, currentAxis);
         // console.log(trackEl.clientHeight);
 
         // ⭐基于scroll做bar
         const barRef = new Wrap(trackEl, { allow: [Axis.X === currentAxis, Axis.Y === currentAxis], overflowDistance: 0 });
-        setStyle(barRef.el as HTMLElement, { position: 'absolute' });
+        setStyle(barRef.el, { position: 'absolute' });
 
         barRef.on('panstart', () => {
             __isFoucsInBar = true;
@@ -127,8 +126,10 @@ export default function (wrapRef: WarpInstance) {
                 changeDOMVisible(trackElement, false);
                 return;
             }
+
             // 内容尺寸大于外层尺寸才能显示进度条
-            if (contentSize[i] > wrapSize[i]) {
+            if (contentSize[i] > wrapSize[i] && __isScrolled) {
+
                 changeOpacity(trackElement, 1);
                 clearTimeout(timeoutIds[i]);
                 timeoutIds[i] = setTimeout(() => {
@@ -173,6 +174,7 @@ export default function (wrapRef: WarpInstance) {
                 changeDOMVisible(trackElement, false);
             }
         });
+
     }
 }
 

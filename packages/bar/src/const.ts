@@ -6,6 +6,7 @@ export const TRACK_CLASS_NAME = 'scroll-bar-track';
 export const THUMB_CLASS_NAME = 'scroll-bar-thumb';
 export const BAR_CSS = `
 .${TRACK_CLASS_NAME}{
+    opacity:0;
     right:0;
     bottom:0;
     background: ${TRACK_COLOR};
