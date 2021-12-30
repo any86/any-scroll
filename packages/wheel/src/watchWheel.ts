@@ -1,6 +1,13 @@
 // https://developer.mozilla.org/zh-CN/docs/Web/API/Element/wheel_event
 const { setTimeout } = window;
-const WHEEL = 'wheel';
+const TYPE_WHEEL = "wheel";
+const TYPE_WHEEL_START = `${TYPE_WHEEL}start` as const;
+const TYPE_WHEEL_MOVE = `${TYPE_WHEEL}move` as const;
+const TYPE_WHEEL_END = `${TYPE_WHEEL}end` as const;
+type TYPE_WHEEL_NAME =
+    | typeof TYPE_WHEEL_START
+    | typeof TYPE_WHEEL_MOVE
+    | typeof TYPE_WHEEL_END;
 
 /**
  * 统一滚轮的表现
@@ -22,11 +29,22 @@ function normalizeWheel(e: WheelEvent, LINE_HEIGHT = 40, PAGE_HEIGHT = 800) {
     }
     return [deltaX, deltaY];
 }
+
 interface WheelEvent2 {
-    target:EventTarget|null;
-    type: 'start' | 'move' | 'end';
-    [k: string]: any;
+    target: EventTarget | null;
+    type: TYPE_WHEEL_NAME;
+    velocityX: number;
+    velocityY: number;
+    deltaX: number;
+    deltaY: number;
+    nativeEvent: WheelEvent;
 }
+/**
+ * 增强版鼠标滚动事件监听器
+ * @param el
+ * @param onChange
+ * @returns 卸载监听器
+ */
 export default function (el: HTMLElement, onChange: (e: WheelEvent2) => void) {
     // 上一次滚动发生时间
     let _lastWheelTime: number | undefined;
@@ -35,6 +53,9 @@ export default function (el: HTMLElement, onChange: (e: WheelEvent2) => void) {
     // 一轮滚动距离的和
     let _deltaYCounter = 0;
     let _deltaXCounter = 0;
+    // 速度
+    let velocityX = 0;
+    let velocityY = 0;
 
     function __onWheel(e: WheelEvent) {
         const [deltaX, deltaY] = normalizeWheel(e);
@@ -46,16 +67,18 @@ export default function (el: HTMLElement, onChange: (e: WheelEvent2) => void) {
          * @param type 类型: 'start' | 'move' | 'end'
          * @param payload 自定义事件数据
          */
-        function _dispatchEvent(type: 'start' | 'move' | 'end', payload?: Record<string, any>) {
+        function _dispatchEvent(type: TYPE_WHEEL_NAME) {
             const wheelEvent2 = {
-                target:e.target,
+                target: e.target,
                 deltaX,
                 deltaY,
                 type,
-                ...payload,
+                velocityX,
+                velocityY,
+                nativeEvent: e,
             };
 
-            const event = new Event('wheel' + type);
+            const event = new Event(TYPE_WHEEL + type);
             onChange(wheelEvent2);
             el.dispatchEvent(event);
         }
@@ -64,28 +87,30 @@ export default function (el: HTMLElement, onChange: (e: WheelEvent2) => void) {
         clearTimeout(_endTimeoutId);
         _endTimeoutId = setTimeout(() => {
             const timeDiff = Date.now() - <number>_lastWheelTime;
-            const vx = _deltaXCounter / timeDiff;
-            const vy = _deltaYCounter / timeDiff;
+            velocityX = _deltaXCounter / timeDiff;
+            velocityY = _deltaYCounter / timeDiff;
 
             _lastWheelTime = void 0;
             _deltaXCounter = 0;
             _deltaYCounter = 0;
-            _dispatchEvent('end', { vx, vy });
+            _dispatchEvent(TYPE_WHEEL_END);
         }, 16);
 
         // 开始
         if (void 0 === _lastWheelTime) {
-            _dispatchEvent('start');
+            velocityX = 0;
+            velocityY = 0;
+            _dispatchEvent(TYPE_WHEEL_START);
         }
         // 移动
         else {
-            _dispatchEvent('move');
+            _dispatchEvent(TYPE_WHEEL_MOVE);
         }
         _lastWheelTime = Date.now();
     }
 
-    el.addEventListener(WHEEL, __onWheel);
+    el.addEventListener(TYPE_WHEEL, __onWheel);
     return () => {
-        el.removeEventListener(WHEEL, __onWheel);
+        el.removeEventListener(TYPE_WHEEL, __onWheel);
     };
 }
