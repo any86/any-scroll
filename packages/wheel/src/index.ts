@@ -20,7 +20,6 @@ export default function (wrapRef: WarpInstance) {
         const isWheelX = allow[0] && (!allow[1] || deltaX);
         const deltaXOrY = deltaY || deltaX;
         const vXorY = velocityY || velocityX;
-console.log(type,vXorY);
         const { xy } = currentContentRef;
         wrapRef.targets = [target];
 
@@ -31,10 +30,13 @@ console.log(type,vXorY);
             const nextXY: [number, number] = isWheelX ? [xy[0] + deltaXOrY, xy[1]] : [xy[0], xy[1] + deltaXOrY];
             wrapRef.dampScroll(nextXY);
         } else if ('wheelend' === type) {
-            const nextXY: [number, number] = isWheelX ? [xy[0] + vXorY * 5, xy[1]] : [xy[0], xy[1] + Math.ceil(vXorY) * 30];
+            // const {el} = wrapRef;
+            // const factor = (isWheelX ? el.clientWidth:el.clientHeight) / 20;
+            const factor = 30;
+            const nextXY: [number, number] = isWheelX ? [xy[0] + Math.ceil(vXorY) * factor, xy[1]] : [xy[0], xy[1] + Math.ceil(vXorY) * factor];
             wrapRef.dampScroll(nextXY);
         }
-    });
+    },{interval:16});
 
     wrapRef.on(TYPE_BEFORE_DESTROY, unWatch);
 }

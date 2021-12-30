@@ -45,7 +45,7 @@ interface WheelEvent2 {
  * @param onChange
  * @returns 卸载监听器
  */
-export default function (el: HTMLElement, onChange: (e: WheelEvent2) => void) {
+export default function (el: HTMLElement, onChange: (e: WheelEvent2) => void, { interval } = { interval: 66 }) {
     // 上一次滚动发生时间
     let _lastWheelTime: number | undefined;
     // wheelend延迟触发的id
@@ -94,7 +94,7 @@ export default function (el: HTMLElement, onChange: (e: WheelEvent2) => void) {
             _deltaXCounter = 0;
             _deltaYCounter = 0;
             _dispatchEvent(TYPE_WHEEL_END);
-        }, 16);
+        }, interval);
 
         // 开始
         if (void 0 === _lastWheelTime) {
