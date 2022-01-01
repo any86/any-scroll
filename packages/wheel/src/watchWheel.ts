@@ -54,12 +54,11 @@ export default function (el: HTMLElement, onChange: (e: WheelEvent2) => void, { 
     let velocityX = 0;
     let velocityY = 0;
 
-    const refreshVelocity = intervalCounter(timeDiff => {
+    const refreshVelocity = throttle((timeDiff) => {
         velocityX = _displacementX / timeDiff;
         velocityY = _displacementY / timeDiff;
         _displacementX = 0;
         _displacementY = 0;
-        // console.log({ velocityY });
     }, 16);
 
     function __onWheel(e: WheelEvent) {
@@ -93,7 +92,6 @@ export default function (el: HTMLElement, onChange: (e: WheelEvent2) => void, { 
         // 最后一下滚动
         clearTimeout(_endTimeoutId);
         _endTimeoutId = setTimeout(() => {
-            console.log('end');
             _dispatchEvent(TYPE_WHEEL_END);
         }, interval);
 
@@ -116,19 +114,21 @@ export default function (el: HTMLElement, onChange: (e: WheelEvent2) => void, { 
     };
 }
 
-function intervalCounter(callback: (timeDiff: number) => void, interval: number) {
+/**
+ * 限流
+ * @param callback 回调
+ * @param waitTime 等待时间
+ * @returns
+ */
+function throttle(callback: (deltaTime: number) => void, waitTime: number) {
     // 记录触发时间
-    let lastTime: number | undefined;
+    let lastTime = Date.now();
     return () => {
         const now = Date.now();
-        if (void 0 === lastTime) {
+        const deltaTime = now - lastTime;
+        if (deltaTime > waitTime) {
             lastTime = now;
-        } else {
-            const timeDiff = now - lastTime;
-            if (timeDiff > interval) {
-                lastTime = undefined;
-                callback(timeDiff);
-            }
+            callback(deltaTime);
         }
-    }
+    };
 }
