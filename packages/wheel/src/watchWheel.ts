@@ -1,13 +1,10 @@
 // https://developer.mozilla.org/zh-CN/docs/Web/API/Element/wheel_event
 const { setTimeout } = window;
-const TYPE_WHEEL = "wheel";
+const TYPE_WHEEL = 'wheel';
 const TYPE_WHEEL_START = `${TYPE_WHEEL}start` as const;
 const TYPE_WHEEL_MOVE = `${TYPE_WHEEL}move` as const;
 const TYPE_WHEEL_END = `${TYPE_WHEEL}end` as const;
-type TYPE_WHEEL_NAME =
-    | typeof TYPE_WHEEL_START
-    | typeof TYPE_WHEEL_MOVE
-    | typeof TYPE_WHEEL_END;
+type TYPE_WHEEL_NAME = typeof TYPE_WHEEL_START | typeof TYPE_WHEEL_MOVE | typeof TYPE_WHEEL_END;
 
 /**
  * 统一滚轮的表现
@@ -45,27 +42,34 @@ interface WheelEvent2 {
  * @param onChange
  * @returns 卸载监听器
  */
-export default function (el: HTMLElement, onChange: (e: WheelEvent2) => void, { interval } = { interval: 66 }) {
+export default function (el: HTMLElement, onChange: (e: WheelEvent2) => void, { interval } = { interval: 166 }) {
     // 上一次滚动发生时间
     let _lastWheelTime: number | undefined;
     // wheelend延迟触发的id
     let _endTimeoutId: number;
-    // 一轮滚动距离的和
-    let _deltaYCounter = 0;
-    let _deltaXCounter = 0;
+    // 一次计算周期的滑动位移
+    let _displacementX = 0;
+    let _displacementY = 0;
     // 速度
     let velocityX = 0;
     let velocityY = 0;
 
+    const refreshVelocity = intervalCounter(timeDiff => {
+        velocityX = _displacementX / timeDiff;
+        velocityY = _displacementY / timeDiff;
+        _displacementX = 0;
+        _displacementY = 0;
+        // console.log({ velocityY });
+    }, 16);
+
     function __onWheel(e: WheelEvent) {
         const [deltaX, deltaY] = normalizeWheel(e);
-        _deltaXCounter += deltaX;
-        _deltaYCounter += deltaY;
+        _displacementX += deltaX;
+        _displacementY += deltaY;
+
         /**
          * 触发回调和自定义DOM事件
-         * @param e 滚轮事件
          * @param type 类型: 'start' | 'move' | 'end'
-         * @param payload 自定义事件数据
          */
         function _dispatchEvent(type: TYPE_WHEEL_NAME) {
             const wheelEvent2 = {
@@ -83,16 +87,13 @@ export default function (el: HTMLElement, onChange: (e: WheelEvent2) => void, { 
             el.dispatchEvent(event);
         }
 
+        // 刷新速度
+        refreshVelocity();
+
         // 最后一下滚动
         clearTimeout(_endTimeoutId);
         _endTimeoutId = setTimeout(() => {
-            const timeDiff = Date.now() - <number>_lastWheelTime;
-            velocityX = _deltaXCounter / timeDiff;
-            velocityY = _deltaYCounter / timeDiff;
-
-            _lastWheelTime = void 0;
-            _deltaXCounter = 0;
-            _deltaYCounter = 0;
+            console.log('end');
             _dispatchEvent(TYPE_WHEEL_END);
         }, interval);
 
@@ -113,4 +114,21 @@ export default function (el: HTMLElement, onChange: (e: WheelEvent2) => void, { 
     return () => {
         el.removeEventListener(TYPE_WHEEL, __onWheel);
     };
+}
+
+function intervalCounter(callback: (timeDiff: number) => void, interval: number) {
+    // 记录触发时间
+    let lastTime: number | undefined;
+    return () => {
+        const now = Date.now();
+        if (void 0 === lastTime) {
+            lastTime = now;
+        } else {
+            const timeDiff = now - lastTime;
+            if (timeDiff > interval) {
+                lastTime = undefined;
+                callback(timeDiff);
+            }
+        }
+    }
 }

@@ -25,18 +25,18 @@ export default function (wrapRef: WarpInstance) {
 
         if ('wheelstart' === type) {
             currentContentRef.stop();
+        } else if ('wheelmove' === type) {
+            if (9 > Math.abs(vXorY)) {
+                const nextXY: [number, number] = isWheelX ? [xy[0] + deltaXOrY, xy[1]] : [xy[0], xy[1] + deltaXOrY];
+                wrapRef.dampScroll(nextXY);
+            } else {
+                const factor = 30;
+                const nextXY: [number, number] = isWheelX ? [xy[0] + Math.ceil(vXorY) * factor, xy[1]] : [xy[0], xy[1] + Math.ceil(vXorY) * factor];
+                wrapRef.dampScroll(nextXY);
+            }
+            // console.log({ vXorY });
         }
-        if ('wheelmove' === type || 'wheelstart' === type) {
-            const nextXY: [number, number] = isWheelX ? [xy[0] + deltaXOrY, xy[1]] : [xy[0], xy[1] + deltaXOrY];
-            wrapRef.dampScroll(nextXY);
-        } else if ('wheelend' === type) {
-            // const {el} = wrapRef;
-            // const factor = (isWheelX ? el.clientWidth:el.clientHeight) / 20;
-            const factor = 30;
-            const nextXY: [number, number] = isWheelX ? [xy[0] + Math.ceil(vXorY) * factor, xy[1]] : [xy[0], xy[1] + Math.ceil(vXorY) * factor];
-            wrapRef.dampScroll(nextXY);
-        }
-    },{interval:16});
+    });
 
     wrapRef.on(TYPE_BEFORE_DESTROY, unWatch);
 }
