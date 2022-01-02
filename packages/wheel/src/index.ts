@@ -1,6 +1,6 @@
 import { Wrap } from '@any-scroll/core';
 import { TYPE_BEFORE_DESTROY } from 'packages/core/src/const';
-import watchWheel from './watchWheel';
+import watchWheel from 'watch-wheel';
 type WarpInstance = InstanceType<typeof Wrap>;
 
 /**
