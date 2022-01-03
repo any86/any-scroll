@@ -68,5 +68,9 @@
     "typescript": "^4.5.4",
     "zlib": "^1.0.5"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "dependencies": {
+    "@changesets/cli": "^2.19.0",
+    "changeset": "^0.2.6"
+  }
 }
