@@ -13,7 +13,7 @@ walkPackageDirs((dirName) => {
             file: `./packages/${dirName}/dist/index.es.js`,
             format: 'esm',
         },
-        external: id => ['any-event', 'any-touch', 'tslib','insert-css','raf','lodash/clamp'].includes(id) || /^@/.test(id),
+        external: id => ['any-event','watch-wheel', 'any-touch', 'tslib','insert-css','raf','lodash/clamp','lodash/inRange'].includes(id) || /^@/.test(id),
         tsConfig: {
             target: 'ES5',
             module: "ESNEXT",

@@ -17,13 +17,14 @@ const options = {
     output: {
         file: `./packages/any-scroll/dist/any-scroll.umd.js`,
         format: 'umd',
+        sourcemap:true,
         name: 'AnyScroll',
     },
     tsConfig: {
         target: "ES5",
     },
     terser: terser({
-        include: [/^.+\.min\.js$/],
+        // include: [/^.+\.min\.js$/],
         output: {
             comments: false
         }
