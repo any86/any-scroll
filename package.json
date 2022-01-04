@@ -70,5 +70,6 @@
     "typescript": "^4.5.4",
     "zlib": "^1.0.5"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "version": "0.2.10"
 }
