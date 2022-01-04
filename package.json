@@ -13,8 +13,8 @@
     "build:ex": "cd example && npm run build",
     "release:ex": "npm run build:ex && node ./scripts/releaseExample.js",
     "release:ex0": "node ./scripts/releaseExample.js",
-    "release:next": "npm run cp-md && npm run build && lerna publish --force-publish --dist-tag next",
-    "release:last": "npm run cp-md && npm run build && lerna publish --force-publish",
+    "release:next": "npm run build && lerna publish --force-publish --dist-tag next",
+    "release": "npm run build && lerna publish --force-publish",
     "rm:dist": "rimraf packages/*/dist",
     "rm:nm": "rimraf packages/**/node_modules && rimraf ./node_modules",
     "build": "npm-run-all rm:dist build:umd build:cjs build:es build:dts",
@@ -22,7 +22,6 @@
     "build:es": "node ./scripts/build.es",
     "build:umd": "node ./scripts/build.umd && node ./scripts/build.umd --compress",
     "build:dts": "rimraf packages/*/types && node ./scripts/build.dts",
-    "release": "npm run build && changeset init && changeset && changeset version pnpm publish",
     "release-no-test": "standard-version && npm run build && npm pub && git push",
     "dev": "rollup -c  --watch --environment NODE_ENV:development",
     "test": "jest",
@@ -70,5 +69,8 @@
     "zlib": "^1.0.5"
   },
   "sideEffects": false,
-  "version": "0.3.5"
+  "version": "0.3.5",
+  "dependencies": {
+    "lerna": "^4.0.0"
+  }
 }
