@@ -15,7 +15,7 @@ module.exports = {
     coveragePathIgnorePatterns: ["<rootDir>/node_modules/","<rootDir>/packages/simulator/"],
     globals: {
         __TEST__: true,
-        __VERSION__: require('./package.json').version,
+        __VERSION__: require('./packages/core/package.json').version,
         ontouchstart: null
     },
     moduleFileExtensions: ['ts', 'tsx', 'js', 'json'],

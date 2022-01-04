@@ -15,14 +15,14 @@
     "release:ex0": "node ./scripts/releaseExample.js",
     "release:next": "npm run cp-md && npm run build && lerna publish --force-publish --dist-tag next",
     "release:last": "npm run cp-md && npm run build && lerna publish --force-publish",
-    "rm:dist": "rimraf packages/**/dist",
+    "rm:dist": "rimraf packages/*/dist",
     "rm:nm": "rimraf packages/**/node_modules && rimraf ./node_modules",
-    "build": "npm-run-all rm build:umd build:cjs build:es build:dts",
+    "build": "npm-run-all rm:dist build:umd build:cjs build:es build:dts",
     "build:cjs": "node ./scripts/build.cjs",
     "build:es": "node ./scripts/build.es",
     "build:umd": "node ./scripts/build.umd && node ./scripts/build.umd --compress",
     "build:dts": "rimraf packages/*/types && node ./scripts/build.dts",
-    "release": "npm run build && lerna publish --force-publish",
+    "release": "npm run build && changeset && changeset version pnpm publish",
     "release-no-test": "standard-version && npm run build && npm pub && git push",
     "dev": "rollup -c  --watch --environment NODE_ENV:development",
     "test": "jest",
@@ -43,6 +43,7 @@
   },
   "homepage": "https://github.com/any86/any-scroll#readme",
   "devDependencies": {
+    "@changesets/cli": "^2.19.0",
     "@rollup/plugin-commonjs": "^19.0.0",
     "@rollup/plugin-json": "^4.0.0",
     "@rollup/plugin-node-resolve": "^13.0.0",
@@ -53,13 +54,15 @@
     "@types/raf": "^3.4.0",
     "brotli": "^1.3.2",
     "chalk": "^2.4.2",
+    "changeset": "^0.2.6",
+    "esbuild": "^0.14.10",
     "gh-pages": "^3.2.3",
     "jest": "^27.4.5",
     "minimist": "^1.2.0",
     "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2",
     "rollup": "^2.62.0",
-    "rollup-plugin-terser": "^5.1.1",
+    "rollup-plugin-terser": "^7.0.2",
     "shelljs": "^0.8.3",
     "standard-version": "^4.4.0",
     "terser": "^4.6.3",
@@ -68,9 +71,5 @@
     "typescript": "^4.5.4",
     "zlib": "^1.0.5"
   },
-  "sideEffects": false,
-  "dependencies": {
-    "@changesets/cli": "^2.19.0",
-    "changeset": "^0.2.6"
-  }
+  "sideEffects": false
 }

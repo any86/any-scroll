@@ -14,7 +14,8 @@ const {
 } = require('brotli');
 const {
     version
-} = require('../../lerna.json');
+} = require('../../packages/core/package.json');
+
 const walkPackageDirs = require('./walkPackageDirs');
 
 module.exports = {
