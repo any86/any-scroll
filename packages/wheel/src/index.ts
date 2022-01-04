@@ -26,11 +26,11 @@ export default function (wrapRef: WarpInstance) {
         if ('wheelstart' === type) {
             currentContentRef.stop();
         } else if ('wheelmove' === type) {
-            if (9 > Math.abs(vXorY)) {
+            if (1 > Math.abs(vXorY)) {
                 const nextXY: [number, number] = isWheelX ? [xy[0] + deltaXOrY, xy[1]] : [xy[0], xy[1] + deltaXOrY];
                 wrapRef.dampScroll(nextXY);
             } else {
-                const factor = 30;
+                const factor = 60;
                 const nextXY: [number, number] = isWheelX ? [xy[0] + Math.ceil(vXorY) * factor, xy[1]] : [xy[0], xy[1] + Math.ceil(vXorY) * factor];
                 wrapRef.dampScroll(nextXY);
             }
