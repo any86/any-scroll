@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.2.17"></a>
+## [0.2.17](https://github.com/any86/any-scroll/compare/v0.2.15...v0.2.17) (2022-01-04)
+
+
+
 <a name="0.2.15"></a>
 ## [0.2.15](https://github.com/any86/any-scroll/compare/v0.2.8...v0.2.15) (2022-01-04)
 
