@@ -1,6 +1,6 @@
 {
     "name": "@any-scroll/wheel",
-    "version": "0.2.8",
+    "version": "0.5.0",
     "description": "虚拟滚动",
     "unpkg": "dist/any-scroll.js",
     "jsdelivr": "dist/any-scroll.js",
@@ -21,10 +21,10 @@
     },
     "homepage": "https://github.com/any86/any-scroll#readme",
     "dependencies": {
-        "@any-scroll/shared": "^0.2.8",
+        "@any-scroll/shared": "^0.5.0",
         "lodash": "^4.17.15",
         "tslib": "^2.3.0",
-        "watch-wheel":"^1.0.0"
+        "watch-wheel": "^1.0.0"
     },
     "devDependencies": {
         "@types/lodash": "^4.14.149"
