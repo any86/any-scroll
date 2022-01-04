@@ -61,26 +61,26 @@ importers:
 
   packages/any-scroll:
     specifiers:
-      '@any-scroll/bar': ^0.2.8
-      '@any-scroll/core': ^0.2.8
-      '@any-scroll/shared': ^0.2.8
+      '@any-scroll/bar': ^0.5.0
+      '@any-scroll/core': ^0.5.0
+      '@any-scroll/shared': ^0.5.0
       tslib: ^2.3.0
     dependencies:
-      '@any-scroll/bar': 0.2.9
-      '@any-scroll/core': 0.2.9
-      '@any-scroll/shared': 0.2.9
+      '@any-scroll/bar': link:../bar
+      '@any-scroll/core': link:../core
+      '@any-scroll/shared': link:../shared
       tslib: 2.3.1
 
   packages/bar:
     specifiers:
-      '@any-scroll/shared': ^0.2.8
+      '@any-scroll/shared': ^0.5.0
       '@types/insert-css': ^2.0.0
       '@types/lodash': ^4.14.149
       insert-css: ^2.0.0
       lodash: ^4.17.15
       tslib: ^2.3.0
     dependencies:
-      '@any-scroll/shared': 0.2.9
+      '@any-scroll/shared': link:../shared
       insert-css: 2.0.0
       lodash: 4.17.21
       tslib: 2.3.1
@@ -120,13 +120,13 @@ importers:
 
   packages/wheel:
     specifiers:
-      '@any-scroll/shared': ^0.2.8
+      '@any-scroll/shared': ^0.5.0
       '@types/lodash': ^4.14.149
       lodash: ^4.17.15
       tslib: ^2.3.0
       watch-wheel: ^1.0.0
     dependencies:
-      '@any-scroll/shared': 0.2.9
+      '@any-scroll/shared': link:../shared
       lodash: 4.17.21
       tslib: 2.3.1
       watch-wheel: 1.0.1
@@ -134,33 +134,6 @@ importers:
       '@types/lodash': 4.14.178
 
 packages:
-
-  /@any-scroll/bar/0.2.9:
-    resolution: {integrity: sha512-PcBvJSZzCIDZTMdVmiAbGagtxcRKSg/QfwiB7SCtYnvMp4AoFQF0bHfkUJUiyrHEUA5evxdb4lsHBTlgEP8OXw==}
-    dependencies:
-      '@any-scroll/shared': 0.2.9
-      insert-css: 2.0.0
-      lodash: 4.17.21
-      tslib: 2.3.1
-    dev: false
-
-  /@any-scroll/core/0.2.9:
-    resolution: {integrity: sha512-FK+DaNZKq1/kP61R0pBqcuuVQFJE2BMPn7f88rvk43Nno+y/xw9oGs0ups/YyGMv8txvXlU0xKKk/1WEWcdpJg==}
-    dependencies:
-      any-event: 2.0.1
-      any-touch: 2.0.1
-      lodash: 4.17.21
-      raf: 3.4.1
-      tslib: 2.3.1
-    dev: false
-
-  /@any-scroll/shared/0.2.9:
-    resolution: {integrity: sha512-cDUsk+ikeWgwJ/aCw4Qj97uzhnC2oONbTEEmGv/6VycOURaNxw4R3G7BrrnFblWw5VaTOepGHfllP6RuotYapQ==}
-    dependencies:
-      any-touch: 2.0.1
-      raf: 3.4.1
-      tslib: 2.3.1
-    dev: false
 
   /@any-touch/compute/2.0.1:
     resolution: {integrity: sha512-hgS34VzrRVPIi1HDmxQihoywsDCx/3yL+oBZNlig0+ZAn5wNwjLi6H9qRo5nj+CPUQaqs3qKjdfHO7+CPtsWBQ==}
