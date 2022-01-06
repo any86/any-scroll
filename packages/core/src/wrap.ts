@@ -1,4 +1,7 @@
-import AnyTouch from 'any-touch';
+import AnyTouch from '@any-touch/core';
+import pan from '@any-touch/pan';
+import swipe from '@any-touch/swipe';
+
 import AnyEvent from 'any-event';
 // declare const WebKitMutationObserver: MutationObserver;
 // declare const MozMutationObserver: MutationObserver;
@@ -124,7 +127,10 @@ export default class Wrap extends AnyEvent {
         }
 
         // ========== 手势 ==========
-        const at = new AnyTouch(el);
+        const at = new AnyTouch(el); 
+        at.use(pan);
+        at.use(swipe);
+
         this.at = at;
 
         at.on(['panstart', 'panmove'], (e) => {
@@ -159,9 +165,9 @@ export default class Wrap extends AnyEvent {
             this.__currentContentRef?.snap();
         });
 
-        const swipe = at.get('swipe');
-        if (swipe) {
-            swipe.velocity = 1;
+        const swipeContext = at.get('swipe');
+        if (swipeContext) {
+            swipeContext.velocity = 1;
         }
         at.on('swipe', (e) => {
             const { __currentContentRef: currentContentRef } = this;

@@ -90,16 +90,32 @@ importers:
 
   packages/core:
     specifiers:
+      '@any-touch/core': ^2.0.2
+      '@any-touch/doubletap': ^2.0.2
+      '@any-touch/pan': ^2.0.2
+      '@any-touch/pinch': ^2.0.2
+      '@any-touch/press': ^2.0.2
+      '@any-touch/rotate': ^2.0.2
+      '@any-touch/swipe': ^2.0.2
+      '@any-touch/tap': ^2.0.2
       '@types/lodash': ^4.14.149
       '@types/raf': ^3.4.0
-      any-event: ^2.0.1
-      any-touch: ^2.0.1
+      any-event: ^2.0.2
+      any-touch: ^2.0.2
       lodash: ^4.17.15
       raf: ^3.4.1
       tslib: ^2.3.0
     dependencies:
-      any-event: 2.0.1
-      any-touch: 2.0.1
+      '@any-touch/core': 2.0.2
+      '@any-touch/doubletap': 2.0.2
+      '@any-touch/pan': 2.0.2
+      '@any-touch/pinch': 2.0.2
+      '@any-touch/press': 2.0.2
+      '@any-touch/rotate': 2.0.2
+      '@any-touch/swipe': 2.0.2
+      '@any-touch/tap': 2.0.2
+      any-event: 2.0.2
+      any-touch: 2.0.2
       lodash: 4.17.21
       raf: 3.4.1
       tslib: 2.3.1
@@ -135,86 +151,78 @@ importers:
 
 packages:
 
-  /@any-touch/compute/2.0.1:
-    resolution: {integrity: sha512-hgS34VzrRVPIi1HDmxQihoywsDCx/3yL+oBZNlig0+ZAn5wNwjLi6H9qRo5nj+CPUQaqs3qKjdfHO7+CPtsWBQ==}
+  /@any-touch/compute/2.0.2:
+    resolution: {integrity: sha512-Xm3p+lw82Iw8BnD3r0xE8o2HRS7vWmAgPz485ix6vGaIu1AY6ifa27N59mPMWnEOqfE7QEsfbG7kPGispo7t2A==}
     dependencies:
-      '@any-touch/shared': 2.0.1
-      '@any-touch/vector': 2.0.1
+      '@any-touch/shared': 2.0.2
+      '@any-touch/vector': 2.0.2
       tslib: 2.3.1
     dev: false
 
-  /@any-touch/core/2.0.1:
-    resolution: {integrity: sha512-r30e4o4J3DbLp9SgzaW3nRGP89F6RT/e/icJ2V1zyPcE7zP8l4lS73UO5v+51NlXOgc44HEXqLRSgAvWzdGtdA==}
+  /@any-touch/core/2.0.2:
+    resolution: {integrity: sha512-RlBsRhlJ5NgKIyf5i0LPylmBnASxOYr9QL7CSWbi7qtZdl7OivSphUAac0tvf4CYyJP/Q76EQ3VzG5pkbqOa+Q==}
     dependencies:
-      '@any-touch/shared': 2.0.1
-      any-event: 2.0.1
+      '@any-touch/shared': 2.0.2
+      any-event: 2.0.2
     dev: false
 
-  /@any-touch/pan/2.0.1:
-    resolution: {integrity: sha512-RfhScgBTKK2JC15e58C3oRQbOQqLI4EyPd2Qpm34SHc7BVkCN1hvPLf0LSH2Ye1KttLjrLiki1gYzm+sHX/4VQ==}
+  /@any-touch/doubletap/2.0.2:
+    resolution: {integrity: sha512-9akAm073iuRCXdIk81NhtoE/6RfcVzjTc4bJpYMlE4PY9vXbtFgRtVbJTrTIv9D1HpE3YBf7LczuhEy1SUbgog==}
     dependencies:
-      '@any-touch/compute': 2.0.1
-      '@any-touch/recognizer': 1.0.15
-      '@any-touch/shared': 2.0.1
+      '@any-touch/compute': 2.0.2
+      '@any-touch/shared': 2.0.2
+      '@any-touch/vector': 2.0.2
     dev: false
 
-  /@any-touch/pinch/2.0.1:
-    resolution: {integrity: sha512-UKMtwv9nEoi18ayPEViklNZvUkHLcmQptc8ft0wzdMHlZTohRs5zENisaIwDtNC7ZAuvgB4xKXMFtYdcPbCjgw==}
+  /@any-touch/pan/2.0.2:
+    resolution: {integrity: sha512-oenShT9552diOaDs5kTWcZOrDwTzUDWYXb7rqRrnaI/bzSktWUOzgcbBNsaSjyV+XzNPhrf8zUXCWHcqD1Cvxw==}
     dependencies:
-      '@any-touch/compute': 2.0.1
-      '@any-touch/recognizer': 1.0.15
+      '@any-touch/compute': 2.0.2
+      '@any-touch/shared': 2.0.2
     dev: false
 
-  /@any-touch/press/2.0.1:
-    resolution: {integrity: sha512-hG22TsbgFqtg+H6QfZoQEtqhdM3UqAnOpJxsp2kS60UJbo2LHJpo7sQAlb5q33xMTiqujaDBvC2jHxExNcO+Ow==}
+  /@any-touch/pinch/2.0.2:
+    resolution: {integrity: sha512-PDb8QbeVZKODvifh00v5U6KndeE1HlbCzOtCQ92RS83hFPHwdvEOTUm8FwAilJxGmCBvGD+VHqRxxh5bzVJJiA==}
     dependencies:
-      '@any-touch/compute': 2.0.1
-      '@any-touch/recognizer': 1.0.15
-      '@any-touch/shared': 2.0.1
+      '@any-touch/compute': 2.0.2
     dev: false
 
-  /@any-touch/recognizer/1.0.15:
-    resolution: {integrity: sha512-9vpWQLO2DyUMN3zN+C5lHqhR/vKg5FE7CVkcNu3tb+cXo8jr0RgDSmoe6evgP4TsB3BEYQ3xMu6vsp40uJK4VQ==}
+  /@any-touch/press/2.0.2:
+    resolution: {integrity: sha512-me+iBb1Taq7A3BTAnX4nRjOP0TseC+NRqUn1eEo+w5qj12Ro+8Fd5K8w04V1I9YEcO7NuOYY12X/XgiwgmLOtQ==}
     dependencies:
-      '@any-touch/shared': 1.0.15
+      '@any-touch/compute': 2.0.2
+      '@any-touch/shared': 2.0.2
     dev: false
 
-  /@any-touch/rotate/2.0.1:
-    resolution: {integrity: sha512-/+V6s121EmaUB21ao8w2Ucxqaitr2ALScvgQkk/O1f1/e3s9UCuGRF5nMzpMlBjDQwVM2zl0rwW2xtHeW+UPYg==}
+  /@any-touch/rotate/2.0.2:
+    resolution: {integrity: sha512-vJEP/Uf4RgakoAiMW5/Vi39meEM36iQarO5KcDMogpHCZrHfFvgqOGwI/q8muZs6Y8DuGACwC1LKVCel1zWb3Q==}
     dependencies:
-      '@any-touch/compute': 2.0.1
-      '@any-touch/recognizer': 1.0.15
+      '@any-touch/compute': 2.0.2
     dev: false
 
-  /@any-touch/shared/1.0.15:
-    resolution: {integrity: sha512-JRtA6h0Wa2gImvPpsM5JATxCK6t7ezBEEVN6ZsB6v3FAK/QmxrnA0O6W4liai7jKj1tA7JLtsRCZJ9v4CWFxsA==}
+  /@any-touch/shared/2.0.2:
+    resolution: {integrity: sha512-rr0kVcPlY8VN/fPGnG8fmGzblbPsQCCYPi9W1WNE9fFFbxyqZcQ3clrZicEwYZM8HXba5xhbHMGz8fmytpbX3Q==}
     dev: false
 
-  /@any-touch/shared/2.0.1:
-    resolution: {integrity: sha512-mWF4pis7gJOqvFIOstQDkonXuAKBllIbi9g6894t7IK53CfCMKC/hzFLuZOUqKi04QabH2u9AxWfhpoKBLVlKw==}
-    dev: false
-
-  /@any-touch/swipe/2.0.1:
-    resolution: {integrity: sha512-rdtc8GFK3+Xb0ROKvxvjy77BCq41b6SgYVCW1PLhrGwUDmzl0S2m5kCKGq+pgJHqeCQ6oZUMuPux8LzTVtbdrw==}
+  /@any-touch/swipe/2.0.2:
+    resolution: {integrity: sha512-PB9hRekIR5mV1ebISwUxjEgvBAlRRHAchP5BDKG15p8p0BgrNFj/p3f9LS0Fo/lF2cb8Gjlzw2SHdR2yEhs3oA==}
     dependencies:
-      '@any-touch/compute': 2.0.1
-      '@any-touch/recognizer': 1.0.15
-      '@any-touch/shared': 2.0.1
+      '@any-touch/compute': 2.0.2
+      '@any-touch/shared': 2.0.2
     dev: false
 
-  /@any-touch/tap/2.0.1:
-    resolution: {integrity: sha512-Sfyhetxf041ikh28vXuX9NoeaCY+csSmOmxf0gHrjYSSyFfYtUY+L/Fuss0s1vovKJqT6r8Rg3vFvjeYv8frqw==}
+  /@any-touch/tap/2.0.2:
+    resolution: {integrity: sha512-rj92agXXQfhStYQ7XP3Y1DkYdcQaKCdMm7hZxCTV/AglzfjE4cjiy4nkW0PF5yihD41uUbblrEO+N8gtZXXrWw==}
     dependencies:
-      '@any-touch/compute': 2.0.1
-      '@any-touch/recognizer': 1.0.15
-      '@any-touch/shared': 2.0.1
-      '@any-touch/vector': 2.0.1
+      '@any-touch/compute': 2.0.2
+      '@any-touch/shared': 2.0.2
+      '@any-touch/vector': 2.0.2
     dev: false
 
-  /@any-touch/vector/2.0.1:
-    resolution: {integrity: sha512-RnM9DSyZjxQEcoquwD7Ex6Oq9HCd/PXNxfoetFYo+Anm66cFQOWRmwio9eO8wdHIGYSDXjb17JLA03Mq8J1Z9Q==}
+  /@any-touch/vector/2.0.2:
+    resolution: {integrity: sha512-YEwU22n8RRfdwSdYLmzDoXgJxWVktCcgovG9tDqksOIO4R7s5KFKQ6uwcv8LcMnqj+0VDXrrS1Pt20eiKesoDA==}
     dependencies:
-      '@any-touch/shared': 2.0.1
+      '@any-touch/shared': 2.0.2
     dev: false
 
   /@babel/code-frame/7.16.7:
@@ -1997,23 +2005,24 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /any-event/2.0.1:
-    resolution: {integrity: sha512-isxR7VrR7hNCXf0Oyam29opZQgDx9ySkKYV1EKrhlhbbu5DVHlpTYXqqsPLp9/UhH7o1AtscEVVM9aNntcbJRA==}
+  /any-event/2.0.2:
+    resolution: {integrity: sha512-lHk89tcWTtv5+H2N0+5areYJCxg+34kww566KmWD1itEtLZTLGUdu++tq6/BRM+FaoOXs14ID2HowSMmHli0lg==}
     dependencies:
       tslib: 2.3.1
     dev: false
 
-  /any-touch/2.0.1:
-    resolution: {integrity: sha512-Jgj8qffTeQ8La/C5slX/Z6FeA2fclqvz3kn0X08l4v+QaXXWCRo2JyRd2gyMC4P+oTrgKsY9b2l47biPeegbKg==}
+  /any-touch/2.0.2:
+    resolution: {integrity: sha512-hVXoN82cO9iuMkyrxnzIow80mMF/UCRhCqfpzX/tYr7oHhhz+nS7JLdSs+WqQRRR0ceZi0wTZ5rC9QlRBK/7jA==}
     dependencies:
-      '@any-touch/core': 2.0.1
-      '@any-touch/pan': 2.0.1
-      '@any-touch/pinch': 2.0.1
-      '@any-touch/press': 2.0.1
-      '@any-touch/rotate': 2.0.1
-      '@any-touch/swipe': 2.0.1
-      '@any-touch/tap': 2.0.1
-      any-event: 2.0.1
+      '@any-touch/core': 2.0.2
+      '@any-touch/doubletap': 2.0.2
+      '@any-touch/pan': 2.0.2
+      '@any-touch/pinch': 2.0.2
+      '@any-touch/press': 2.0.2
+      '@any-touch/rotate': 2.0.2
+      '@any-touch/swipe': 2.0.2
+      '@any-touch/tap': 2.0.2
+      any-event: 2.0.2
       tslib: 2.3.1
     dev: false
 

@@ -21,8 +21,16 @@
     },
     "homepage": "https://github.com/any86/any-scroll#readme",
     "dependencies": {
-        "any-event": "^2.0.1",
-        "any-touch": "^2.0.1",
+        "any-event": "^2.0.2",
+        "any-touch": "^2.0.2",
+        "@any-touch/core": "^2.0.2",
+        "@any-touch/doubletap": "^2.0.2",
+        "@any-touch/pan": "^2.0.2",
+        "@any-touch/pinch": "^2.0.2",
+        "@any-touch/press": "^2.0.2",
+        "@any-touch/rotate": "^2.0.2",
+        "@any-touch/swipe": "^2.0.2",
+        "@any-touch/tap": "^2.0.2",
         "lodash": "^4.17.15",
         "raf": "^3.4.1",
         "tslib": "^2.3.0"
