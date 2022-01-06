@@ -75,6 +75,8 @@ any-scroll的滚动实际是通过2个"**父子div**"的相对位置变化模拟
         - [swipe : 滑动](#事件)
         - [pinch : 缩放](#事件)
         - [rotate : 旋转](#事件)
+- [进阶使用](#进阶使用)
+    - [支持更多手势(tap/press/pinch/rotate)](#支持更多手势)
 - [常见问题](#常见问题)
     - [no-scroll : 不滚动](#no-scroll)
     - [ResizeObserver : 监视内容变化](#监视内容变化)
@@ -345,6 +347,35 @@ as.on('tap', e=>{
 
 
 [🚀返回目录](#目录)
+
+## 进阶使用
+### 支持更多手势
+any-scroll基于any-touch开发, 所以也支持他的所有手势, 但是为了体积默认只加载了swipe/pan, 开启更多方法:
+```javascript
+import AScroll from 'any-scroll';
+import tap from '@any-touch/tap';
+import swipe from '@any-touch/swipe';
+import pinch from '@any-touch/pinch';
+import rotate from '@any-touch/rotate';
+
+const as = new AScroll();
+// 加载单击手势
+as.at.use(tap);
+// 加载快划
+as.at.use(swipe);
+// 加载缩放
+as.at.use(pinch);
+// 加载旋转
+as.at.use(rotate);
+
+as.on('tap',e=>{
+
+});
+```
+
+[🚀返回目录](#目录)
+
+
 
 ## 常见问题
 
