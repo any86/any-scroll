@@ -1,6 +1,6 @@
 {
     "name": "@any-scroll/core",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "description": "虚拟滚动",
     "unpkg": "dist/any-scroll.js",
     "jsdelivr": "dist/any-scroll.js",
@@ -21,8 +21,6 @@
     },
     "homepage": "https://github.com/any86/any-scroll#readme",
     "dependencies": {
-        "any-event": "^2.0.2",
-        "any-touch": "^2.0.2",
         "@any-touch/core": "^2.0.2",
         "@any-touch/doubletap": "^2.0.2",
         "@any-touch/pan": "^2.0.2",
@@ -31,6 +29,8 @@
         "@any-touch/rotate": "^2.0.2",
         "@any-touch/swipe": "^2.0.2",
         "@any-touch/tap": "^2.0.2",
+        "any-event": "^2.0.2",
+        "any-touch": "^2.0.2",
         "lodash": "^4.17.15",
         "raf": "^3.4.1",
         "tslib": "^2.3.0"
