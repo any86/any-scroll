@@ -2,7 +2,7 @@ import AnyEvent from 'any-event';
 import raf from 'raf';
 import clamp from 'lodash/clamp';
 import inRange from 'lodash/inRange';
-import {  damp, tween, runTwice } from '@any-scroll/shared';
+import { damp, tween, runTwice } from '@any-scroll/shared';
 import { xY2Tuple, easing } from '@any-scroll/shared';
 import { TYPE_BEFORE_DESTROY, TYPE_BEFORE_UPDATED, TYPE_SCROLL_END, TYPE_UPDATED } from './const';
 // 类型
@@ -239,15 +239,23 @@ export default class Content extends AnyEvent {
         raf.cancel(this.__dampScrollRafId);
         // console.log('_dampScroll', distXY, this.xy);
 
-        // 内部状态, 根据不同位置会发生变化
+        // 可行的目标位置,
+        // 是distXY范围的子集,
+        // 每次_moveTo之前判断是要移动出界,
+        // 如果出界那么修改_distXY,
+        // 保证只在可行范围内执行滑动动画
+        // !!! 之所以每次滑动前修改_distXY,
+        // 而不是开始滑动直接修改_distXY到可行范围,
+        // 是因为想要实现滑动到边界速度不为0,
+        // 然后直接反向复位的动画效果
         const _distXY: [number, number] = [...tupleXY];
 
         // raf刷新的移动,
         function _moveTo(context: Content) {
+            // console.log('测试: 滚动');
             // 是否到达终点
             context.isScrolling = true;
             const { xy, minXY, maxXY } = context;
-
             // 计算有效的当前值
             const _nextXY = runTwice((i) => {
                 if (!allow[i]) return xy[i];
@@ -268,28 +276,30 @@ export default class Content extends AnyEvent {
                     _distXY[i] = minXY[i];
                 }
                 // 可移动范围内
+                // 主要解决目标地址在"maxXY[i] + overflowDistance"等中间时候的自动复位
                 else {
                     // 当前已经到达目标
                     if (_nextValue === _distXY[i]) {
+                        // 到达目标位置,
                         // 但是位置超出的边框
+                        // 进行复位
                         // 重新计算_distXY
                         if (xy[i] > maxXY[i]) {
                             _distXY[i] = maxXY[i];
                         } else if (xy[i] < minXY[i]) {
                             _distXY[i] = minXY[i];
                         }
-                    } else {
-                        return _nextValue;
                     }
+                    return _nextValue;
                 }
                 return damp(context.xy[i], _distXY[i], damping);
             });
+            // console.log(_nextXY);
 
             context.moveTo(_nextXY);
 
             // 是否开启的轴已经滚动到终点
             const _needScroll = runTwice((i) => allow[i] && _distXY[i] !== _nextXY[i]).some((bool) => bool);
-
             // 迭代 OR 跳出迭代
             if (_needScroll) {
                 context.__dampScrollRafId = raf(() => {
