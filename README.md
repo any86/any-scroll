@@ -16,7 +16,7 @@ any-scroll的滚动实际是通过2个"**父子div**"的相对位置变化模拟
 <div> <!-- warp --> 
     <div> <!-- content -->
         content
-    <div>
+    </div>
 </div>
 ```
 
