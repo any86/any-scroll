@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.3.10"></a>
+## [0.3.10](https://github.com/any86/any-scroll/compare/v0.6.2...v0.3.10) (2023-05-26)
+
+
+### Bug Fixes
+
+* 添加内容自动计算尺寸 ([c923eb2](https://github.com/any86/any-scroll/commit/c923eb2))
+
+
+
 <a name="0.3.9"></a>
 ## [0.3.9](https://github.com/any86/any-scroll/compare/v0.6.1...v0.3.9) (2023-05-26)
 
