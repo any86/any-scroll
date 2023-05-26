@@ -24,7 +24,7 @@ export default class extends Wrap {
      * 加载插件
      * @param plugin 插件
      */
-    public use(plugin: Plugin, options: PluginOptions) {
+    public use(plugin: Plugin, options: PluginOptions={}) {
         plugin(this, options);
     }
 }
