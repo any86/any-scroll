@@ -76,8 +76,8 @@ export default class Content extends AnyEvent {
                 ro.disconnect();
             })
         }
-        // 降级用MutationObserver兼容
-        else if (MutationObserver) {
+        // 用MutationObserver兼容
+        if (MutationObserver) {
             this.update();
             const observer = new MutationObserver(() => {
                 this.update();
