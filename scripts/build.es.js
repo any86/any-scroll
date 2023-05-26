@@ -15,7 +15,7 @@ walkPackageDirs((dirName) => {
         },
         external: id => ['any-event','watch-wheel', 'any-touch', 'tslib','insert-css','raf','lodash/clamp','lodash/inRange'].includes(id) || /^@/.test(id),
         tsConfig: {
-            target: 'ES5',
+            target: 'ES6',
             module: "ESNEXT",
         }
     });

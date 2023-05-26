@@ -21,7 +21,7 @@ const options = {
         name: 'AnyScroll',
     },
     tsConfig: {
-        target: "ES5",
+        target: "ES6",
     },
     terser: terser({
         // include: [/^.+\.min\.js$/],

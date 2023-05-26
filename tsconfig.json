@@ -6,10 +6,14 @@
         // 严格模式, 强烈建议开启
         "strict": true,
         // 支持别名导入:
-        // import * as React from "react"
+        // 让
+        // import React from "react"
+        // 等价于
+        //  import * as React from "react"
+        // 虽然react没有默认导出
         "esModuleInterop": true,
         // 目标js的版本
-        "target": "ES5",
+        "target": "ES6",
         // 目标代码的模块结构版本
         // "module": "CommonJS",
         // 在表达式和声明上有隐含的 any类型时报错。
@@ -39,9 +43,9 @@
         "rootDir": ".",
         "paths": {
             "@any-scroll/*": ["packages/*/src"],
-            "@testUtils":["testUtils"]
+            "@testUtils": ["testUtils"]
         }
     },
     // 入口文件
-    "include": ["global.d.ts","testUtils","packages/*/src", "packages/*/types", "packages/*/__tests__"]
+    "include": ["global.d.ts", "testUtils", "packages/*/src", "packages/*/types", "packages/*/__tests__"]
 }
