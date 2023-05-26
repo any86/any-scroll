@@ -23,6 +23,7 @@
     "dependencies": {
         "@any-scroll/bar": "^0.5.2",
         "@any-scroll/core": "^0.5.2",
+        "@any-scroll/wheel": "^0.5.2",
         "@any-scroll/shared": "^0.5.2",
         "tslib": "^2.3.0"
     },
