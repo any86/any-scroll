@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 importers:
 
   .:
@@ -87,14 +91,17 @@ importers:
   packages/any-scroll:
     dependencies:
       '@any-scroll/bar':
-        specifier: ^0.5.2
+        specifier: ^0.6.3
         version: link:../bar
       '@any-scroll/core':
-        specifier: ^0.5.2
+        specifier: ^0.6.3
         version: link:../core
       '@any-scroll/shared':
-        specifier: ^0.5.2
+        specifier: ^0.6.3
         version: link:../shared
+      '@any-scroll/wheel':
+        specifier: ^0.6.3
+        version: link:../wheel
       tslib:
         specifier: ^2.3.0
         version: 2.3.1
@@ -102,7 +109,7 @@ importers:
   packages/bar:
     dependencies:
       '@any-scroll/shared':
-        specifier: ^0.5.2
+        specifier: ^0.6.3
         version: link:../shared
       insert-css:
         specifier: ^2.0.0
@@ -186,7 +193,7 @@ importers:
   packages/wheel:
     dependencies:
       '@any-scroll/shared':
-        specifier: ^0.5.2
+        specifier: ^0.6.3
         version: link:../shared
       lodash:
         specifier: ^4.17.15
@@ -305,7 +312,7 @@ packages:
       convert-source-map: 1.8.0
       debug: 4.3.3
       gensync: 1.0.0-beta.2
-      json5: 2.2.0
+      json5: 2.2.3
       semver: 6.3.0
       source-map: 0.5.7
     transitivePeerDependencies:
@@ -5169,12 +5176,10 @@ packages:
   /json-stringify-safe@5.0.1:
     resolution: {integrity: sha1-Epai1Y/UXxmg9s4B1lcB4sc1tus=}
 
-  /json5@2.2.0:
-    resolution: {integrity: sha512-f+8cldu7X/y7RAJurMEJmdoKXGB/X550w2Nr3tTbezL6RwEE/iMcm+tZnXeoZtKuOq6ft8+CqzEkrIgx1fPoQA==}
+  /json5@2.2.3:
+    resolution: {integrity: sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg==}
     engines: {node: '>=6'}
     hasBin: true
-    dependencies:
-      minimist: 1.2.5
     dev: true
 
   /jsonfile@4.0.0:
@@ -7677,7 +7682,7 @@ packages:
       fast-json-stable-stringify: 2.1.0
       jest: 27.4.5
       jest-util: 27.4.2
-      json5: 2.2.0
+      json5: 2.2.3
       lodash.memoize: 4.1.2
       make-error: 1.3.6
       semver: 7.3.5
