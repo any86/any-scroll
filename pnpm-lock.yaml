@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 importers:
 
   .:
@@ -87,14 +91,17 @@ importers:
   packages/any-scroll:
     dependencies:
       '@any-scroll/bar':
-        specifier: ^0.5.2
+        specifier: ^0.6.3
         version: link:../bar
       '@any-scroll/core':
-        specifier: ^0.5.2
+        specifier: ^0.6.3
         version: link:../core
       '@any-scroll/shared':
-        specifier: ^0.5.2
+        specifier: ^0.6.3
         version: link:../shared
+      '@any-scroll/wheel':
+        specifier: ^0.6.3
+        version: link:../wheel
       tslib:
         specifier: ^2.3.0
         version: 2.3.1
@@ -102,7 +109,7 @@ importers:
   packages/bar:
     dependencies:
       '@any-scroll/shared':
-        specifier: ^0.5.2
+        specifier: ^0.6.3
         version: link:../shared
       insert-css:
         specifier: ^2.0.0
@@ -186,7 +193,7 @@ importers:
   packages/wheel:
     dependencies:
       '@any-scroll/shared':
-        specifier: ^0.5.2
+        specifier: ^0.6.3
         version: link:../shared
       lodash:
         specifier: ^4.17.15
@@ -6545,8 +6552,8 @@ packages:
     dependencies:
       side-channel: 1.0.4
 
-  /qs@6.5.2:
-    resolution: {integrity: sha512-N5ZAX4/LxJmF+7wN74pUD6qAh9/wnvdQcjq9TZjevvXzSUo7bfmw91saqMjzGS2xq91/odN2dW/WOl7qQHNDGA==}
+  /qs@6.5.3:
+    resolution: {integrity: sha512-qxXIEh4pCGfHICj1mAJQ2/2XVZkjCDTcEgfoSQxc/fYivUZxTkk7L3bDBJSoNrEzXI17oUO5Dp07ktqE5KzczA==}
     engines: {node: '>=0.6'}
     dev: false
 
@@ -6865,7 +6872,7 @@ packages:
       mime-types: 2.1.34
       oauth-sign: 0.9.0
       performance-now: 2.1.0
-      qs: 6.5.2
+      qs: 6.5.3
       safe-buffer: 5.2.1
       tough-cookie: 2.5.0
       tunnel-agent: 0.6.0
