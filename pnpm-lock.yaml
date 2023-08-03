@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 importers:
 
   .:
@@ -87,14 +91,17 @@ importers:
   packages/any-scroll:
     dependencies:
       '@any-scroll/bar':
-        specifier: ^0.5.2
+        specifier: ^0.6.3
         version: link:../bar
       '@any-scroll/core':
-        specifier: ^0.5.2
+        specifier: ^0.6.3
         version: link:../core
       '@any-scroll/shared':
-        specifier: ^0.5.2
+        specifier: ^0.6.3
         version: link:../shared
+      '@any-scroll/wheel':
+        specifier: ^0.6.3
+        version: link:../wheel
       tslib:
         specifier: ^2.3.0
         version: 2.3.1
@@ -102,7 +109,7 @@ importers:
   packages/bar:
     dependencies:
       '@any-scroll/shared':
-        specifier: ^0.5.2
+        specifier: ^0.6.3
         version: link:../shared
       insert-css:
         specifier: ^2.0.0
@@ -186,7 +193,7 @@ importers:
   packages/wheel:
     dependencies:
       '@any-scroll/shared':
-        specifier: ^0.5.2
+        specifier: ^0.6.3
         version: link:../shared
       lodash:
         specifier: ^4.17.15
@@ -934,7 +941,7 @@ packages:
     dependencies:
       '@lerna/child-process': 4.0.0
       '@lerna/describe-ref': 4.0.0
-      minimatch: 3.0.4
+      minimatch: 3.1.2
       npmlog: 4.1.2
       slash: 3.0.0
     dev: false
@@ -1486,7 +1493,7 @@ packages:
       chalk: 4.1.2
       dedent: 0.7.0
       load-json-file: 6.2.0
-      minimatch: 3.0.4
+      minimatch: 3.1.2
       npmlog: 4.1.2
       p-map: 4.0.0
       p-pipe: 3.1.0
@@ -2691,7 +2698,7 @@ packages:
     dev: false
 
   /concat-map@0.0.1:
-    resolution: {integrity: sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=}
+    resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
 
   /concat-stream@1.6.2:
     resolution: {integrity: sha512-27HBghJxjiZtIk3Ycvn/4kbJk/1uZuJFfuPEns6LaEvpvG1f0hTea8lilrouyo9mVc2GWdcEZ8OLoGmSADlrCw==}
@@ -3257,7 +3264,7 @@ packages:
     resolution: {integrity: sha512-eu5XjSstm0WXQsARgo6kPjkINYZlOUW+z/KtAAIBjHa5mUpMPrxJytbPIndWz6GubBuuuH5ljtVcXKnVnH5q8w==}
     dependencies:
       find-up: 2.1.0
-      minimatch: 3.0.4
+      minimatch: 3.1.2
     dev: true
 
   /duplexer3@0.1.4:
@@ -3877,7 +3884,7 @@ packages:
       fs.realpath: 1.0.0
       inflight: 1.0.6
       inherits: 2.0.4
-      minimatch: 3.0.4
+      minimatch: 3.1.2
       once: 1.4.0
       path-is-absolute: 1.0.1
 
@@ -4124,7 +4131,7 @@ packages:
   /ignore-walk@3.0.4:
     resolution: {integrity: sha512-PY6Ii8o1jMRA1z4F2hRkH/xN59ox43DavKvD3oDpfurRlOJyAHpifIwpbdv1n4jt4ov0jSpw3kQ4GhJnpBL6WQ==}
     dependencies:
-      minimatch: 3.0.4
+      minimatch: 3.1.2
     dev: false
 
   /ignore@5.2.0:
@@ -5635,8 +5642,8 @@ packages:
     engines: {node: '>=4'}
     dev: false
 
-  /minimatch@3.0.4:
-    resolution: {integrity: sha512-yJHVQEhyqPLUTgt9B83PXu6W3rx4MvvHvSUvToogpwoGDOUQ+yDrR0HRot+yOCdCO7u4hX3pWft6kWBBcqh0UA==}
+  /minimatch@3.1.2:
+    resolution: {integrity: sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==}
     dependencies:
       brace-expansion: 1.1.11
 
@@ -5771,7 +5778,7 @@ packages:
       array-differ: 3.0.0
       array-union: 2.1.0
       arrify: 2.0.1
-      minimatch: 3.0.4
+      minimatch: 3.1.2
     dev: false
 
   /mute-stream@0.0.8:
@@ -5997,7 +6004,7 @@ packages:
       chalk: 2.4.2
       cross-spawn: 6.0.5
       memorystream: 0.3.1
-      minimatch: 3.0.4
+      minimatch: 3.1.2
       pidtree: 0.3.1
       read-pkg: 3.0.0
       shell-quote: 1.7.3
@@ -7545,7 +7552,7 @@ packages:
     dependencies:
       '@istanbuljs/schema': 0.1.3
       glob: 7.2.0
-      minimatch: 3.0.4
+      minimatch: 3.1.2
     dev: true
 
   /text-extensions@1.9.0:
